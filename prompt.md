@@ -64,10 +64,7 @@ H2: Quando o Reparo é Viável
 
 H2: Conclusão
 - Mensagem central: "Antes de condenar, diagnostique"
-- CTA: "Envie seu inversor para a TEC Solar. Realizamos diagnóstico
-  eletrônico completo em nível de placa e devolvemos um laudo técnico
-  detalhado — mesmo que o reparo não seja viável. Atendemos todo o
-  Brasil via logística reversa. Fale com nossa equipe pelo WhatsApp."
+- Envie seu inversor para a TEC Solar.** Realizamos diagnóstico eletrônico completo em nível de placa e devolvemos um laudo técnico detalhado — mesmo que o reparo não seja viável. Atendemos todo o Brasil via logística reversa. 📲 **[Falar com a TEC Solar no WhatsApp](https://wa.me/5538998891587?text=Ol%C3%A1%2C%20vim%20pelo%20blog%20e%20quero%20enviar%20meu%20inversor%20para%20diagn%C3%B3stico)** Siga a TEC Solar: [@tecsolar_oficial](https://www.instagram.com/tec_solar_moc/)
 
 PARÂMETROS DO RASCUNHO:
 - 900 a 1200 palavras
