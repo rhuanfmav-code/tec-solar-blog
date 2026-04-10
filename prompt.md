@@ -69,8 +69,7 @@ Argumento financeiro: custo de reparo vs. inversor novo
 H2: Conclusão
 
 Mensagem central: "Antes de condenar, diagnostique"
-Envie seu inversor para a TEC Solar. Realizamos diagnóstico eletrônico completo em nível de placa e devolvemos um laudo técnico detalhado — mesmo que o reparo não seja viável. Atendemos todo o Brasil via logística reversa. Falar com a TEC Solar no WhatsApp Siga a TEC Solar: @tecsolar_oficial
-
+Envie seu inversor para a TEC Solar. Realizamos diagnóstico eletrônico completo em nível de placa e devolvemos um laudo técnico detalhado — mesmo que o reparo não seja viável. Atendemos todo o Brasil via logística reversa. [Falar com a TEC Solar no WhatsApp](https://wa.me/5538998891587) | [@tec_solar_moc](https://www.instagram.com/tec_solar_moc/)
 PARÂMETROS DO RASCUNHO:
 
 900 a 1200 palavras
