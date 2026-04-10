@@ -560,3 +560,287 @@ Texto técnico + humanizado + SEO em um único output.
 TEC Solar — Onde a energia solar volta a funcionar.
 83 posts | ~3 meses de conteúdo | Humanizer integrado automaticamente
 Versão 4 — fluxo completo: pesquisa → rascunho → humanizer → output
+════════════════════════════════════
+IDENTIDADE VISUAL TEC SOLAR
+(aplicar obrigatoriamente em todas as 5 imagens)
+════════════════════════════════════
+
+FUNDO OBRIGATÓRIO: Azul escuro profundo exato #0D1F3C —
+  não azul royal, não azul médio, deve ser muito escuro
+CIRCUITOS: Trilhas PCB brilhando densamente em ciano #00B4D8
+  e dourado #F5A623 cobrindo o fundo inteiro como placa-mãe
+  gigante — traços finos com nós de conexão brilhantes,
+  igual aos posts do Instagram @tec_solar_moc
+PONTOS DE LUZ: Espalhados como estrelas tecnológicas
+ATMOSFERA: Cinematográfica, premium, tech dark, dramática
+ESTILO: Fotorrealista — inversores e placas eletrônicas reais
+  com efeitos de luz ciano e dourada, sem renderização 3D genérica
+
+TIPOGRAFIA EXATA — igual aos posts do Instagram @tec_solar_moc:
+Títulos principais: Montserrat ExtraBold ou Black, CAIXA ALTA
+  Palavra principal = dourado #F5A623, sombra de texto sutil
+  Palavras secundárias = branco puro #FFFFFF
+  Tamanho muito grande e impactante, ocupa 2 a 3 linhas
+  Exemplos corretos do padrão:
+  → "GROWATT" dourado + "ERRO 102" dourado
+  → "FALHA DE" branco + "COMUNICAÇÃO" dourado
+  → "O MERCADO CONDENA." branco / "A TEC SOLAR REPARA." dourado
+Subtítulos: Montserrat Bold, branco #FFFFFF, tamanho médio
+Bullets: Montserrat Medium, branco, ícone colorido à esquerda
+Rodapé TODAS as imagens: "REPARO · DIAGNÓSTICO · MANUTENÇÃO"
+  Montserrat Regular, branco 35% opacidade, letras espaçadas
+
+FORMATO: 1080x1350px PNG, proporção 4:5, feed Instagram
+SEM LOGO: Deixar espaço completamente vazio e limpo
+  120x120px no canto inferior direito — sem estrela,
+  sem ornamento, sem nada — apenas espaço vazio para logo
+IMAGENS SEPARADAS: Cada imagem é arquivo individual —
+  nunca combinar em grade ou mosaico
+
+════════════════════════════════════
+PROMPT IMAGEM 1 — CAPA
+════════════════════════════════════
+
+"Generate a single standalone vertical Instagram post image.
+Format: 1080x1350 pixels, 4:5 ratio, PNG.
+This is image 1 of 5 — deliver as individual file only, never merged.
+
+BACKGROUND: Very dark navy blue exactly #0D1F3C covering entire image.
+Dense glowing PCB circuit board traces in cyan #00B4D8 and golden #F5A623
+covering the entire background like a giant motherboard — thin traces with
+bright connection nodes, exactly like @tec_solar_moc Instagram posts.
+Bright scattered light dots as tech stars across the background.
+
+MAIN VISUAL CENTER-BOTTOM (occupying 55% image height, lower half):
+[EQUIPAMENTO: ex: Growatt MIN series on-grid solar inverter —
+white rectangular body with green trim on top and bottom edges,
+green Growatt logo centered upper area, small rectangular LCD display,
+green leaf icon below display, MC4 DC connectors at bottom, AC terminals
+on side, ~35cm x 32cm x 17cm proportions]
+Floating in dramatic 3/4 perspective above glowing PCB surface.
+Cyan electric arcs and fault sparks radiating from both sides of inverter.
+Golden energy sparks exploding around it.
+Intense cyan glow halo behind the inverter.
+Top 40% of image is clear space for text.
+
+TEXT OVERLAY — top area, left-aligned, 60px left margin:
+
+Row 1 small tag (rounded rectangle outline in cyan):
+lightning bolt emoji + '[CATEGORIA: ex: CÓDIGO DE ERRO]'
+Montserrat Bold uppercase, cyan #00B4D8, small size, wide letter-spacing.
+
+Row 2-3 main title very large impactful:
+'[MARCA: ex: GROWATT]' — Montserrat Black uppercase, golden #F5A623, ~90px
+'[CÓDIGO: ex: ERRO 102]' — Montserrat Black uppercase, golden #F5A623, ~90px
+
+Thin horizontal cyan line separator, 60% image width.
+
+Row 4-5 subtitle:
+'[SUBTÍTULO 1: ex: Falha de Isolamento:]'
+'[SUBTÍTULO 2: ex: diagnóstico real em nível de placa]'
+Montserrat SemiBold, white #FFFFFF, medium size.
+
+BOTTOM FOOTER centered:
+'REPARO · DIAGNÓSTICO · MANUTENÇÃO'
+Montserrat Regular, white 35% opacity, very wide letter-spacing.
+
+BOTTOM-RIGHT CORNER: Completely empty clean space 120x120px for logo.
+No star, no ornament, no symbol — just empty space.
+Ultra HD photorealistic cinematic tech premium."
+
+════════════════════════════════════
+PROMPT IMAGEM 2 — A CAUSA RAIZ
+════════════════════════════════════
+
+"Generate a single standalone vertical Instagram post image.
+Format: 1080x1350 pixels, 4:5 ratio, PNG.
+This is image 2 of 5 — deliver as individual file only, never merged.
+
+BACKGROUND: Very dark navy #0D1F3C with dense glowing cyan and golden
+PCB circuit traces covering entire background as giant motherboard.
+
+MAIN VISUAL CENTER-BOTTOM (60% image height, lower half):
+Extreme close-up of solar inverter power circuit board opened and exposed,
+isometric perspective slightly tilted for depth.
+Visible in high detail: cylindrical electrolytic capacitors,
+IGBT transistors in TO-247 package, toroidal transformer,
+central DSP microchip, SMD resistors and capacitors.
+EMI filter capacitors near DC input with subtle amber/orange glow
+indicating thermal degradation.
+PCB traces illuminated in cyan showing current path.
+Thin cyan light threads leaking between components —
+electrical leakage current visual effect.
+Top 40% clear for text.
+
+TEXT OVERLAY — top, left-aligned:
+
+Small counter inside cyan border rectangle:
+'02 / 05' — Montserrat Bold, cyan #00B4D8, small.
+
+Title 2 lines large:
+'A CAUSA' — Montserrat Black uppercase, white #FFFFFF, large
+'RAIZ' — Montserrat Black uppercase, golden #F5A623, large
+
+Thin cyan separator line.
+
+3 bullet points:
+● cyan filled circle '[CAUSA 1: ex: Isolamento abaixo de 1 MΩ entre string DC e terra]'
+● cyan filled circle '[CAUSA 2: ex: Umidade infiltrada nos cabos DC ou painéis]'
+● golden filled circle '[CAUSA PRINCIPAL: ex: Capacitor EMI degradado na entrada DC]'
+Montserrat Medium, white, medium size.
+Third bullet in golden — most important cause.
+
+BOTTOM: 'REPARO · DIAGNÓSTICO · MANUTENÇÃO' same footer style.
+BOTTOM-RIGHT: Empty clean 120x120px space. No logo. No ornament.
+Ultra HD photorealistic cinematic tech premium."
+
+════════════════════════════════════
+PROMPT IMAGEM 3 — COMO IDENTIFICAR
+════════════════════════════════════
+
+"Generate a single standalone vertical Instagram post image.
+Format: 1080x1350 pixels, 4:5 ratio, PNG.
+This is image 3 of 5 — deliver as individual file only, never merged.
+
+BACKGROUND: Very dark navy #0D1F3C with dense cyan and golden PCB traces.
+
+MAIN VISUAL CENTER-BOTTOM (lower half of image):
+Electronics technician hands in dark gray work gloves holding professional
+yellow or red digital megohmmeter (isolation resistance meter with digital
+display and black test probes) pressed against DC input terminals of an
+open solar inverter circuit board on professional electronics lab workbench.
+Background softly blurred: oscilloscope with glowing waveform screen,
+professional soldering iron, LED illuminated magnifying glass.
+Cyan diagnostic light beam from probes scanning components.
+Subtle golden sparks at measurement point.
+Top clear for text.
+
+TEXT OVERLAY — top, left-aligned:
+
+Counter: '03 / 05' cyan border tag — same style as image 2.
+
+Title 2 lines:
+'NA' — Montserrat Black uppercase, white, large
+'BANCADA' — Montserrat Black uppercase, golden #F5A623, large
+
+Thin cyan separator line.
+
+3 stacked information boxes with left border accent:
+
+BOX 1 — 3px cyan left border, very subtle cyan transparent background:
+Label: 'PASSO 1' Montserrat Bold cyan uppercase small wide-spaced
+Text: '[PASSO 1: ex: Megômetro 500V DC entre polo + ou − e terra. Abaixo de 1 MΩ = falha confirmada]'
+Montserrat Regular white medium.
+
+BOX 2 — 3px cyan left border:
+Label: 'PASSO 2' cyan
+Text: '[PASSO 2: ex: Medir ESR dos capacitores EMI. Valor elevado = degradação confirmada]'
+
+BOX 3 — 3px golden left border, very subtle golden transparent background:
+Label: '⚠ SINAL FÍSICO' Montserrat Bold golden uppercase small
+Text: '[SINAL FÍSICO: ex: Cheiro de epóxi queimado = origem do defeito]'
+
+BOTTOM: 'REPARO · DIAGNÓSTICO · MANUTENÇÃO' footer.
+BOTTOM-RIGHT: Empty clean 120x120px. No logo. No ornament.
+Ultra HD photorealistic cinematic."
+
+════════════════════════════════════
+PROMPT IMAGEM 4 — O ERRO DO MERCADO
+════════════════════════════════════
+
+"Generate a single standalone vertical Instagram post image.
+Format: 1080x1350 pixels, 4:5 ratio, PNG.
+This is image 4 of 5 — deliver as individual file only, never merged.
+
+BACKGROUND: Very dark navy #0D1F3C with dense glowing PCB circuit traces.
+
+MAIN VISUAL CENTER (central portion of image):
+Two [MARCA DO POST] inverters side by side,
+divided by vertical white/cyan light beam in exact center.
+LEFT inverter: dead, cold gray color, dark shadows, no energy,
+deteriorated look, subtle red X above it.
+RIGHT inverter: vibrant, cyan energy explosion bursting from inside,
+golden glow radiating outward, illuminated display,
+light rays expanding outward in all directions.
+Upper and lower areas free for text overlay.
+
+TEXT OVERLAY:
+
+Top centered:
+Counter '04 / 05' cyan tag.
+
+Title 2 lines centered:
+'O MERCADO CONDENA.' — Montserrat Black uppercase, white #FFFFFF, large
+'A TEC SOLAR REPARA.' — Montserrat Black uppercase, golden #F5A623, large
+
+Golden centered separator line.
+
+Dark translucent box with subtle white border centered:
+'[TEXTO: ex: Técnico vê o Erro 102 e troca o inversor sem diagnosticar.
+O problema retorna em meses no equipamento novo.]'
+Montserrat Regular white 85% opacity medium size.
+
+Two comparison blocks side by side bottom area:
+LEFT — red #ff6b6b border, subtle red transparent bg:
+  Label 'TROCA' Montserrat Regular white small uppercase
+  Value '[VALOR TROCA: ex: R$4.500]' Montserrat ExtraBold #ff6b6b large
+  Sub 'inversor novo' Montserrat Regular white small
+
+RIGHT — cyan #00B4D8 border, subtle cyan transparent bg:
+  Label 'REPARO' Montserrat Regular white small uppercase
+  Value '[VALOR REPARO: ex: R$600]' Montserrat ExtraBold cyan large
+  Sub 'TEC Solar' Montserrat Regular white small
+
+BOTTOM: 'REPARO · DIAGNÓSTICO · MANUTENÇÃO' footer.
+BOTTOM-RIGHT: Empty clean 120x120px. No logo. No ornament.
+Ultra HD photorealistic cinematic."
+
+════════════════════════════════════
+PROMPT IMAGEM 5 — CTA FINAL
+════════════════════════════════════
+
+"Generate a single standalone vertical Instagram post image.
+Format: 1080x1350 pixels, 4:5 ratio, PNG.
+This is image 5 of 5 — deliver as individual file only, never merged.
+
+BACKGROUND: Very dark navy #0D1F3C with MAXIMUM INTENSITY dense glowing
+cyan and golden PCB circuit traces covering every area of the background.
+
+MAIN VISUAL CENTER:
+[EQUIPAMENTO DO POST] inverter centered, slightly elevated,
+presented like a technical trophy.
+MAXIMUM energy explosion: cyan and golden light bursting from
+inverter center in all directions, very long light rays reaching
+all image edges, floating golden and cyan energy particles everywhere,
+premium tech lens flare effects at corners and edges.
+Clear space top and bottom for text overlay.
+
+TEXT OVERLAY:
+
+Top centered:
+Small spaced text: 'ANTES DE CONDENAR,'
+Montserrat Bold uppercase, white 40% opacity, very wide letter-spacing.
+
+Main title 1 line very large:
+'DIAGNOSTIQUE.'
+Montserrat Black uppercase, golden #F5A623, very large impactful,
+subtle golden glow shadow.
+
+Thin cyan centered separator line.
+
+Support text 2 lines centered:
+'Laudo técnico completo em nível de placa.'
+'Atendemos todo o Brasil via logística reversa.'
+Montserrat Regular, white 75% opacity, medium, generous line-height.
+
+Rounded rectangle box with cyan border, very subtle cyan transparent bg:
+Inside top: 'WHATSAPP' Montserrat Regular white 40% opacity small wide-spaced
+Main: '(38) 99889-1587' Montserrat ExtraBold white #FFFFFF large bold
+
+Below box:
+'@tec_solar_moc' Montserrat Regular white 30% opacity small.
+
+BOTTOM: 'REPARO · DIAGNÓSTICO · MANUTENÇÃO' footer.
+BOTTOM-RIGHT: Completely empty clean 120x120px space for manual logo insertion.
+No star, no ornament, no symbol — just empty space.
+Ultra HD photorealistic cinematic tech premium."
