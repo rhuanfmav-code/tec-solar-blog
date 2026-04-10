@@ -337,8 +337,16 @@ PÚBLICO-ALVO SECUNDÁRIO: donos de sistemas com equipamento parado
 TEMA DO DIA
 ════════════════════════════════════
 
-Pegue o próximo tema não concluído da lista abaixo,
-execute as 3 etapas (rascunho → humanizer → output),
+INSTRUÇÕES DE CONTROLE DE SEQUÊNCIA:
+
+1. Leia o arquivo progresso.md neste repositório
+2. Verifique qual foi o último post gerado
+3. Gere o PRÓXIMO post da lista (último + 1)
+4. Após gerar o post completo, atualize o arquivo
+   progresso.md com o número do post recém-gerado
+5. Salve o post na pasta /posts com o nome correto
+
+Execute as 3 etapas (rascunho → humanizer → output)
 e ao final informe: "Post gerado: [número e título]"
 
 [LISTA DE TEMAS — PARTE 2 DESTE ARQUIVO]
