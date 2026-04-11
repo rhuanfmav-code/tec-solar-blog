@@ -1,0 +1,58 @@
+name: Gerar Carrossel Instagram
+
+on:
+  workflow_dispatch:
+    inputs:
+      numero_post:
+        description: 'Número do post (ex: 02)'
+        required: true
+        default: '02'
+  push:
+    paths:
+      - 'posts/post-**.md'
+
+jobs:
+  gerar-carrossel:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repositório
+        uses: actions/checkout@v4
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Instalar dependências
+        run: pip install requests
+
+      - name: Detectar número do post
+        id: detect_post
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "NUMERO_POST=${{ github.event.inputs.numero_post }}" >> $GITHUB_ENV
+          else
+            # Detecta o último post modificado no push
+            CHANGED=$(git diff --name-only HEAD~1 HEAD | grep 'posts/post-' | head -1)
+            NUM=$(echo "$CHANGED" | grep -o '[0-9]\+' | head -1)
+            PADDED=$(printf '%02d' "$NUM")
+            echo "NUMERO_POST=$PADDED" >> $GITHUB_ENV
+          fi
+
+      - name: Gerar carrossel via DALL-E 3
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: |
+          python3 .github/scripts/gerar_carrossel.py $NUMERO_POST
+
+      - name: Commit e push das imagens geradas
+        run: |
+          git config user.name "TEC Solar Bot"
+          git config user.email "bot@tecsolar.com.br"
+          git add carrossel/
+          git diff --staged --quiet || git commit -m "feat: carrossel post-$NUMERO_POST gerado via DALL-E 3"
+          git push
