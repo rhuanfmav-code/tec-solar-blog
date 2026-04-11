@@ -21,6 +21,8 @@ jobs:
     steps:
       - name: Checkout repositório
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Configurar Python
         uses: actions/setup-python@v5
@@ -34,20 +36,23 @@ jobs:
         id: detect_post
         run: |
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            echo "NUMERO_POST=${{ github.event.inputs.numero_post }}" >> $GITHUB_ENV
+            NUMERO_POST="${{ github.event.inputs.numero_post }}"
           else
-            # Detecta o último post modificado no push
-            CHANGED=$(git diff --name-only HEAD~1 HEAD | grep 'posts/post-' | head -1)
-            NUM=$(echo "$CHANGED" | grep -o '[0-9]\+' | head -1)
-            PADDED=$(printf '%02d' "$NUM")
-            echo "NUMERO_POST=$PADDED" >> $GITHUB_ENV
+            CHANGED=$(git diff --name-only HEAD~1 HEAD 2>/dev/null | grep 'posts/post-' | head -1)
+            if [ -z "$CHANGED" ]; then
+              CHANGED=$(ls -t posts/post-*.md 2>/dev/null | head -1)
+            fi
+            NUM=$(echo "$CHANGED" | grep -oE '[0-9]+' | tail -1)
+            NUMERO_POST=$(printf '%02d' "$NUM")
           fi
+          echo "NUMERO_POST=$NUMERO_POST" >> $GITHUB_ENV
+          echo "Post detectado: $NUMERO_POST"
 
       - name: Gerar carrossel via DALL-E 3
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: |
-          python3 .github/scripts/gerar_carrossel.py $NUMERO_POST
+          python3 .github/scripts/gerar_carrossel.py "$NUMERO_POST"
 
       - name: Commit e push das imagens geradas
         run: |
