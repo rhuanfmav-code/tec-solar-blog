@@ -4,6 +4,12 @@ TEC Solar — Centro Técnico de Inversores Solares
 
 Uso: python3 gerar_carrossel.py <numero_post>
 Exemplo: python3 gerar_carrossel.py 02
+
+FILOSOFIA DOS PROMPTS:
+- Texto é o elemento PRIMÁRIO — deve ser legível e renderizado com precisão
+- Visuais são FOTORREALISTAS: fotografias de produto, macro de PCB, bancada real
+- Inversores descritos fisicamente (sem marca) mas compatíveis com o modelo do post
+- Cada slide é um carousel card completo com hierarquia visual clara
 """
 
 import requests
@@ -24,206 +30,230 @@ POSTS = {
     "02": {
         "titulo": "Fronius State 102 — Tensão CC Muito Alta",
         "prompts": [
+
+            # ─────────────────────────────────
             # SLIDE 1 — CAPA
-            """Generate a single standalone vertical Instagram post image.
-Format: 1080x1350 pixels, 4:5 ratio, PNG.
-This is image 1 of 5 — deliver as individual file only, never merged.
-BACKGROUND: Very dark navy blue exactly #0D1F3C covering entire image.
-Dense glowing PCB circuit board traces in cyan #00B4D8 and golden #F5A623
-covering the entire background like a giant motherboard — thin traces with
-bright connection nodes, exactly like @tec_solar_moc Instagram posts.
-Bright scattered light dots as tech stars across the background.
-MAIN VISUAL CENTER-BOTTOM (occupying 55% image height, lower half):
-Fronius Symo on-grid solar inverter — white/gray metallic casing, LCD display on front panel, DC connection terminals at bottom — floating in dramatic 3/4 perspective above glowing PCB surface.
-Cyan electric arcs and fault sparks radiating from both sides of inverter.
-Golden energy sparks exploding around it.
-Intense cyan glow halo behind the inverter.
-Top 40% of image is clear space for text.
-TEXT OVERLAY — top area, left-aligned, 60px left margin:
-Row 1 small tag inside rounded rectangle with cyan border:
-lightning bolt emoji + 'CÓDIGO DE ERRO'
-Montserrat Bold uppercase, cyan #00B4D8, small, wide letter-spacing.
-Row 2-3 main title very large impactful (2 lines):
-'STATE 102' — Montserrat Black uppercase, golden #F5A623, ~90px
-'FRONIUS' — Montserrat Black uppercase, golden #F5A623, ~90px
-Thin horizontal cyan #00B4D8 line separator, 60% image width.
-Row 4-5 subtitle (2 lines):
-'Tensão CC Alta —'
-'String ou Sensor com Defeito?'
-Montserrat SemiBold, white #FFFFFF, medium size.
-BOTTOM FOOTER centered:
-'REPARO · DIAGNÓSTICO · MANUTENÇÃO'
-Montserrat Regular, white 35% opacity, very wide letter-spacing.
-BOTTOM-RIGHT CORNER: Completely empty clean space 120x120px.
-No star, no ornament, no symbol — just empty space for logo.
-Ultra HD photorealistic cinematic tech premium.
-DO NOT merge with other images. Single file only.""",
+            # ─────────────────────────────────
+            """Vertical Instagram carousel slide, 1080x1350px, 4:5 ratio, single image, do not merge with other images.
 
-            # SLIDE 2 — CAUSA RAIZ
-            """Generate a single standalone vertical Instagram post image.
-Format: 1080x1350 pixels, 4:5 ratio, PNG.
-This is image 2 of 5 — deliver as individual file only, never merged.
-BACKGROUND: Very dark navy blue exactly #0D1F3C covering entire image.
-Dense glowing PCB circuit board traces in cyan #00B4D8 and golden #F5A623
-covering entire background like giant motherboard with bright connection nodes.
-MAIN VISUAL CENTER-BOTTOM (60% image height, lower half):
-Extreme close-up of solar inverter power circuit board opened and exposed,
-isometric perspective slightly tilted for depth.
-Visible components in high detail: cylindrical electrolytic capacitors,
-IGBT transistors in TO-247 package, toroidal transformer,
-central DSP microchip, SMD resistors and capacitors.
-High-value resistors near DC input connectors with subtle amber/orange glow
-indicating thermal drift degradation.
-PCB traces illuminated in cyan showing current path.
-Thin cyan light threads leaking between components — visual effect of false voltage reading signal.
-Top 40% clear for text overlay.
-TEXT OVERLAY — top, left-aligned:
-Small counter inside rounded rectangle with cyan border:
-'02 / 05' — Montserrat Bold, cyan #00B4D8, small size.
-Title 2 lines large:
-'A CAUSA' — Montserrat Black uppercase, white #FFFFFF, large
-'RAIZ' — Montserrat Black uppercase, golden #F5A623, large
-Thin cyan separator line.
-3 bullet points stacked:
-● cyan filled circle 'String dimensionada sem coeficiente de temperatura — Voc elevada no frio'
-● cyan filled circle 'Inversor opera fora do limite por meses sem que o erro seja percebido'
-● golden filled circle 'Resistores do divisor de tensão com deriva — leitura falsa no ADC'
-Montserrat Medium, white, medium size.
-Third bullet uses golden circle — it is the most critical cause.
-BOTTOM FOOTER: 'REPARO · DIAGNÓSTICO · MANUTENÇÃO'
-Montserrat Regular, white 35% opacity, very wide letter-spacing.
-BOTTOM-RIGHT CORNER: Completely empty clean 120x120px space. No logo. No ornament.
-Ultra HD photorealistic cinematic tech premium.
-DO NOT merge with other images. Single file only.""",
+CRITICAL — RENDER ALL TEXT BELOW CLEARLY AND LEGIBLY. Text is the primary element.
 
-            # SLIDE 3 — COMO IDENTIFICAR NA PRÁTICA
-            """Generate a single standalone vertical Instagram post image.
-Format: 1080x1350 pixels, 4:5 ratio, PNG.
-This is image 3 of 5 — deliver as individual file only, never merged.
-BACKGROUND: Very dark navy blue exactly #0D1F3C with dense glowing
-cyan and golden PCB circuit traces covering entire background.
-MAIN VISUAL CENTER-BOTTOM (lower half of image):
-Electronics technician hands wearing dark gray work gloves holding
-a professional yellow or red digital multimeter
-(high voltage rated, digital display, black test probes)
-pressed against DC input terminals of an open Fronius solar inverter
-circuit board on professional electronics lab workbench.
-Background softly blurred: oscilloscope with glowing waveform screen,
-professional soldering iron, LED illuminated magnifying glass.
-Cyan diagnostic light beam shooting from multimeter probes
-scanning components like a diagnostic scanner.
-Subtle golden sparks at measurement point.
-Top clear for text overlay.
-TEXT OVERLAY — top, left-aligned:
-Counter inside cyan border rectangle:
-'03 / 05' — Montserrat Bold, cyan #00B4D8, small.
-Title 2 lines:
-'NA' — Montserrat Black uppercase, white #FFFFFF, large
-'BANCADA' — Montserrat Black uppercase, golden #F5A623, large
-Thin cyan separator line.
-3 stacked information boxes with left border accent:
-BOX 1 — 3px cyan left border, very subtle cyan transparent background:
-Label: 'PASSO 1' Montserrat Bold cyan uppercase small wide letter-spacing
-Text: 'Medir tensão CC na entrada com multímetro calibrado e comparar com o histórico do display'
-Montserrat Regular, white, medium size.
-BOX 2 — 3px cyan left border, subtle cyan transparent background:
-Label: 'PASSO 2' Montserrat Bold cyan uppercase small
-Text: 'Localizar resistores do divisor de tensão na placa de controle e medir em modo de resistência'
-Montserrat Regular, white, medium size.
-BOX 3 — 3px golden left border, very subtle golden transparent background:
-Label: '⚠ SINAL FÍSICO' Montserrat Bold golden uppercase small
-Text: 'Multímetro lê tensão dentro do limite, mas inversor reporta valor acima — defeito no circuito de medição'
-Montserrat Regular, white, medium size.
-BOTTOM FOOTER: 'REPARO · DIAGNÓSTICO · MANUTENÇÃO'
-Montserrat Regular, white 35% opacity, very wide letter-spacing.
-BOTTOM-RIGHT CORNER: Completely empty clean 120x120px. No logo. No ornament.
-Ultra HD photorealistic cinematic tech premium.
-DO NOT merge with other images. Single file only.""",
+LAYOUT: Top 45% = text zone. Bottom 55% = product photo zone.
 
+TEXT ZONE (top 45%, dark navy #0D1F3C background, left-aligned, 60px left margin):
+Line 1 — small pill badge with cyan #00B4D8 border, rounded corners:
+  Text inside badge: "⚡ CÓDIGO DE ERRO" — Montserrat Bold, all caps, cyan #00B4D8, 24px, wide letter-spacing
+Line 2 — main title, very large, bold:
+  "STATE 102" — Montserrat Black, all caps, golden yellow #F5A623, 88px, visible and sharp
+Line 3 — subtitle line, same weight:
+  "FRONIUS" — Montserrat Black, all caps, white #FFFFFF, 88px
+Horizontal rule: thin cyan #00B4D8 line, 65% of image width, 3px thick
+Line 4 — supporting text:
+  "Tensão CC Alta —" — Montserrat SemiBold, white #FFFFFF, 32px
+Line 5:
+  "String ou defeito no sensor?" — Montserrat SemiBold, white #FFFFFF, 32px
+
+BOTTOM FOOTER (last 80px of image):
+  Text: "REPARO · DIAGNÓSTICO · MANUTENÇÃO" — Montserrat Regular, white 40% opacity, all caps, very wide letter-spacing, centered
+
+BOTTOM-RIGHT: empty 120x120px space reserved for logo
+
+PRODUCT PHOTO ZONE (bottom 55%):
+Ultra-high resolution product photograph of a wall-mounted solar string inverter:
+- Rectangular white and light gray metallic enclosure, approximately 60cm tall × 45cm wide × 20cm deep
+- Front panel features a blue-backlit LCD numeric display showing "State 102" error code
+- Ventilation grilles on both sides, aluminum heat sink fins visible on edges
+- Professional DC/AC wiring terminals at the bottom with colored cables
+- Mounted on dark wall, dramatic side lighting casting sharp shadows
+- Cyan electric arc faults glowing at the DC input terminals
+- Golden light halo emanating from behind the unit
+- Background: very dark navy blue #0D1F3C with glowing circuit board trace patterns in cyan and gold
+
+STYLE: ultra-detailed product photography, Canon EOS R5 quality, cinematic studio lighting, photorealistic, no cartoons, no 3D renders.""",
+
+            # ─────────────────────────────────
+            # SLIDE 2 — A CAUSA RAIZ
+            # ─────────────────────────────────
+            """Vertical Instagram carousel slide, 1080x1350px, 4:5 ratio, single image, do not merge with other images.
+
+CRITICAL — RENDER ALL TEXT BELOW CLEARLY AND LEGIBLE. Text is the primary element of this image.
+
+LAYOUT: Top 50% = text zone on dark background. Bottom 50% = macro PCB photo zone.
+
+TEXT ZONE (top 50%, solid dark navy #0D1F3C, left-aligned, 60px margins):
+Line 1 — counter badge, small, cyan border rounded rectangle:
+  "02 / 05" — Montserrat Bold, cyan #00B4D8, 22px, wide letter-spacing
+Line 2 — title, very large:
+  "A CAUSA" — Montserrat Black, all caps, white #FFFFFF, 82px
+Line 3 — title accent:
+  "RAIZ" — Montserrat Black, all caps, golden #F5A623, 82px
+Horizontal rule: thin cyan line, 60% width
+Bullet list, left-aligned, 32px Montserrat Medium, white, line-height 1.6:
+  "●  String dimensionada sem coeficiente de temperatura"
+  "●  Voc dos painéis sobe 15–20% em dias frios"
+  "●  Resistores do divisor de tensão com deriva de valor"
+The third bullet uses a golden ● circle and golden text — it is the most critical point.
+
+BOTTOM FOOTER: "REPARO · DIAGNÓSTICO · MANUTENÇÃO" — Montserrat Regular, white 40% opacity, all caps, centered, wide letter-spacing
+
+BOTTOM-RIGHT: empty 120x120px space
+
+PHOTO ZONE (bottom 50%):
+Extreme macro photography of a real solar inverter power electronics circuit board, opened and exposed on a lab bench:
+- Large cylindrical aluminum electrolytic capacitors (35mm tall, blue and black sleeves) arranged in rows
+- IGBT power transistors in TO-247 packages with silver metallic body and three leads
+- Toroidal ferrite transformer wrapped in yellow tape
+- DSP/FPGA control microchip in LQFP package at center
+- SMD ceramic capacitors and metal film resistors densely packed
+- One area near DC input shows capacitors with bulging tops and slight amber burn marks — indicating thermal degradation
+- PCB traces lit in cyan, faint glow effect at component joints
+- Background: dark navy, glowing PCB patterns
+
+STYLE: Nikon Z9 macro lens, 1:1 magnification, professional electronics photography, no 3D render, photorealistic.""",
+
+            # ─────────────────────────────────
+            # SLIDE 3 — NA BANCADA
+            # ─────────────────────────────────
+            """Vertical Instagram carousel slide, 1080x1350px, 4:5 ratio, single image, do not merge with other images.
+
+CRITICAL — RENDER ALL TEXT BELOW CLEARLY AND LEGIBLY. Text cards must be sharp and readable.
+
+LAYOUT: Top 42% = text zone. Bottom 58% = workbench photo zone.
+
+TEXT ZONE (top 42%, dark navy #0D1F3C background, left-aligned, 60px margins):
+Line 1 — counter badge:
+  "03 / 05" — Montserrat Bold, cyan #00B4D8, 22px, rounded rectangle badge with cyan border
+Line 2 — title:
+  "NA" — Montserrat Black, all caps, white #FFFFFF, 82px
+Line 3 — title accent:
+  "BANCADA" — Montserrat Black, all caps, golden #F5A623, 82px
+Horizontal rule: thin cyan line, 60% width
+
+Three text boxes stacked vertically, each with a left border accent:
+
+BOX 1 — 4px solid cyan left border, very subtle cyan transparent background:
+  Label: "PASSO 1" — Montserrat Bold, cyan #00B4D8, 18px, all caps, wide spacing
+  Text: "Medir tensão CC na entrada com multímetro e comparar com o histórico do display"
+  — Montserrat Regular, white, 26px
+
+BOX 2 — 4px solid cyan left border:
+  Label: "PASSO 2" — Montserrat Bold, cyan #00B4D8, 18px
+  Text: "Localizar resistores do divisor de tensão na placa e testar em modo ohm"
+  — Montserrat Regular, white, 26px
+
+BOX 3 — 4px solid golden #F5A623 left border, subtle golden background:
+  Label: "⚠ SINAL FÍSICO" — Montserrat Bold, golden #F5A623, 18px
+  Text: "Multímetro dentro do limite — display lê acima. Defeito no circuito de medição"
+  — Montserrat Regular, white, 26px
+
+BOTTOM FOOTER: "REPARO · DIAGNÓSTICO · MANUTENÇÃO" — Montserrat Regular, white 40% opacity, centered, wide letter-spacing
+
+BOTTOM-RIGHT: empty 120x120px space
+
+PHOTO ZONE (bottom 58%):
+Professional electronics repair workbench, photographed from slightly above at 45-degree angle:
+- Technician hands in dark gray anti-static work gloves
+- Holding a yellow FLUKE or BRYMEN digital multimeter with red and black probes
+- Probes placed on DC bus capacitor terminals of an open inverter circuit board
+- Multimeter display showing DC voltage reading: "987 V DC"
+- Circuit board clearly visible: green PCB, large IGBT transistors, cylindrical capacitors
+- Workbench tools softly blurred in background: oscilloscope with green waveform, soldering station, magnifying lamp
+- Cyan diagnostic light beam from probes scanning circuit
+- Professional laboratory ambient lighting
+- Background: very dark navy blue with subtle glowing PCB trace patterns
+
+STYLE: Canon EOS 5D Mark IV, 50mm lens, professional product photography, photorealistic, not illustrated, not 3D rendered.""",
+
+            # ─────────────────────────────────
             # SLIDE 4 — O ERRO DO MERCADO
-            """Generate a single standalone vertical Instagram post image.
-Format: 1080x1350 pixels, 4:5 ratio, PNG.
-This is image 4 of 5 — deliver as individual file only, never merged.
-BACKGROUND: Very dark navy blue exactly #0D1F3C with dense glowing
-cyan and golden PCB circuit traces covering entire background.
-MAIN VISUAL CENTER (central portion of image):
-Two Fronius solar inverters side by side,
-divided by vertical white/cyan light beam in exact center of image.
-LEFT inverter: dead, cold gray color, no energy, dark shadows,
-deteriorated look, subtle red X symbol above it.
-RIGHT inverter: vibrant, cyan energy explosion bursting from inside,
-golden glow radiating outward, illuminated display,
-light rays expanding outward in all directions.
-Upper and lower image areas free for text overlay.
-TEXT OVERLAY:
-Top centered:
-Counter '04 / 05' — cyan border tag same style.
-Title 2 lines centered:
-'O MERCADO CONDENA.' — Montserrat Black uppercase, white #FFFFFF, large
-'A TEC SOLAR REPARA.' — Montserrat Black uppercase, golden #F5A623, large
-Golden centered separator line.
-Dark translucent box with subtle white border centered:
-'Técnico mede tensão acima do limite, condena o inversor e troca por novo — sem verificar se é medição falsa ou string mal dimensionada. O problema se repete.'
-Montserrat Regular, white 85% opacity, medium size.
-Two comparison blocks side by side bottom area:
-LEFT block — red #ff6b6b border, subtle red transparent background:
-Label 'TROCA' Montserrat Regular white small uppercase
-Value 'R$ 7.000' Montserrat ExtraBold #ff6b6b large
-Sub 'inversor novo' Montserrat Regular white small
-RIGHT block — cyan #00B4D8 border, subtle cyan transparent background:
-Label 'REPARO' Montserrat Regular white small uppercase
-Value 'R$ 600' Montserrat ExtraBold cyan #00B4D8 large
-Sub 'TEC Solar' Montserrat Regular white small
-BOTTOM FOOTER: 'REPARO · DIAGNÓSTICO · MANUTENÇÃO'
-Montserrat Regular, white 35% opacity, very wide letter-spacing.
-BOTTOM-RIGHT CORNER: Completely empty clean 120x120px. No logo. No ornament.
-Ultra HD photorealistic cinematic tech premium.
-DO NOT merge with other images. Single file only.""",
+            # ─────────────────────────────────
+            """Vertical Instagram carousel slide, 1080x1350px, 4:5 ratio, single image, do not merge with other images.
 
+CRITICAL — RENDER ALL TEXT AND NUMBERS BELOW CLEARLY AND LEGIBLY. Numbers must be sharp and readable.
+
+LAYOUT:
+- Top 35%: title text zone on dark navy background
+- Middle 30%: two inverter photos side by side, divided by center light beam
+- Bottom 35%: comparison price boxes + quote + footer
+
+TEXT ZONE (top 35%, dark navy #0D1F3C):
+Counter: "04 / 05" — Montserrat Bold, cyan, small badge
+Title line 1, centered, very large:
+  "O MERCADO CONDENA." — Montserrat Black, all caps, white #FFFFFF, 64px
+Title line 2, centered:
+  "A TEC SOLAR REPARA." — Montserrat Black, all caps, golden #F5A623, 64px
+Thin golden horizontal rule, centered, 50% width
+
+MIDDLE PHOTO ZONE (30%):
+Split composition — two identical white rectangular wall-mounted solar inverters side by side, divided by a vertical white/cyan energy beam:
+LEFT inverter: dead unit — gray desaturated photo, no display light, dust on surface, drooping cables, red X symbol above it in a red circle
+RIGHT inverter: active repaired unit — display lit and showing "Normal", cyan light radiating from ventilation grilles, golden warm glow, crisp clean cables
+
+BOTTOM COMPARISON ZONE (35%):
+Centered quote box, dark background with white subtle border:
+  Text: "Sem checar o circuito de medição, o inversor bom vira sucata."
+  — Montserrat Italic, white 85% opacity, 26px, centered
+
+Two side-by-side comparison cards:
+LEFT CARD — red border #FF4444, dark red transparent background:
+  Top label: "TROCA" — Montserrat Regular, white, 18px, all caps, wide spacing
+  Big number: "R$ 7.000" — Montserrat ExtraBold, red #FF4444, 58px — MUST BE CLEARLY VISIBLE AND LEGIBLE
+  Sub-label: "inversor novo" — Montserrat Regular, white, 18px
+
+RIGHT CARD — cyan border #00B4D8, dark cyan transparent background:
+  Top label: "REPARO" — Montserrat Regular, white, 18px, all caps, wide spacing
+  Big number: "R$ 600" — Montserrat ExtraBold, cyan #00B4D8, 58px — MUST BE CLEARLY VISIBLE AND LEGIBLE
+  Sub-label: "TEC Solar" — Montserrat Regular, white, 18px
+
+FOOTER: "REPARO · DIAGNÓSTICO · MANUTENÇÃO" — Montserrat Regular, white 40% opacity, centered
+BOTTOM-RIGHT: empty 120x120px space""",
+
+            # ─────────────────────────────────
             # SLIDE 5 — CTA FINAL
-            """Generate a single standalone vertical Instagram post image.
-Format: 1080x1350 pixels, 4:5 ratio, PNG.
-This is image 5 of 5 — deliver as individual file only, never merged.
-BACKGROUND: Very dark navy blue exactly #0D1F3C with MAXIMUM INTENSITY
-dense glowing cyan #00B4D8 and golden #F5A623 PCB circuit traces
-covering every area of the background at full brightness.
-MAIN VISUAL CENTER:
-Fronius Symo on-grid solar inverter — white/gray metallic casing, LCD display on front panel
-Centered and slightly elevated, presented like a technical trophy.
-MAXIMUM energy explosion: cyan and golden light bursting from
-inverter center in all directions simultaneously,
-very long light rays reaching all four image edges,
-floating golden and cyan energy particles everywhere around the inverter,
-premium tech lens flare effects at corners and image edges.
-Clear space in top and bottom areas for text overlay.
-TEXT OVERLAY:
-Top centered:
-Small spaced text: 'ANTES DE CONDENAR,'
-Montserrat Bold uppercase, white 40% opacity, very wide letter-spacing, small.
-Main title 1 line very large impactful:
-'DIAGNOSTIQUE.'
-Montserrat Black uppercase, golden #F5A623, very large size,
-subtle golden glow shadow effect around letters.
-Thin cyan centered separator line below title.
-Support text 2 lines centered:
-'Laudo técnico completo em nível de placa.'
-'Atendemos todo o Brasil via logística reversa.'
-Montserrat Regular, white 75% opacity, medium size, generous line-height.
-Rounded rectangle box centered with cyan #00B4D8 border,
-very subtle cyan transparent background:
-Inside top label: 'WHATSAPP'
-Montserrat Regular, white 40% opacity, small, very wide letter-spacing
-Main number centered: '(38) 99889-1587'
-Montserrat ExtraBold, white #FFFFFF, large bold size
-Text below the box:
-'@tec_solar_moc'
-Montserrat Regular, white 30% opacity, small size.
-BOTTOM FOOTER: 'REPARO · DIAGNÓSTICO · MANUTENÇÃO'
-Montserrat Regular, white 35% opacity, very wide letter-spacing, centered.
-BOTTOM-RIGHT CORNER: Completely empty clean 120x120px space.
-No star, no ornament, no symbol — just empty space for manual logo insertion.
-Ultra HD photorealistic cinematic tech premium.
-DO NOT merge with other images. Single file only.""",
+            # ─────────────────────────────────
+            """Vertical Instagram carousel slide, 1080x1350px, 4:5 ratio, single image, do not merge with other images.
+
+CRITICAL — ALL TEXT MUST BE RENDERED SHARPLY AND LEGIBLY. This is a call-to-action card — text is everything.
+
+BACKGROUND: Very dark navy blue #0D1F3C, maximum intensity dense glowing circuit board traces in cyan #00B4D8 and golden #F5A623 covering the entire background like a giant glowing motherboard — ultra-bright connection nodes, light bursts at junctions, scattered bright tech star dots everywhere.
+
+CENTRAL PRODUCT PHOTO:
+Ultra-high resolution photograph of a wall-mounted solar string inverter in REPAIRED and OPERATIONAL state:
+- White and light gray metallic rectangular enclosure, professional grade
+- Blue LCD display illuminated showing "NORMAL" or "OK" status — no error code
+- Clean professional cabling at terminals
+- Positioned at center of image, slightly elevated, like a trophy
+- Maximum energy explosion effect: intense cyan and golden light rays bursting outward from the inverter in all directions, reaching all four image edges
+- Long golden light streaks radiating outward like solar flares
+- Floating golden and cyan energy particles surrounding the inverter
+- Premium lens flare effects at image corners
+
+TEXT OVERLAY — render all text clearly:
+
+Top of image, centered, small spaced text:
+  "ANTES DE CONDENAR," — Montserrat Bold, all caps, white 45% opacity, 24px, very wide letter-spacing
+
+Main title, centered, very large:
+  "DIAGNOSTIQUE." — Montserrat Black, all caps, golden #F5A623, 96px
+  Golden glow shadow effect behind each letter — text must be large, bold, unmistakably readable
+
+Thin cyan horizontal rule, centered, 55% width
+
+Supporting text, 2 lines, centered:
+  "Laudo técnico completo em nível de placa." — Montserrat Regular, white 80% opacity, 28px
+  "Atendemos todo o Brasil via logística reversa." — Montserrat Regular, white 80% opacity, 28px
+
+Contact box — rounded rectangle, cyan #00B4D8 border, 3px, dark subtle cyan fill:
+  Top label inside box: "WHATSAPP" — Montserrat Regular, white 45% opacity, 16px, all caps, wide spacing
+  Main number — MUST BE LEGIBLE AND LARGE:
+  "(38) 99889-1587" — Montserrat ExtraBold, white #FFFFFF, 52px, centered inside box
+  Below box, small:
+  "@tec_solar_moc" — Montserrat Regular, white 35% opacity, 20px, centered
+
+FOOTER: "REPARO · DIAGNÓSTICO · MANUTENÇÃO" — Montserrat Regular, white 35% opacity, all caps, wide letter-spacing, centered
+BOTTOM-RIGHT: completely empty clean 120x120px space, no ornament, no logo, just empty space
+
+STYLE: ultra HD photorealistic cinematic, premium tech dark aesthetic, product photography quality, photorealistic inverter — not illustrated, not 3D cartoon rendered.""",
         ]
     }
 }
@@ -307,7 +337,7 @@ def main():
         arquivo = gerar_imagem(prompt, i, numero_post)
         arquivos.append(arquivo)
         if i < 5:
-            time.sleep(2)  # pausa entre chamadas
+            time.sleep(2)
 
     print("\n" + "=" * 60)
     print(f"Carrossel Post {numero_post} concluído:")
