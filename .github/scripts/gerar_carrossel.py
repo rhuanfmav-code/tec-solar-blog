@@ -90,9 +90,11 @@ ALTURA   = 1350
 # ============================================================
 
 def baixar_imagem(url):
-    resp = requests.get(url, timeout=15)
+    headers = {"User-Agent": "Mozilla/5.0"}
+    resp = requests.get(url, timeout=15, headers=headers)
+    resp.raise_for_status()
     return Image.open(BytesIO(resp.content)).convert("RGBA")
-
+    
 def get_font(tamanho, bold=False):
     """Tenta carregar Montserrat, fallback para DejaVu."""
     fontes_bold = [
@@ -114,7 +116,7 @@ def get_font(tamanho, bold=False):
 
 def montar_fundo(url_fundo, url_inversor=None, posicao="centro-baixo"):
     """Monta o fundo com overlay e o inversor posicionado."""
-    fundo = baixar_imagem(url_fundo).resize((LARGURA, ALTURA))
+    fundo = baixar_imagem(url_fundo).resize((LARGURA, ALTURA), Image.LANCZOS)
     canvas = Image.new("RGBA", (LARGURA, ALTURA))
     canvas.paste(fundo, (0, 0))
 
