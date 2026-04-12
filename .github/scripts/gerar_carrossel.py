@@ -75,12 +75,12 @@ PLACAS = [
 # CORES TEC SOLAR
 # ============================================================
 
-COR_FUNDO      = (13, 31, 60)        # #0D1F3C
-COR_DOURADO    = (245, 166, 35)      # #F5A623
-COR_CIANO      = (0, 180, 216)       # #00B4D8
+COR_FUNDO      = (13, 31, 60)
+COR_DOURADO    = (245, 166, 35)
+COR_CIANO      = (0, 180, 216)
 COR_BRANCO     = (255, 255, 255)
-COR_VERMELHO   = (255, 107, 107)     # comparativo troca
-COR_OVERLAY    = (13, 31, 60, 200)   # overlay semi-transparente
+COR_VERMELHO   = (255, 107, 107)
+COR_OVERLAY    = (13, 31, 60, 120)
 
 LARGURA  = 1080
 ALTURA   = 1350
@@ -94,9 +94,8 @@ def baixar_imagem(url):
     resp = requests.get(url, timeout=15, headers=headers)
     resp.raise_for_status()
     return Image.open(BytesIO(resp.content)).convert("RGBA")
-    
+
 def get_font(tamanho, bold=False):
-    """Tenta carregar Montserrat, fallback para DejaVu."""
     fontes_bold = [
         "/usr/share/fonts/truetype/montserrat/Montserrat-ExtraBold.ttf",
         "/usr/share/fonts/truetype/montserrat/Montserrat-Bold.ttf",
@@ -115,35 +114,33 @@ def get_font(tamanho, bold=False):
     return ImageFont.load_default()
 
 def montar_fundo(url_fundo, url_inversor=None, posicao="centro-baixo"):
-    """Monta o fundo com overlay e o inversor posicionado."""
     fundo = baixar_imagem(url_fundo).resize((LARGURA, ALTURA), Image.LANCZOS)
     canvas = Image.new("RGBA", (LARGURA, ALTURA))
     canvas.paste(fundo, (0, 0))
 
-    # Overlay azul escuro semi-transparente
     overlay = Image.new("RGBA", (LARGURA, ALTURA), COR_OVERLAY)
     canvas = Image.alpha_composite(canvas, overlay)
 
     if url_inversor:
-    inversor = baixar_imagem(url_inversor)
-    max_h = 580
-    ratio = max_h / inversor.height
-    novo_w = int(inversor.width * ratio)
-    inversor = inversor.resize((novo_w, max_h), Image.LANCZOS)
-    
-    # Garante alpha correto
-    if inversor.mode != "RGBA":
-        inversor = inversor.convert("RGBA")
-    r, g, b, a = inversor.split()
-    
-    if posicao == "centro-baixo":
-        x = (LARGURA - novo_w) // 2
-        y = ALTURA - max_h - 80
-    elif posicao == "centro":
-        x = (LARGURA - novo_w) // 2
-        y = (ALTURA - max_h) // 2
+        inversor = baixar_imagem(url_inversor)
+        max_h = 580
+        ratio = max_h / inversor.height
+        novo_w = int(inversor.width * ratio)
+        inversor = inversor.resize((novo_w, max_h), Image.LANCZOS)
 
-   
+        if inversor.mode != "RGBA":
+            inversor = inversor.convert("RGBA")
+        r, g, b, a = inversor.split()
+
+        if posicao == "centro-baixo":
+            x = (LARGURA - novo_w) // 2
+            y = ALTURA - max_h - 80
+        elif posicao == "centro":
+            x = (LARGURA - novo_w) // 2
+            y = (ALTURA - max_h) // 2
+
+        canvas.paste(inversor, (x, y), a)
+
     return canvas.convert("RGB")
 
 def desenhar_linha(draw, y, cor=None, largura_pct=0.6):
@@ -153,7 +150,6 @@ def desenhar_linha(draw, y, cor=None, largura_pct=0.6):
     draw.rectangle([x1, y, x2, y + 2], fill=cor)
 
 def desenhar_texto_wrap(draw, texto, x, y, font, cor, max_largura, alinhamento="left"):
-    """Desenha texto com quebra de linha automática."""
     palavras = texto.split()
     linhas = []
     linha_atual = ""
@@ -186,8 +182,7 @@ def rodape(draw):
     texto = "REPARO  ·  DIAGNÓSTICO  ·  MANUTENÇÃO"
     bbox = draw.textbbox((0, 0), texto, font=font)
     x = (LARGURA - bbox[2]) // 2
-    draw.text((x, ALTURA - 60), texto, font=font,
-              fill=(255, 255, 255, 90))
+    draw.text((x, ALTURA - 60), texto, font=font, fill=(255, 255, 255, 90))
 
 def salvar(img, numero_post, numero_slide):
     pasta = f"carrossel/post-{numero_post:02d}"
@@ -208,16 +203,6 @@ def detectar_marca(titulo):
             return marca
     return None
 
-def detectar_fundo_por_slide(numero_slide):
-    mapa = {
-        1: "falha",
-        2: "componente",
-        3: "diagnostico",
-        4: "falha",
-        5: "cta",
-    }
-    return mapa.get(numero_slide, "diagnostico")
-
 # ============================================================
 # SLIDE 1 — CAPA
 # ============================================================
@@ -229,7 +214,6 @@ def gerar_slide_1(dados, numero_post, marca):
     img = montar_fundo(url_fundo, url_inversor, "centro-baixo")
     draw = ImageDraw.Draw(img)
 
-    # Tag categoria
     font_tag = get_font(26, bold=True)
     tag_texto = f"⚡  {dados.get('categoria', 'CÓDIGO DE ERRO').upper()}"
     bbox = draw.textbbox((0, 0), tag_texto, font=font_tag)
@@ -238,10 +222,9 @@ def gerar_slide_1(dados, numero_post, marca):
     tag_x = 60
     tag_y = 70
     draw.rounded_rectangle([tag_x, tag_y, tag_x + tag_w, tag_y + tag_h],
-                           radius=20, outline=COR_CIANO, width=2)
+                            radius=20, outline=COR_CIANO, width=2)
     draw.text((tag_x + 20, tag_y + 10), tag_texto, font=font_tag, fill=COR_CIANO)
 
-    # Título linha 1
     y = tag_y + tag_h + 28
     font_titulo = get_font(88, bold=True)
     linha1 = dados.get("titulo_linha1", "").upper()
@@ -250,18 +233,15 @@ def gerar_slide_1(dados, numero_post, marca):
     draw.text((x, y), linha1, font=font_titulo, fill=COR_DOURADO)
     y += bbox[3] + 10
 
-    # Título linha 2
     linha2 = dados.get("titulo_linha2", "").upper()
     bbox = draw.textbbox((0, 0), linha2, font=font_titulo)
     x = (LARGURA - bbox[2]) // 2
     draw.text((x, y), linha2, font=font_titulo, fill=COR_DOURADO)
     y += bbox[3] + 24
 
-    # Linha separadora
     desenhar_linha(draw, y)
     y += 28
 
-    # Subtítulo
     font_sub = get_font(34, bold=True)
     sub1 = dados.get("subtitulo1", "")
     sub2 = dados.get("subtitulo2", "")
@@ -282,19 +262,16 @@ def gerar_slide_1(dados, numero_post, marca):
 
 def gerar_slide_2(dados, numero_post, marca):
     url_fundo = FUNDOS["componente"]
-    # Slide 2 usa placa eletrônica
     url_placa = PLACAS[numero_post % len(PLACAS)]
 
     img = montar_fundo(url_fundo, url_placa, "centro-baixo")
     draw = ImageDraw.Draw(img)
 
-    # Contador
     font_cont = get_font(26, bold=True)
     draw.rounded_rectangle([LARGURA - 140, 50, LARGURA - 50, 90],
-                           radius=8, outline=COR_CIANO, width=2)
+                            radius=8, outline=COR_CIANO, width=2)
     draw.text((LARGURA - 130, 56), "02 / 05", font=font_cont, fill=COR_CIANO)
 
-    # Título
     y = 90
     font_titulo = get_font(72, bold=True)
     draw.text((60, y), "A CAUSA", font=font_titulo, fill=COR_BRANCO)
@@ -302,11 +279,9 @@ def gerar_slide_2(dados, numero_post, marca):
     draw.text((60, y), "RAIZ", font=font_titulo, fill=COR_DOURADO)
     y += 90
 
-    # Linha
     desenhar_linha(draw, y, largura_pct=0.4)
     y += 30
 
-    # Bullets
     font_bullet = get_font(30)
     causas = [
         (dados.get("causa1", ""), COR_CIANO),
@@ -334,13 +309,11 @@ def gerar_slide_3(dados, numero_post, marca):
     img = montar_fundo(url_fundo, url_inversor, "centro-baixo")
     draw = ImageDraw.Draw(img)
 
-    # Contador
     font_cont = get_font(26, bold=True)
     draw.rounded_rectangle([LARGURA - 140, 50, LARGURA - 50, 90],
-                           radius=8, outline=COR_CIANO, width=2)
+                            radius=8, outline=COR_CIANO, width=2)
     draw.text((LARGURA - 130, 56), "03 / 05", font=font_cont, fill=COR_CIANO)
 
-    # Título
     y = 90
     font_titulo = get_font(72, bold=True)
     draw.text((60, y), "NA", font=font_titulo, fill=COR_BRANCO)
@@ -351,7 +324,6 @@ def gerar_slide_3(dados, numero_post, marca):
     desenhar_linha(draw, y, largura_pct=0.4)
     y += 30
 
-    # Caixas de passos
     font_label = get_font(24, bold=True)
     font_texto = get_font(28)
     passos = [
@@ -360,7 +332,6 @@ def gerar_slide_3(dados, numero_post, marca):
         ("⚠ SINAL FÍSICO", dados.get("sinal_fisico", ""), COR_DOURADO),
     ]
     for label, texto, cor in passos:
-        # Borda esquerda colorida
         draw.rectangle([60, y, 65, y + 90], fill=cor)
         draw.text((80, y + 5), label, font=font_label, fill=cor)
         y_fim = desenhar_texto_wrap(draw, texto, 80, y + 38, font_texto, COR_BRANCO, 900)
@@ -380,13 +351,11 @@ def gerar_slide_4(dados, numero_post, marca):
     img = montar_fundo(url_fundo, url_inversor, "centro-baixo")
     draw = ImageDraw.Draw(img)
 
-    # Contador
     font_cont = get_font(26, bold=True)
     draw.rounded_rectangle([LARGURA - 140, 50, LARGURA - 50, 90],
-                           radius=8, outline=COR_CIANO, width=2)
+                            radius=8, outline=COR_CIANO, width=2)
     draw.text((LARGURA - 130, 56), "04 / 05", font=font_cont, fill=COR_CIANO)
 
-    # Título
     y = 90
     font_titulo = get_font(60, bold=True)
     draw.text((60, y), "O MERCADO CONDENA.", font=font_titulo, fill=COR_BRANCO)
@@ -397,16 +366,13 @@ def gerar_slide_4(dados, numero_post, marca):
     desenhar_linha(draw, y, cor=COR_DOURADO, largura_pct=0.4)
     y += 30
 
-    # Caixa de texto
     font_texto = get_font(28)
     erro = dados.get("texto_erro_mercado", "")
     draw.rounded_rectangle([55, y, LARGURA - 55, y + 140],
-                           radius=10, fill=(255, 255, 255, 20))
-    y_fim = desenhar_texto_wrap(draw, erro, 80, y + 20, font_texto,
-                                COR_BRANCO, 900)
+                            radius=10, fill=(255, 255, 255, 20))
+    y_fim = desenhar_texto_wrap(draw, erro, 80, y + 20, font_texto, COR_BRANCO, 900)
     y = max(y_fim, y + 145) + 30
 
-    # Blocos comparativos
     font_label  = get_font(24)
     font_valor  = get_font(56, bold=True)
     font_sub    = get_font(22)
@@ -416,17 +382,15 @@ def gerar_slide_4(dados, numero_post, marca):
     x_esq       = 55
     x_dir       = x_esq + bloco_w + gap
 
-    # Bloco esquerda — TROCA
     draw.rounded_rectangle([x_esq, y, x_esq + bloco_w, y + bloco_h],
-                           radius=10, outline=COR_VERMELHO, width=2)
+                            radius=10, outline=COR_VERMELHO, width=2)
     draw.text((x_esq + 20, y + 16), "TROCA", font=font_label, fill=COR_BRANCO)
     draw.text((x_esq + 20, y + 50), dados.get("valor_troca", "R$4.500"),
               font=font_valor, fill=COR_VERMELHO)
     draw.text((x_esq + 20, y + 120), "inversor novo", font=font_sub, fill=COR_BRANCO)
 
-    # Bloco direita — REPARO
     draw.rounded_rectangle([x_dir, y, x_dir + bloco_w, y + bloco_h],
-                           radius=10, outline=COR_CIANO, width=2)
+                            radius=10, outline=COR_CIANO, width=2)
     draw.text((x_dir + 20, y + 16), "REPARO", font=font_label, fill=COR_BRANCO)
     draw.text((x_dir + 20, y + 50), dados.get("valor_reparo", "R$600"),
               font=font_valor, fill=COR_CIANO)
@@ -446,25 +410,20 @@ def gerar_slide_5(dados, numero_post, marca):
     img = montar_fundo(url_fundo, url_inversor, "centro")
     draw = ImageDraw.Draw(img)
 
-    # Texto acima
     font_acima = get_font(28)
     texto_acima = "ANTES DE CONDENAR,"
     bbox = draw.textbbox((0, 0), texto_acima, font=font_acima)
     x = (LARGURA - bbox[2]) // 2
-    draw.text((x, 80), texto_acima, font=font_acima,
-              fill=(255, 255, 255, 100))
+    draw.text((x, 80), texto_acima, font=font_acima, fill=(255, 255, 255, 100))
 
-    # Título principal
     font_diag = get_font(88, bold=True)
     texto_diag = "DIAGNOSTIQUE."
     bbox = draw.textbbox((0, 0), texto_diag, font=font_diag)
     x = (LARGURA - bbox[2]) // 2
     draw.text((x, 130), texto_diag, font=font_diag, fill=COR_DOURADO)
 
-    # Linha separadora
     desenhar_linha(draw, 240)
 
-    # Texto apoio
     font_apoio = get_font(30)
     apoio1 = "Laudo técnico completo em nível de placa."
     apoio2 = "Atendemos todo o Brasil via logística reversa."
@@ -475,17 +434,15 @@ def gerar_slide_5(dados, numero_post, marca):
     x = (LARGURA - bbox[2]) // 2
     draw.text((x, 314), apoio2, font=font_apoio, fill=(255, 255, 255, 190))
 
-    # Caixa WhatsApp
     caixa_y = ALTURA - 340
     draw.rounded_rectangle([100, caixa_y, LARGURA - 100, caixa_y + 160],
-                           radius=16, outline=COR_CIANO, width=2)
+                            radius=16, outline=COR_CIANO, width=2)
 
     font_wlabel = get_font(24)
     texto_wl = "WHATSAPP"
     bbox = draw.textbbox((0, 0), texto_wl, font=font_wlabel)
     x = (LARGURA - bbox[2]) // 2
-    draw.text((x, caixa_y + 18), texto_wl, font=font_wlabel,
-              fill=(255, 255, 255, 100))
+    draw.text((x, caixa_y + 18), texto_wl, font=font_wlabel, fill=(255, 255, 255, 100))
 
     font_wnum = get_font(56, bold=True)
     numero = dados.get("whatsapp", "(38) 99889-1587")
@@ -493,13 +450,11 @@ def gerar_slide_5(dados, numero_post, marca):
     x = (LARGURA - bbox[2]) // 2
     draw.text((x, caixa_y + 60), numero, font=font_wnum, fill=COR_BRANCO)
 
-    # Instagram
     font_ig = get_font(26)
     ig = "@tec_solar_moc"
     bbox = draw.textbbox((0, 0), ig, font=font_ig)
     x = (LARGURA - bbox[2]) // 2
-    draw.text((x, caixa_y + 178), ig, font=font_ig,
-              fill=(255, 255, 255, 80))
+    draw.text((x, caixa_y + 178), ig, font=font_ig, fill=(255, 255, 255, 80))
 
     rodape(draw)
     return salvar(img, numero_post, 5)
@@ -509,25 +464,6 @@ def gerar_slide_5(dados, numero_post, marca):
 # ============================================================
 
 def gerar_carrossel(numero_post, dados):
-    """
-    dados = {
-        "titulo_linha1":     "FRONIUS",
-        "titulo_linha2":     "STATE 102",
-        "categoria":         "CÓDIGO DE ERRO",
-        "subtitulo1":        "Tensão CC Alta:",
-        "subtitulo2":        "causa real e diagnóstico na bancada",
-        "causa1":            "String mal dimensionada para a faixa de Voc do modelo",
-        "causa2":            "Temperatura baixa elevando o Voc além do limite",
-        "causa_principal":   "Deriva do ADC no divisor resistivo da placa de medição",
-        "passo1":            "Meça a tensão CC em frio (< 10°C). Acima de 950V = string fora do projeto",
-        "passo2":            "Meça a resistência dos resistores do divisor. Desvio > 1% = defeito confirmado",
-        "sinal_fisico":      "Resistores SMD com escurecimento superficial ou leitura instável no multímetro",
-        "texto_erro_mercado":"Técnico vê State 102 e troca o inversor. O problema era a string — ou pior, um resistor de R$ 2,00.",
-        "valor_troca":       "R$ 7.000",
-        "valor_reparo":      "R$ 600",
-        "whatsapp":          "(38) 99889-1587",
-    }
-    """
     print(f"\n🚀 Gerando carrossel — Post {numero_post:02d}")
     marca = detectar_marca(
         dados.get("titulo_linha1", "") + " " + dados.get("titulo_linha2", "")
@@ -543,30 +479,28 @@ def gerar_carrossel(numero_post, dados):
     print(f"\n✅ Carrossel completo: carrossel/post-{numero_post:02d}/")
 
 # ============================================================
-# ENTRADA — chamado pelo GitHub Actions
+# ENTRADA
 # ============================================================
 
 if __name__ == "__main__":
     numero_post = int(sys.argv[1]) if len(sys.argv) > 1 else 2
 
-    # Estes dados são substituídos automaticamente pelo Claude Code
-    # com as variáveis extraídas do post gerado no dia
     dados = {
-        "titulo_linha1":     os.environ.get("TITULO_L1", "FRONIUS"),
-        "titulo_linha2":     os.environ.get("TITULO_L2", "STATE 102"),
-        "categoria":         os.environ.get("CATEGORIA", "CÓDIGO DE ERRO"),
-        "subtitulo1":        os.environ.get("SUBTITULO1", "Tensão CC Alta:"),
-        "subtitulo2":        os.environ.get("SUBTITULO2", "causa real e diagnóstico"),
-        "causa1":            os.environ.get("CAUSA1", "String mal dimensionada"),
-        "causa2":            os.environ.get("CAUSA2", "Temperatura baixa elevando o Voc"),
-        "causa_principal":   os.environ.get("CAUSA_PRINCIPAL", "Deriva do ADC no divisor resistivo"),
-        "passo1":            os.environ.get("PASSO1", "Meça a tensão CC com string fria"),
-        "passo2":            os.environ.get("PASSO2", "Meça resistência do divisor"),
-        "sinal_fisico":      os.environ.get("SINAL_FISICO", "Resistores SMD escurecidos"),
-        "texto_erro_mercado":os.environ.get("TEXTO_ERRO", "Técnico troca o inversor sem diagnosticar a causa real."),
-        "valor_troca":       os.environ.get("VALOR_TROCA", "R$ 7.000"),
-        "valor_reparo":      os.environ.get("VALOR_REPARO", "R$ 600"),
-        "whatsapp":          "(38) 99889-1587",
+        "titulo_linha1":      os.environ.get("TITULO_L1", "FRONIUS"),
+        "titulo_linha2":      os.environ.get("TITULO_L2", "STATE 102"),
+        "categoria":          os.environ.get("CATEGORIA", "CÓDIGO DE ERRO"),
+        "subtitulo1":         os.environ.get("SUBTITULO1", "Tensão CC Alta:"),
+        "subtitulo2":         os.environ.get("SUBTITULO2", "causa real e diagnóstico"),
+        "causa1":             os.environ.get("CAUSA1", "String mal dimensionada"),
+        "causa2":             os.environ.get("CAUSA2", "Temperatura baixa elevando o Voc"),
+        "causa_principal":    os.environ.get("CAUSA_PRINCIPAL", "Deriva do ADC no divisor resistivo"),
+        "passo1":             os.environ.get("PASSO1", "Meça a tensão CC com string fria"),
+        "passo2":             os.environ.get("PASSO2", "Meça resistência do divisor"),
+        "sinal_fisico":       os.environ.get("SINAL_FISICO", "Resistores SMD escurecidos"),
+        "texto_erro_mercado": os.environ.get("TEXTO_ERRO", "Técnico troca o inversor sem diagnosticar a causa real."),
+        "valor_troca":        os.environ.get("VALOR_TROCA", "R$ 7.000"),
+        "valor_reparo":       os.environ.get("VALOR_REPARO", "R$ 600"),
+        "whatsapp":           "(38) 99889-1587",
     }
 
     gerar_carrossel(numero_post, dados)
