@@ -161,9 +161,13 @@ def montar_fundo(url_fundo, url_imagem=None, posicao="centro-baixo"):
 
     if url_imagem:
         img_item = baixar_imagem(url_imagem)
-        max_h = 1200
+        max_h = 900
         ratio = max_h / img_item.height
         novo_w = int(img_item.width * ratio)
+        if novo_w > LARGURA - 40:
+            novo_w = LARGURA - 40
+            ratio = novo_w / img_item.width
+            max_h = int(img_item.height * ratio)
         img_item = img_item.resize((novo_w, max_h), Image.LANCZOS)
 
         if img_item.mode != "RGBA":
@@ -172,10 +176,25 @@ def montar_fundo(url_fundo, url_imagem=None, posicao="centro-baixo"):
 
         if posicao == "centro-baixo":
             x = (LARGURA - novo_w) // 2
-            y = ALTURA - max_h + 200
+            y = ALTURA - max_h - 60
         elif posicao == "centro":
             x = (LARGURA - novo_w) // 2
             y = (ALTURA - max_h) // 2
+
+        # Glow ciano embaixo do inversor
+        glow = Image.new("RGBA", (LARGURA, ALTURA), (0, 0, 0, 0))
+        glow_draw = ImageDraw.Draw(glow)
+        centro_x = x + novo_w // 2
+        base_y = y + max_h
+        for i in range(10):
+            opacidade = int(70 - i * 7)
+            raio_x = (novo_w // 2) + i * 35
+            raio_y = 20 + i * 10
+            glow_draw.ellipse([
+                centro_x - raio_x, base_y - raio_y,
+                centro_x + raio_x, base_y + raio_y
+            ], fill=(0, 180, 216, opacidade))
+        canvas = Image.alpha_composite(canvas, glow)
 
         canvas.paste(img_item, (x, y), a)
 
