@@ -125,22 +125,25 @@ def montar_fundo(url_fundo, url_inversor=None, posicao="centro-baixo"):
     canvas = Image.alpha_composite(canvas, overlay)
 
     if url_inversor:
-        inversor = baixar_imagem(url_inversor)
-        # Redimensiona mantendo proporção — altura máx 580px
-        max_h = 580
-        ratio = max_h / inversor.height
-        novo_w = int(inversor.width * ratio)
-        inversor = inversor.resize((novo_w, max_h), Image.LANCZOS)
+    inversor = baixar_imagem(url_inversor)
+    max_h = 580
+    ratio = max_h / inversor.height
+    novo_w = int(inversor.width * ratio)
+    inversor = inversor.resize((novo_w, max_h), Image.LANCZOS)
+    
+    # Garante alpha correto
+    if inversor.mode != "RGBA":
+        inversor = inversor.convert("RGBA")
+    r, g, b, a = inversor.split()
+    
+    if posicao == "centro-baixo":
+        x = (LARGURA - novo_w) // 2
+        y = ALTURA - max_h - 80
+    elif posicao == "centro":
+        x = (LARGURA - novo_w) // 2
+        y = (ALTURA - max_h) // 2
 
-        if posicao == "centro-baixo":
-            x = (LARGURA - novo_w) // 2
-            y = ALTURA - max_h - 80
-        elif posicao == "centro":
-            x = (LARGURA - novo_w) // 2
-            y = (ALTURA - max_h) // 2
-
-        canvas.paste(inversor, (x, y), inversor)
-
+   
     return canvas.convert("RGB")
 
 def desenhar_linha(draw, y, cor=None, largura_pct=0.6):
