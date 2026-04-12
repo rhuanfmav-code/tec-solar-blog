@@ -1,6 +1,6 @@
 """
 TEC Solar — Gerador de Carrossel Instagram
-Versão 3.0 — Imagens reais de inversores + Python Pillow
+Versão 4.0 — GitHub Assets + Mix de imagens por contexto
 """
 
 import os
@@ -8,82 +8,121 @@ import sys
 import requests
 from PIL import Image, ImageDraw, ImageFont, ImageEnhance
 from io import BytesIO
-import textwrap
 
 # ============================================================
-# BANCO DE IMAGENS REAIS — POSTIMG.CC
+# BASE URL — GitHub Raw
+# ============================================================
+
+BASE = "https://raw.githubusercontent.com/rhuanfmav-code/tec-solar-blog/main/"
+
+# ============================================================
+# BANCO DE IMAGENS — GitHub
 # ============================================================
 
 FUNDOS = {
-    "falha":      "https://i.postimg.cc/Ty2GJZMC/fundo-raios-falha-png.png",
-    "diagnostico":"https://i.postimg.cc/qtB0x9Vc/fundo-bancada-tech-png.png",
-    "componente": "https://i.postimg.cc/Z9YZx1tH/fundo-circuitos-ciano-png.png",
-    "cta":        "https://i.postimg.cc/Y42kzJK8/fundo-energia-restaurada-png.png",
+    "falha":       BASE + "fundo-raios-falha.png.png",
+    "diagnostico": BASE + "fundo-bancada-tech.png.png",
+    "componente":  BASE + "fundo-circuitos-ciano.png.png",
+    "cta":         BASE + "fundo-energia-restaurada.png.png",
 }
 
-INVERSORES = {
-    "fronius":   [
-        "https://i.postimg.cc/XZN3kT6S/Inversor-Fronius.png",
-        "https://i.postimg.cc/XZ2WHQnY/Inversor-Fronius-(2).png",
-        "https://i.postimg.cc/FfPvWDhK/Inversor-Fronius-(3).png",
+# Inversores FECHADOS — capa, CTA, comparativo
+INVERSORES_FECHADOS = {
+    "fronius":  [
+        BASE + "inversor-fronius.png.png",
+        BASE + "inversor-fronius.png (2).png",
     ],
-    "growatt":   [
-        "https://i.postimg.cc/f3WZf6QM/Inversor-Growatt.png",
-        "https://i.postimg.cc/wtWzf097/Inversor-Growatt-(2).png",
+    "growatt":  [
+        BASE + "inversor-growatt.png.png",
+        BASE + "inversor-growatt.png (2).png",
+        BASE + "inversor-growatt.png (3).png",
     ],
-    "deye":      [
-        "https://i.postimg.cc/B8ZsBdfs/Inversor-Deye.png",
-        "https://i.postimg.cc/Z9fm7VJR/Inversor-Deye-(2).png",
+    "deye":     [
+        BASE + "inversor-deye.png.png",
+        BASE + "inversor-deye.png (2).png",
     ],
-    "sma":       [
-        "https://i.postimg.cc/Y42kzJBM/Inversor-SMA.png",
-        "https://i.postimg.cc/WDpjwQc2/Inversor-SMA-(2).png",
+    "sma":      [
+        BASE + "inversor-sma.png.png",
+        BASE + "inversor-sma.png (2).png",
+        BASE + "inversor-sma.png (3).png",
     ],
-    "sungrow":   [
-        "https://i.postimg.cc/Lq4R3rF9/Inversor-Sungrow.png",
-        "https://i.postimg.cc/v1Pyq3bJ/Inversor-Sungrow-(2).png",
+    "sungrow":  [
+        BASE + "inversor-sungrow.png.png",
+        BASE + "inversor-sungrow.png (2).png",
+        BASE + "inversor-sungrow.png (3).png",
     ],
-    "weg":       [
-        "https://i.postimg.cc/gwcdHfbk/Inversor-Weg.png",
-        "https://i.postimg.cc/hJCnypKW/inversor-Weg-(2).png",
+    "weg":      [
+        BASE + "inversor-weg.png.png",
+        BASE + "inversor-weg.png (2).png",
     ],
-    "canadian":  [
-        "https://i.postimg.cc/p90vGqPN/Inversor-Canadian.png",
-        "https://i.postimg.cc/NyNtJpQv/Inversor-Canadian-(2).png",
-        "https://i.postimg.cc/8FyGKtTG/Inversor-Canadian-(3).png",
+    "canadian": [
+        BASE + "inversor-canadian.png.png",
+        BASE + "inversor-canadian.png (2).png",
     ],
-    "hoymiles":  [
-        "https://i.postimg.cc/FfPvWDhm/Inversor-hoymiles.png",
-        "https://i.postimg.cc/Tykx7CTT/Inversor-hoymiles-(2).png",
+    "hoymiles": [
+        BASE + "inversor-hpymiles.png.png",
+        BASE + "inversor-hpymiles.png (2).png",
+        BASE + "inversor-hpymiles.png (3).png",
     ],
-    "abb":       [
-        "https://i.postimg.cc/NyNtJpQg/Inversor-ABB.png",
-        "https://i.postimg.cc/xksQxt9T/Inversor-ABB-(2).png",
-        "https://i.postimg.cc/WD9VWXsp/Inversor-ABB-(3).png",
+    "drive":    [
+        BASE + "inversor-drive.png.png",
+        BASE + "inversor-drive.png (2).png",
     ],
 }
 
+# Inversores ABERTOS — slides técnicos (bancada, diagnóstico)
+INVERSORES_ABERTOS = {
+    "fronius":  [BASE + "inversor-aberto-fronius.png.png"],
+    "growatt":  [BASE + "inversor-aberto-growatt.png.png"],
+    "deye":     [BASE + "inversor-aberto-deye.png.png"],
+    "sma":      [BASE + "inversor-aberto-sma.png.png"],
+    "sungrow":  [BASE + "inversor-aberto-sungrow.png.png"],
+    "weg":      [BASE + "inversor-aberto-weg.png.png"],
+}
+
+# Placas eletrônicas — slide causa raiz
 PLACAS = [
-    "https://i.postimg.cc/McZxmhJk/Placa-Eletronica.png",
-    "https://i.postimg.cc/mcZRy0fv/Placa-eletronica-(2).png",
-    "https://i.postimg.cc/qtB0x9VW/Placa-eletronica-(3).png",
-    "https://i.postimg.cc/5H91SZdG/Placa-eletronica-(4).png",
-    "https://i.postimg.cc/4K4ZQrkW/Placa-eletronica-(5).png",
+    BASE + "placa-eletronica.png.png",
+    BASE + "placa-eletronica.png (2).png",
+    BASE + "placa-eletronica.png (3).png",
+    BASE + "placa-eletronica.png (4).png",
+    BASE + "placa-eletronica.png (5).png",
 ]
+
+# ============================================================
+# LÓGICA DE IMAGEM POR SLIDE
+# Slide 1 — Capa:       inversor FECHADO
+# Slide 2 — Causa raiz: PLACA eletrônica
+# Slide 3 — Bancada:    inversor ABERTO
+# Slide 4 — Mercado:    inversor FECHADO
+# Slide 5 — CTA:        inversor FECHADO
+# ============================================================
+
+def get_inversor_fechado(marca, indice=0):
+    lista = INVERSORES_FECHADOS.get(marca, INVERSORES_FECHADOS["fronius"])
+    return lista[indice % len(lista)]
+
+def get_inversor_aberto(marca):
+    lista = INVERSORES_ABERTOS.get(marca)
+    if lista:
+        return lista[0]
+    return get_inversor_fechado(marca, 1)
+
+def get_placa(numero_post):
+    return PLACAS[numero_post % len(PLACAS)]
 
 # ============================================================
 # CORES TEC SOLAR
 # ============================================================
 
-COR_FUNDO      = (13, 31, 60)
-COR_DOURADO    = (245, 166, 35)
-COR_CIANO      = (0, 180, 216)
-COR_BRANCO     = (255, 255, 255)
-COR_VERMELHO   = (255, 107, 107)
-COR_OVERLAY    = (13, 31, 60, 120)
+COR_DOURADO  = (245, 166, 35)
+COR_CIANO    = (0, 180, 216)
+COR_BRANCO   = (255, 255, 255)
+COR_VERMELHO = (255, 107, 107)
+COR_OVERLAY  = (13, 31, 60, 120)
 
-LARGURA  = 1080
-ALTURA   = 1350
+LARGURA = 1080
+ALTURA  = 1350
 
 # ============================================================
 # UTILITÁRIOS
@@ -113,7 +152,7 @@ def get_font(tamanho, bold=False):
             return ImageFont.truetype(caminho, tamanho)
     return ImageFont.load_default()
 
-def montar_fundo(url_fundo, url_inversor=None, posicao="centro-baixo"):
+def montar_fundo(url_fundo, url_imagem=None, posicao="centro-baixo"):
     fundo = baixar_imagem(url_fundo).resize((LARGURA, ALTURA), Image.LANCZOS)
     canvas = Image.new("RGBA", (LARGURA, ALTURA))
     canvas.paste(fundo, (0, 0))
@@ -121,16 +160,16 @@ def montar_fundo(url_fundo, url_inversor=None, posicao="centro-baixo"):
     overlay = Image.new("RGBA", (LARGURA, ALTURA), COR_OVERLAY)
     canvas = Image.alpha_composite(canvas, overlay)
 
-    if url_inversor:
-        inversor = baixar_imagem(url_inversor)
+    if url_imagem:
+        img_item = baixar_imagem(url_imagem)
         max_h = 580
-        ratio = max_h / inversor.height
-        novo_w = int(inversor.width * ratio)
-        inversor = inversor.resize((novo_w, max_h), Image.LANCZOS)
+        ratio = max_h / img_item.height
+        novo_w = int(img_item.width * ratio)
+        img_item = img_item.resize((novo_w, max_h), Image.LANCZOS)
 
-        if inversor.mode != "RGBA":
-            inversor = inversor.convert("RGBA")
-        r, g, b, a = inversor.split()
+        if img_item.mode != "RGBA":
+            img_item = img_item.convert("RGBA")
+        r, g, b, a = img_item.split()
 
         if posicao == "centro-baixo":
             x = (LARGURA - novo_w) // 2
@@ -139,7 +178,7 @@ def montar_fundo(url_fundo, url_inversor=None, posicao="centro-baixo"):
             x = (LARGURA - novo_w) // 2
             y = (ALTURA - max_h) // 2
 
-        canvas.paste(inversor, (x, y), a)
+        canvas.paste(img_item, (x, y), a)
 
     return canvas.convert("RGB")
 
@@ -193,25 +232,23 @@ def salvar(img, numero_post, numero_slide):
     return caminho
 
 # ============================================================
-# DETECTAR MARCA DO POST
+# DETECTAR MARCA
 # ============================================================
 
 def detectar_marca(titulo):
     titulo_lower = titulo.lower()
-    for marca in INVERSORES.keys():
+    for marca in INVERSORES_FECHADOS.keys():
         if marca in titulo_lower:
             return marca
     return None
 
 # ============================================================
-# SLIDE 1 — CAPA
+# SLIDE 1 — CAPA (inversor fechado)
 # ============================================================
 
 def gerar_slide_1(dados, numero_post, marca):
-    url_fundo = FUNDOS["falha"]
-    url_inversor = INVERSORES.get(marca, INVERSORES["fronius"])[0] if marca else None
-
-    img = montar_fundo(url_fundo, url_inversor, "centro-baixo")
+    url_inv = get_inversor_fechado(marca, 0) if marca else None
+    img = montar_fundo(FUNDOS["falha"], url_inv, "centro-baixo")
     draw = ImageDraw.Draw(img)
 
     font_tag = get_font(26, bold=True)
@@ -219,52 +256,41 @@ def gerar_slide_1(dados, numero_post, marca):
     bbox = draw.textbbox((0, 0), tag_texto, font=font_tag)
     tag_w = bbox[2] + 40
     tag_h = bbox[3] + 20
-    tag_x = 60
-    tag_y = 70
+    tag_x, tag_y = 60, 70
     draw.rounded_rectangle([tag_x, tag_y, tag_x + tag_w, tag_y + tag_h],
                             radius=20, outline=COR_CIANO, width=2)
     draw.text((tag_x + 20, tag_y + 10), tag_texto, font=font_tag, fill=COR_CIANO)
 
     y = tag_y + tag_h + 28
     font_titulo = get_font(88, bold=True)
-    linha1 = dados.get("titulo_linha1", "").upper()
-    bbox = draw.textbbox((0, 0), linha1, font=font_titulo)
-    x = (LARGURA - bbox[2]) // 2
-    draw.text((x, y), linha1, font=font_titulo, fill=COR_DOURADO)
-    y += bbox[3] + 10
+    for linha_key in ["titulo_linha1", "titulo_linha2"]:
+        linha = dados.get(linha_key, "").upper()
+        bbox = draw.textbbox((0, 0), linha, font=font_titulo)
+        x = (LARGURA - bbox[2]) // 2
+        draw.text((x, y), linha, font=font_titulo, fill=COR_DOURADO)
+        y += bbox[3] + 10
 
-    linha2 = dados.get("titulo_linha2", "").upper()
-    bbox = draw.textbbox((0, 0), linha2, font=font_titulo)
-    x = (LARGURA - bbox[2]) // 2
-    draw.text((x, y), linha2, font=font_titulo, fill=COR_DOURADO)
-    y += bbox[3] + 24
-
+    y += 14
     desenhar_linha(draw, y)
     y += 28
 
     font_sub = get_font(34, bold=True)
-    sub1 = dados.get("subtitulo1", "")
-    sub2 = dados.get("subtitulo2", "")
-    bbox = draw.textbbox((0, 0), sub1, font=font_sub)
-    x = (LARGURA - bbox[2]) // 2
-    draw.text((x, y), sub1, font=font_sub, fill=COR_BRANCO)
-    y += bbox[3] + 10
-    bbox = draw.textbbox((0, 0), sub2, font=font_sub)
-    x = (LARGURA - bbox[2]) // 2
-    draw.text((x, y), sub2, font=font_sub, fill=COR_BRANCO)
+    for sub_key in ["subtitulo1", "subtitulo2"]:
+        sub = dados.get(sub_key, "")
+        bbox = draw.textbbox((0, 0), sub, font=font_sub)
+        x = (LARGURA - bbox[2]) // 2
+        draw.text((x, y), sub, font=font_sub, fill=COR_BRANCO)
+        y += bbox[3] + 10
 
     rodape(draw)
     return salvar(img, numero_post, 1)
 
 # ============================================================
-# SLIDE 2 — CAUSA RAIZ
+# SLIDE 2 — CAUSA RAIZ (placa eletrônica)
 # ============================================================
 
 def gerar_slide_2(dados, numero_post, marca):
-    url_fundo = FUNDOS["componente"]
-    url_placa = PLACAS[numero_post % len(PLACAS)]
-
-    img = montar_fundo(url_fundo, url_placa, "centro-baixo")
+    img = montar_fundo(FUNDOS["componente"], get_placa(numero_post), "centro-baixo")
     draw = ImageDraw.Draw(img)
 
     font_cont = get_font(26, bold=True)
@@ -297,16 +323,12 @@ def gerar_slide_2(dados, numero_post, marca):
     return salvar(img, numero_post, 2)
 
 # ============================================================
-# SLIDE 3 — COMO IDENTIFICAR NA PRÁTICA
+# SLIDE 3 — BANCADA (inversor aberto)
 # ============================================================
 
 def gerar_slide_3(dados, numero_post, marca):
-    url_fundo = FUNDOS["diagnostico"]
-    url_inversor = INVERSORES.get(marca, INVERSORES["fronius"])[
-        min(1, len(INVERSORES.get(marca, [])) - 1)
-    ] if marca else None
-
-    img = montar_fundo(url_fundo, url_inversor, "centro-baixo")
+    url_inv = get_inversor_aberto(marca) if marca else None
+    img = montar_fundo(FUNDOS["diagnostico"], url_inv, "centro-baixo")
     draw = ImageDraw.Draw(img)
 
     font_cont = get_font(26, bold=True)
@@ -341,14 +363,12 @@ def gerar_slide_3(dados, numero_post, marca):
     return salvar(img, numero_post, 3)
 
 # ============================================================
-# SLIDE 4 — ERRO DO MERCADO
+# SLIDE 4 — MERCADO (inversor fechado)
 # ============================================================
 
 def gerar_slide_4(dados, numero_post, marca):
-    url_fundo = FUNDOS["falha"]
-    url_inversor = INVERSORES.get(marca, INVERSORES["fronius"])[0] if marca else None
-
-    img = montar_fundo(url_fundo, url_inversor, "centro-baixo")
+    url_inv = get_inversor_fechado(marca, 0) if marca else None
+    img = montar_fundo(FUNDOS["falha"], url_inv, "centro-baixo")
     draw = ImageDraw.Draw(img)
 
     font_cont = get_font(26, bold=True)
@@ -373,26 +393,24 @@ def gerar_slide_4(dados, numero_post, marca):
     y_fim = desenhar_texto_wrap(draw, erro, 80, y + 20, font_texto, COR_BRANCO, 900)
     y = max(y_fim, y + 145) + 30
 
-    font_label  = get_font(24)
-    font_valor  = get_font(56, bold=True)
-    font_sub    = get_font(22)
-    bloco_w     = 440
-    bloco_h     = 160
-    gap         = 20
-    x_esq       = 55
-    x_dir       = x_esq + bloco_w + gap
+    font_label = get_font(24)
+    font_valor = get_font(56, bold=True)
+    font_sub   = get_font(22)
+    bloco_w, bloco_h, gap = 440, 160, 20
+    x_esq = 55
+    x_dir = x_esq + bloco_w + gap
 
     draw.rounded_rectangle([x_esq, y, x_esq + bloco_w, y + bloco_h],
                             radius=10, outline=COR_VERMELHO, width=2)
     draw.text((x_esq + 20, y + 16), "TROCA", font=font_label, fill=COR_BRANCO)
-    draw.text((x_esq + 20, y + 50), dados.get("valor_troca", "R$4.500"),
+    draw.text((x_esq + 20, y + 50), dados.get("valor_troca", "R$ 4.500"),
               font=font_valor, fill=COR_VERMELHO)
     draw.text((x_esq + 20, y + 120), "inversor novo", font=font_sub, fill=COR_BRANCO)
 
     draw.rounded_rectangle([x_dir, y, x_dir + bloco_w, y + bloco_h],
                             radius=10, outline=COR_CIANO, width=2)
     draw.text((x_dir + 20, y + 16), "REPARO", font=font_label, fill=COR_BRANCO)
-    draw.text((x_dir + 20, y + 50), dados.get("valor_reparo", "R$600"),
+    draw.text((x_dir + 20, y + 50), dados.get("valor_reparo", "R$ 600"),
               font=font_valor, fill=COR_CIANO)
     draw.text((x_dir + 20, y + 120), "TEC Solar", font=font_sub, fill=COR_BRANCO)
 
@@ -400,14 +418,12 @@ def gerar_slide_4(dados, numero_post, marca):
     return salvar(img, numero_post, 4)
 
 # ============================================================
-# SLIDE 5 — CTA FINAL
+# SLIDE 5 — CTA (inversor fechado)
 # ============================================================
 
 def gerar_slide_5(dados, numero_post, marca):
-    url_fundo = FUNDOS["cta"]
-    url_inversor = INVERSORES.get(marca, INVERSORES["fronius"])[-1] if marca else None
-
-    img = montar_fundo(url_fundo, url_inversor, "centro")
+    url_inv = get_inversor_fechado(marca, -1) if marca else None
+    img = montar_fundo(FUNDOS["cta"], url_inv, "centro")
     draw = ImageDraw.Draw(img)
 
     font_acima = get_font(28)
@@ -425,24 +441,22 @@ def gerar_slide_5(dados, numero_post, marca):
     desenhar_linha(draw, 240)
 
     font_apoio = get_font(30)
-    apoio1 = "Laudo técnico completo em nível de placa."
-    apoio2 = "Atendemos todo o Brasil via logística reversa."
-    bbox = draw.textbbox((0, 0), apoio1, font=font_apoio)
-    x = (LARGURA - bbox[2]) // 2
-    draw.text((x, 270), apoio1, font=font_apoio, fill=(255, 255, 255, 190))
-    bbox = draw.textbbox((0, 0), apoio2, font=font_apoio)
-    x = (LARGURA - bbox[2]) // 2
-    draw.text((x, 314), apoio2, font=font_apoio, fill=(255, 255, 255, 190))
+    for i, apoio in enumerate([
+        "Laudo técnico completo em nível de placa.",
+        "Atendemos todo o Brasil via logística reversa."
+    ]):
+        bbox = draw.textbbox((0, 0), apoio, font=font_apoio)
+        x = (LARGURA - bbox[2]) // 2
+        draw.text((x, 270 + i * 44), apoio, font=font_apoio, fill=(255, 255, 255, 190))
 
     caixa_y = ALTURA - 340
     draw.rounded_rectangle([100, caixa_y, LARGURA - 100, caixa_y + 160],
                             radius=16, outline=COR_CIANO, width=2)
 
     font_wlabel = get_font(24)
-    texto_wl = "WHATSAPP"
-    bbox = draw.textbbox((0, 0), texto_wl, font=font_wlabel)
+    bbox = draw.textbbox((0, 0), "WHATSAPP", font=font_wlabel)
     x = (LARGURA - bbox[2]) // 2
-    draw.text((x, caixa_y + 18), texto_wl, font=font_wlabel, fill=(255, 255, 255, 100))
+    draw.text((x, caixa_y + 18), "WHATSAPP", font=font_wlabel, fill=(255, 255, 255, 100))
 
     font_wnum = get_font(56, bold=True)
     numero = dados.get("whatsapp", "(38) 99889-1587")
