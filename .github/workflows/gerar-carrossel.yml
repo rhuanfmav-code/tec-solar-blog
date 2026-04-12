@@ -8,8 +8,10 @@ on:
         required: true
         default: '02'
   push:
+    branches:
+      - main
     paths:
-      - 'posts/post-**.md'
+      - 'carrossel-dados/post-*.json'
 
 jobs:
   gerar-carrossel:
@@ -29,28 +31,52 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Instalar dependências
-        run: pip install requests
+      - name: Instalar fontes Montserrat
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y fonts-montserrat || true
 
-      - name: Detectar número do post
+      - name: Instalar dependências Python
+        run: pip install requests Pillow
+
+      - name: Detectar número do post e carregar dados do JSON
         id: detect_post
         run: |
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             NUMERO_POST="${{ github.event.inputs.numero_post }}"
+            JSON_FILE="carrossel-dados/post-$(printf '%02d' "$NUMERO_POST").json"
           else
-            CHANGED=$(git diff --name-only HEAD~1 HEAD 2>/dev/null | grep 'posts/post-' | head -1)
+            CHANGED=$(git diff --name-only HEAD~1 HEAD 2>/dev/null | grep 'carrossel-dados/post-' | head -1)
             if [ -z "$CHANGED" ]; then
-              CHANGED=$(ls -t posts/post-*.md 2>/dev/null | head -1)
+              CHANGED=$(ls -t carrossel-dados/post-*.json 2>/dev/null | head -1)
             fi
+            JSON_FILE="$CHANGED"
             NUM=$(echo "$CHANGED" | grep -oE '[0-9]+' | tail -1)
             NUMERO_POST=$(printf '%02d' "$NUM")
           fi
           echo "NUMERO_POST=$NUMERO_POST" >> $GITHUB_ENV
-          echo "Post detectado: $NUMERO_POST"
+          echo "Post detectado: $NUMERO_POST — $JSON_FILE"
 
-      - name: Gerar carrossel via DALL-E 3
-        env:
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          if [ -f "$JSON_FILE" ]; then
+            echo "TITULO_L1=$(jq -r '.titulo_linha1 // ""' "$JSON_FILE")"       >> $GITHUB_ENV
+            echo "TITULO_L2=$(jq -r '.titulo_linha2 // ""' "$JSON_FILE")"       >> $GITHUB_ENV
+            echo "CATEGORIA=$(jq -r '.categoria // ""' "$JSON_FILE")"           >> $GITHUB_ENV
+            echo "SUBTITULO1=$(jq -r '.subtitulo1 // ""' "$JSON_FILE")"         >> $GITHUB_ENV
+            echo "SUBTITULO2=$(jq -r '.subtitulo2 // ""' "$JSON_FILE")"         >> $GITHUB_ENV
+            echo "CAUSA1=$(jq -r '.causa1 // ""' "$JSON_FILE")"                 >> $GITHUB_ENV
+            echo "CAUSA2=$(jq -r '.causa2 // ""' "$JSON_FILE")"                 >> $GITHUB_ENV
+            echo "CAUSA_PRINCIPAL=$(jq -r '.causa_principal // ""' "$JSON_FILE")" >> $GITHUB_ENV
+            echo "PASSO1=$(jq -r '.passo1 // ""' "$JSON_FILE")"                 >> $GITHUB_ENV
+            echo "PASSO2=$(jq -r '.passo2 // ""' "$JSON_FILE")"                 >> $GITHUB_ENV
+            echo "SINAL_FISICO=$(jq -r '.sinal_fisico // ""' "$JSON_FILE")"     >> $GITHUB_ENV
+            echo "TEXTO_ERRO=$(jq -r '.texto_erro_mercado // ""' "$JSON_FILE")" >> $GITHUB_ENV
+            echo "VALOR_TROCA=$(jq -r '.valor_troca // ""' "$JSON_FILE")"       >> $GITHUB_ENV
+            echo "VALOR_REPARO=$(jq -r '.valor_reparo // ""' "$JSON_FILE")"     >> $GITHUB_ENV
+          else
+            echo "AVISO: Arquivo $JSON_FILE não encontrado. Usando valores padrão."
+          fi
+
+      - name: Gerar carrossel com Pillow
         run: |
           python3 .github/scripts/gerar_carrossel.py "$NUMERO_POST"
 
@@ -59,5 +85,5 @@ jobs:
           git config user.name "TEC Solar Bot"
           git config user.email "bot@tecsolar.com.br"
           git add carrossel/
-          git diff --staged --quiet || git commit -m "feat: carrossel post-$NUMERO_POST gerado via DALL-E 3"
+          git diff --staged --quiet || git commit -m "feat: carrossel post-$NUMERO_POST gerado via Pillow"
           git push
