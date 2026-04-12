@@ -161,7 +161,7 @@ def montar_fundo(url_fundo, url_imagem=None, posicao="centro-baixo"):
 
     if url_imagem:
         img_item = baixar_imagem(url_imagem)
-        max_h = 900
+        max_h = 750
         ratio = max_h / img_item.height
         novo_w = int(img_item.width * ratio)
         if novo_w > LARGURA - 40:
@@ -176,7 +176,7 @@ def montar_fundo(url_fundo, url_imagem=None, posicao="centro-baixo"):
 
         if posicao == "centro-baixo":
             x = (LARGURA - novo_w) // 2
-            y = ALTURA - max_h - 60
+            y = ALTURA - max_h - 180
         elif posicao == "centro":
             x = (LARGURA - novo_w) // 2
             y = (ALTURA - max_h) // 2
