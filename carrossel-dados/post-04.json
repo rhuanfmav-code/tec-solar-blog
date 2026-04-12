@@ -1,0 +1,18 @@
+{
+  "numero_post": 4,
+  "titulo_linha1": "SMA",
+  "titulo_linha2": "ERRO 3501",
+  "categoria": "CÓDIGO DE ERRO",
+  "subtitulo1": "Falha de Isolamento:",
+  "subtitulo2": "diagnóstico completo do sistema fotovoltaico",
+  "causa1": "Cabo CC com isolamento degradado por UV ou roedores",
+  "causa2": "MC4 mal crimpado com água no conector",
+  "causa_principal": "Resistência de isolamento da string abaixo de 100 kΩ",
+  "passo1": "Medir isolamento com megôhmímetro 1000V CC por string",
+  "passo2": "Testar painéis desconectados em condições de umidade",
+  "sinal_fisico": "MC4 com borracha endurecida ou backsheet delamimado no painel",
+  "texto_erro_mercado": "Técnico faz teste com inversor ligado e painéis gerando — medição inválida e perigosa",
+  "valor_troca": "R$ 6.500",
+  "valor_reparo": "R$ 580",
+  "whatsapp": "(38) 99889-1587"
+}
