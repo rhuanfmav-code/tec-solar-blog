@@ -1,0 +1,18 @@
+{
+  "numero_post": 3,
+  "titulo_linha1": "DEYE",
+  "titulo_linha2": "TENSÃO DE REDE",
+  "categoria": "CÓDIGO DE ERRO",
+  "subtitulo1": "Sobretensão / Subtensão CA:",
+  "subtitulo2": "diagnóstico real em nível de placa",
+  "causa1": "Cabo CA subdimensionado eleva tensão nos terminais",
+  "causa2": "Concessionária com tensão fora do PRODIST Módulo 8",
+  "causa_principal": "Circuito de medição da placa de controle com defeito",
+  "passo1": "Medir tensão nos terminais CA com inversor gerando",
+  "passo2": "Comparar leitura do display com multímetro True RMS",
+  "sinal_fisico": "Resistores SMD queimados ou trilhas oxidadas no circuito CA",
+  "texto_erro_mercado": "Técnico mede tensão com inversor desligado, declara rede normal e condena a placa",
+  "valor_troca": "R$ 4.500",
+  "valor_reparo": "R$ 450",
+  "whatsapp": "(38) 99889-1587"
+}
