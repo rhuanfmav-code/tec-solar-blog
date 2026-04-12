@@ -13,7 +13,7 @@ from io import BytesIO
 # BASE URL — GitHub Raw
 # ============================================================
 
-BASE = "https://raw.githubusercontent.com/rhuanfmav-code/tec-solar-blog/main/"
+BASE = "https://raw.githubusercontent.com/rhuanfmav-code/tec-solar-blog/main/assets/"
 
 # ============================================================
 # BANCO DE IMAGENS — GitHub
