@@ -117,8 +117,9 @@ def parsear_post(caminho_arquivo):
 
     match_h1 = re.search(r"^#\s+(.+)$", conteudo, re.MULTILINE)
     titulo_raw = match_h1.group(1).strip() if match_h1 else dados["titulo_seo"]
-    # Remove prefixo "Post XX — " ou "Post XX - " do título antes de publicar
-    dados["titulo"] = re.sub(r'^Post\s+\d+\s*[—\-]+\s*', '', titulo_raw).strip()
+    # Remove prefixo "Post XX —", "Post XX -" ou "Post XX:" do título antes de publicar.
+    # Cobre: em dash (—), hífen (-), dois-pontos (:), com ou sem espaços ao redor.
+    dados["titulo"] = re.sub(r'^Post\s+\d+\s*[—\-:]+\s*', '', titulo_raw).strip()
     return dados
 
 # ============================================================
