@@ -170,26 +170,27 @@ def fazer_upload_imagem(dados_imagem, alt_text, legenda, titulo_post):
 # CATEGORIAS E TAGS
 # ============================================================
 
-def obter_ou_criar_categoria(nome):
-    # Categoria fixa — Inversores Solares (ID 52)
-    return 52
 def obter_ou_criar_tags(tags_str):
-    """Retorna lista de IDs de tags, criando as que não existem."""
     tags = [t.strip() for t in tags_str.split(",") if t.strip()]
     ids = []
     for tag in tags:
-        resp = requests.get(f"{API_BASE}/tags", auth=AUTH, params={"search": tag})
-        existentes = resp.json()
-        encontrado = False
-        for t in existentes:
-            if t["name"].lower() == tag.lower():
-                ids.append(t["id"])
-                encontrado = True
-                break
-        if not encontrado:
-            resp = requests.post(f"{API_BASE}/tags", auth=AUTH, json={"name": tag})
-            if resp.status_code in [200, 201]:
-                ids.append(resp.json()["id"])
+        try:
+            resp = requests.get(f"{API_BASE}/tags", auth=AUTH, params={"search": tag})
+            if resp.status_code == 200 and resp.text.strip():
+                existentes = resp.json()
+                encontrado = False
+                for t in existentes:
+                    if t["name"].lower() == tag.lower():
+                        ids.append(t["id"])
+                        encontrado = True
+                        break
+                if not encontrado:
+                    resp2 = requests.post(f"{API_BASE}/tags", auth=AUTH, json={"name": tag})
+                    if resp2.status_code in [200, 201]:
+                        ids.append(resp2.json()["id"])
+        except Exception as e:
+            print(f"   AVISO tag '{tag}': {e}")
+            continue
     return ids
 
 # ============================================================
