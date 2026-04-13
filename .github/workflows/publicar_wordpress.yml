@@ -1,0 +1,55 @@
+name: Publicar Post WordPress
+
+on:
+  workflow_dispatch:
+    inputs:
+      numero_post:
+        description: 'Número do post (ex: 03)'
+        required: true
+        default: '03'
+  push:
+    paths:
+      - 'posts/post-**.md'
+
+jobs:
+  publicar:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout repositório
+        uses: actions/checkout@v4
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Instalar dependências
+        run: pip install pillow requests
+
+      - name: Detectar arquivo do post
+        id: detect_post
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            NUMERO="${{ github.event.inputs.numero_post }}"
+            ARQUIVO="posts/post-$(printf '%02d' $NUMERO).md"
+          else
+            CHANGED=$(git diff --name-only HEAD~1 HEAD 2>/dev/null | grep 'posts/post-' | head -1)
+            if [ -z "$CHANGED" ]; then
+              CHANGED=$(ls -t posts/post-*.md 2>/dev/null | head -1)
+            fi
+            ARQUIVO="$CHANGED"
+          fi
+          echo "ARQUIVO_POST=$ARQUIVO" >> $GITHUB_ENV
+          echo "Arquivo detectado: $ARQUIVO"
+
+      - name: Publicar no WordPress
+        env:
+          WP_URL:          ${{ secrets.WP_URL }}
+          WP_USER:         ${{ secrets.WP_USER }}
+          WP_APP_PASSWORD: ${{ secrets.WP_APP_PASSWORD }}
+          UNSPLASH_ACCESS_KEY: ${{ secrets.UNSPLASH_ACCESS_KEY }}
+        run: |
+          python3 .github/scripts/publicar_wordpress.py "$ARQUIVO_POST"
