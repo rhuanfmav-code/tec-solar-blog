@@ -1,6 +1,6 @@
 """
 TEC Solar — Publicador Automático WordPress
-Versão 1.1 — Corrigido categoria + upload imagem
+Versão 1.3 — Unsplash API para imagens relevantes por contexto
 """
 
 import os
@@ -16,12 +16,77 @@ try:
 except ImportError:
     PIL_OK = False
 
-WP_URL      = os.environ.get("WP_URL", "https://blogtecsolar.com.br")
-WP_USER     = os.environ.get("WP_USER", "")
-WP_PASSWORD = os.environ.get("WP_APP_PASSWORD", "")
+WP_URL           = os.environ.get("WP_URL", "https://blogtecsolar.com.br")
+WP_USER          = os.environ.get("WP_USER", "")
+WP_PASSWORD      = os.environ.get("WP_APP_PASSWORD", "")
+UNSPLASH_KEY     = os.environ.get("UNSPLASH_ACCESS_KEY", "")
 
 API_BASE = f"{WP_URL.rstrip('/')}/wp-json/wp/v2"
 AUTH     = (WP_USER, WP_PASSWORD)
+
+# ============================================================
+# QUERIES UNSPLASH POR CONTEXTO
+# ============================================================
+
+QUERIES_UNSPLASH = {
+    "falha de isolamento":     "solar inverter electronics repair",
+    "isolamento":              "solar inverter electronics repair",
+    "tensão de rede":          "solar panel technician maintenance",
+    "sobretensão":             "electrical engineer solar panel",
+    "subtensão":               "solar energy technician",
+    "placa de controle":       "electronics circuit board repair",
+    "igbt":                    "power electronics circuit board",
+    "capacitor":               "electronics components circuit board",
+    "string":                  "solar panel installation rooftop",
+    "fronius":                 "solar inverter technician repair",
+    "growatt":                 "solar energy system maintenance",
+    "deye":                    "solar inverter installation",
+    "sma":                     "solar power inverter electronics",
+    "sungrow":                 "solar energy technician equipment",
+    "weg":                     "industrial solar inverter",
+    "drive":                   "solar pump irrigation system",
+    "bombeamento":             "solar pump water irrigation",
+    "default":                 "solar inverter technician repair electronics",
+}
+
+def buscar_imagem_unsplash(titulo_post, palavra_chave):
+    """Busca imagem relevante no Unsplash baseado no contexto do post."""
+    if not UNSPLASH_KEY:
+        return None
+
+    texto = (titulo_post + " " + palavra_chave).lower()
+    query = QUERIES_UNSPLASH["default"]
+    for chave, q in QUERIES_UNSPLASH.items():
+        if chave in texto:
+            query = q
+            break
+
+    print(f"   Buscando Unsplash: '{query}'")
+    resp = requests.get(
+        "https://api.unsplash.com/search/photos",
+        headers={"Authorization": f"Client-ID {UNSPLASH_KEY}"},
+        params={
+            "query": query,
+            "per_page": 5,
+            "orientation": "landscape",
+            "content_filter": "high",
+        },
+        timeout=15
+    )
+
+    if resp.status_code != 200:
+        print(f"   AVISO Unsplash: {resp.status_code}")
+        return None
+
+    resultados = resp.json().get("results", [])
+    if not resultados:
+        return None
+
+    # Pega a primeira imagem de alta qualidade
+    foto = resultados[0]
+    url = foto["urls"]["regular"]  # 1080px largura
+    print(f"   Imagem encontrada: {foto['alt_description'] or query}")
+    return url
 
 # ============================================================
 # PARSER
@@ -46,74 +111,38 @@ def parsear_post(caminho_arquivo):
         "conteudo":          extrair_secao(conteudo, "TEXTO DO POST — VERSÃO HUMANIZADA FINAL"),
         "links_internos":    extrair_secao(conteudo, "LINKS INTERNOS SUGERIDOS"),
         "links_externos":    extrair_secao(conteudo, "LINKS EXTERNOS SUGERIDOS"),
-        "imagem_principal":  extrair_dados_imagem(conteudo, "IMAGEM PRINCIPAL"),
-        "imagem_secundaria": extrair_dados_imagem(conteudo, "IMAGEM SECUNDÁRIA"),
     }
 
     match_h1 = re.search(r"^#\s+(.+)$", conteudo, re.MULTILINE)
     dados["titulo"] = match_h1.group(1).strip() if match_h1 else dados["titulo_seo"]
     return dados
 
-def extrair_dados_imagem(conteudo, tipo):
-    secao = extrair_secao(conteudo, tipo + " — USE ESTA") or extrair_secao(conteudo, tipo + " — USE NO MEIO DO POST")
-    if not secao:
-        return None
-    dados = {}
-    for linha in secao.split("\n"):
-        linha = linha.strip().lstrip("→").strip()
-        if linha.startswith("URL para download:"):
-            dados["url"] = linha.split(":", 1)[1].strip()
-        elif linha.startswith("Nome do arquivo:"):
-            dados["nome"] = linha.split(":", 1)[1].strip()
-        elif linha.startswith("Alt Text"):
-            dados["alt"] = re.sub(r"\(.*?\)", "", linha.split(":", 1)[1]).strip()
-        elif linha.startswith("Legenda:"):
-            dados["legenda"] = linha.split(":", 1)[1].strip()
-        elif linha.startswith("Onde inserir:"):
-            dados["posicao"] = linha.split(":", 1)[1].strip()
-    return dados if "url" in dados else None
-
 # ============================================================
 # IMAGENS
 # ============================================================
 
-def baixar_e_converter_jpeg(url, nome_arquivo, max_kb=150):
-    """Baixa imagem e converte para JPEG (mais compatível que WebP)."""
-    print(f"   Baixando imagem: {url}")
+def fazer_upload_imagem(url_imagem, alt_text, legenda, titulo_post):
+    """Baixa imagem da URL, converte para JPEG e faz upload no WordPress."""
+    print(f"   Baixando: {url_imagem}")
     headers = {"User-Agent": "Mozilla/5.0"}
-    resp = requests.get(url, timeout=30, headers=headers)
+    resp = requests.get(url_imagem, timeout=30, headers=headers)
     resp.raise_for_status()
 
-    if not PIL_OK:
-        nome_jpg = nome_arquivo.replace(".webp", ".jpg")
-        return resp.content, nome_jpg, "image/jpeg"
+    nome_arquivo = "tec-solar-post.jpg"
+    mime_type = "image/jpeg"
 
-    img = Image.open(BytesIO(resp.content)).convert("RGB")
-    if img.width > 1200 or img.height > 1200:
-        img.thumbnail((1200, 1200), Image.LANCZOS)
-
-    qualidade = 85
-    while qualidade >= 40:
+    if PIL_OK:
+        img = Image.open(BytesIO(resp.content)).convert("RGB")
+        if img.width > 1200 or img.height > 1200:
+            img.thumbnail((1200, 1200), Image.LANCZOS)
         buffer = BytesIO()
-        img.save(buffer, format="JPEG", quality=qualidade, optimize=True)
-        if buffer.tell() / 1024 <= max_kb:
-            break
-        qualidade -= 10
+        img.save(buffer, format="JPEG", quality=85, optimize=True)
+        conteudo = buffer.getvalue()
+        print(f"   Convertida: {len(conteudo)//1024}KB")
+    else:
+        conteudo = resp.content
 
-    nome_jpg = nome_arquivo.replace(".webp", ".jpg").replace(".png", ".jpg")
-    if not nome_jpg.endswith(".jpg"):
-        nome_jpg += ".jpg"
-
-    print(f"   Convertida: {buffer.tell()//1024}KB (qualidade {qualidade})")
-    return buffer.getvalue(), nome_jpg, "image/jpeg"
-
-def fazer_upload_imagem(dados_imagem, alt_text, legenda, titulo_post):
-    conteudo, nome_arquivo, mime_type = baixar_e_converter_jpeg(
-        dados_imagem["url"],
-        dados_imagem.get("nome", "imagem-tec-solar.jpg")
-    )
-
-    resp = requests.post(
+    resp_up = requests.post(
         f"{API_BASE}/media",
         auth=AUTH,
         headers={
@@ -122,8 +151,8 @@ def fazer_upload_imagem(dados_imagem, alt_text, legenda, titulo_post):
         },
         data=conteudo
     )
-    resp.raise_for_status()
-    media = resp.json()
+    resp_up.raise_for_status()
+    media = resp_up.json()
     media_id = media["id"]
 
     requests.post(f"{API_BASE}/media/{media_id}", auth=AUTH, json={
@@ -133,19 +162,15 @@ def fazer_upload_imagem(dados_imagem, alt_text, legenda, titulo_post):
         "description": alt_text,
     })
 
-    print(f"   Upload OK: ID {media_id} — {nome_arquivo}")
+    print(f"   Upload OK: ID {media_id}")
     return media_id, media.get("source_url", "")
 
 # ============================================================
-# CATEGORIA — fixa Inversores Solares (ID 52)
+# CATEGORIA E TAGS
 # ============================================================
 
 def obter_categoria():
     return 52
-
-# ============================================================
-# TAGS
-# ============================================================
 
 def obter_ou_criar_tags(tags_str):
     tags = [t.strip() for t in tags_str.split(",") if t.strip()]
@@ -217,9 +242,7 @@ def converter_markdown_para_html(texto):
     for linha in linhas:
         s = linha.strip()
         if not s:
-            fechar_p()
-            fechar_lista()
-            continue
+            fechar_p(); fechar_lista(); continue
         if s.startswith("### "):
             fechar_p(); fechar_lista()
             html.append(f"<h3>{formatar(s[4:])}</h3>")
@@ -235,39 +258,24 @@ def converter_markdown_para_html(texto):
         elif s.startswith("- ") or s.startswith("* "):
             fechar_p()
             if not em_ul:
-                fechar_lista()
-                html.append("<ul>")
-                em_ul = True
+                fechar_lista(); html.append("<ul>"); em_ul = True
             html.append(f"<li>{formatar(s[2:])}</li>")
         elif re.match(r'^\d+\.\s', s):
             fechar_p()
             if not em_ol:
-                fechar_lista()
-                html.append("<ol>")
-                em_ol = True
-            item_ol = re.sub(r'^\d+\.\s', '', s)
-            html.append(f"<li>{formatar(item_ol)}</li>")
+                fechar_lista(); html.append("<ol>"); em_ol = True
+            item = re.sub(r'^\d+\.\s', '', s)
+            html.append(f"<li>{formatar(item)}</li>")
         else:
             fechar_lista()
             if not em_p:
-                html.append("<p>")
-                em_p = True
+                html.append("<p>"); em_p = True
             else:
                 html.append(" ")
             html.append(formatar(s))
 
-    fechar_p()
-    fechar_lista()
+    fechar_p(); fechar_lista()
     return "\n".join(html)
-
-def inserir_imagem_no_conteudo(conteudo_html, url_imagem, alt_text, legenda, marcador_h2):
-    img_html = f'\n<figure class="wp-block-image size-large"><img src="{url_imagem}" alt="{alt_text}" /><figcaption>{legenda}</figcaption></figure>\n'
-    match = re.search(rf'(<h2>{re.escape(marcador_h2)}.*?</h2>)', conteudo_html, re.IGNORECASE)
-    if match:
-        pos = match.end()
-        return conteudo_html[:pos] + img_html + conteudo_html[pos:]
-    meio = len(conteudo_html) // 2
-    return conteudo_html[:meio] + img_html + conteudo_html[meio:]
 
 # ============================================================
 # YOAST SEO
@@ -294,53 +302,32 @@ def publicar_post(caminho_arquivo):
     print(f"   Título: {dados['titulo']}")
     print(f"   Slug: {dados['slug']}")
 
-    # Upload imagens
-    id_imagem_principal = None
-    url_imagem_secundaria = ""
+    # Busca imagem relevante no Unsplash
+    id_imagem = None
+    print("\n📷 Buscando imagem...")
+    url_img = buscar_imagem_unsplash(dados["titulo"], dados["palavra_chave"])
 
-    if dados["imagem_principal"]:
-        print("\n📷 Imagem principal...")
-        try:
-            id_imagem_principal, _ = fazer_upload_imagem(
-                dados["imagem_principal"],
-                dados["imagem_principal"].get("alt", ""),
-                dados["imagem_principal"].get("legenda", ""),
-                dados["titulo"]
-            )
-        except Exception as e:
-            print(f"   AVISO imagem principal: {e}")
+    if not url_img:
+        # Fallback: imagem padrão do GitHub
+        print("   Usando imagem padrão TEC Solar")
+        url_img = "https://raw.githubusercontent.com/rhuanfmav-code/tec-solar-blog/main/fundo-bancada-tech.png.png"
 
-    if dados["imagem_secundaria"]:
-        print("\n📷 Imagem secundária...")
-        try:
-            _, url_imagem_secundaria = fazer_upload_imagem(
-                dados["imagem_secundaria"],
-                dados["imagem_secundaria"].get("alt", ""),
-                dados["imagem_secundaria"].get("legenda", ""),
-                dados["titulo"]
-            )
-        except Exception as e:
-            print(f"   AVISO imagem secundária: {e}")
+    try:
+        alt_text = f"Diagnóstico técnico de inversor solar — {dados['titulo']}"
+        id_imagem, _ = fazer_upload_imagem(url_img, alt_text, dados["titulo"], dados["titulo"])
+    except Exception as e:
+        print(f"   AVISO imagem: {e}")
 
     # Conteúdo
     print("\n📝 Processando conteúdo...")
     conteudo_html = converter_markdown_para_html(dados["conteudo"])
-
-    if url_imagem_secundaria and dados["imagem_secundaria"]:
-        posicao = dados["imagem_secundaria"].get("posicao", "")
-        match_h2 = re.search(r'[Aa]pós\s+H2\s+["\'](.+?)["\']', posicao)
-        marcador = match_h2.group(1) if match_h2 else "Como identificar na prática"
-        conteudo_html = inserir_imagem_no_conteudo(conteudo_html, url_imagem_secundaria,
-            dados["imagem_secundaria"].get("alt", ""), dados["imagem_secundaria"].get("legenda", ""), marcador)
-
     conteudo_html = processar_links(conteudo_html, dados["links_internos"], dados["links_externos"])
 
     # Categoria e tags
     print("\n🏷 Categorias e tags...")
     categoria_id = obter_categoria()
     tag_ids = obter_ou_criar_tags(dados["tags"]) if dados["tags"] else []
-    print(f"   Categoria ID: {categoria_id}")
-    print(f"   Tags IDs: {tag_ids}")
+    print(f"   Categoria ID: {categoria_id} | Tags: {tag_ids}")
 
     # Criar post
     print("\n📤 Criando post no WordPress...")
@@ -358,8 +345,8 @@ def publicar_post(caminho_arquivo):
     }
     if tag_ids:
         payload["tags"] = tag_ids
-    if id_imagem_principal:
-        payload["featured_media"] = id_imagem_principal
+    if id_imagem:
+        payload["featured_media"] = id_imagem
 
     resp = requests.post(f"{API_BASE}/posts", auth=AUTH, json=payload)
     if resp.status_code not in [200, 201]:
