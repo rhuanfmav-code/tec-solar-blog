@@ -171,18 +171,8 @@ def fazer_upload_imagem(dados_imagem, alt_text, legenda, titulo_post):
 # ============================================================
 
 def obter_ou_criar_categoria(nome):
-    """Retorna o ID da categoria, criando se não existir."""
-    resp = requests.get(f"{API_BASE}/categories", auth=AUTH, params={"search": nome})
-    categorias = resp.json()
-    for cat in categorias:
-        if cat["name"].lower() == nome.lower():
-            return cat["id"]
-
-    # Criar categoria
-    resp = requests.post(f"{API_BASE}/categories", auth=AUTH, json={"name": nome})
-    resp.raise_for_status()
-    return resp.json()["id"]
-
+    # Categoria fixa — Inversores Solares (ID 52)
+    return 52
 def obter_ou_criar_tags(tags_str):
     """Retorna lista de IDs de tags, criando as que não existem."""
     tags = [t.strip() for t in tags_str.split(",") if t.strip()]
