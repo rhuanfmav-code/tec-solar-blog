@@ -6,6 +6,7 @@ Versão 1.3 — Unsplash API para imagens relevantes por contexto
 import os
 import sys
 import re
+import json
 import requests
 from pathlib import Path
 from io import BytesIO
@@ -93,7 +94,8 @@ def buscar_imagem_unsplash(titulo_post, palavra_chave):
 # ============================================================
 
 def extrair_secao(conteudo, marcador):
-    pattern = rf"##\s*\[{re.escape(marcador)}\]\s*\n(.*?)\n(?=##|\Z)"
+    # Usa "## [" como delimitador de fim para não cortar H2s internos do post
+    pattern = rf"##\s*\[{re.escape(marcador)}\]\s*\n(.*?)\n(?=##\s*\[|\Z)"
     match = re.search(pattern, conteudo, re.DOTALL)
     return match.group(1).strip() if match else ""
 
@@ -114,7 +116,9 @@ def parsear_post(caminho_arquivo):
     }
 
     match_h1 = re.search(r"^#\s+(.+)$", conteudo, re.MULTILINE)
-    dados["titulo"] = match_h1.group(1).strip() if match_h1 else dados["titulo_seo"]
+    titulo_raw = match_h1.group(1).strip() if match_h1 else dados["titulo_seo"]
+    # Remove prefixo "Post XX — " ou "Post XX - " do título antes de publicar
+    dados["titulo"] = re.sub(r'^Post\s+\d+\s*[—\-]+\s*', '', titulo_raw).strip()
     return dados
 
 # ============================================================
@@ -155,7 +159,7 @@ def fazer_upload_imagem(url_imagem, alt_text, legenda, titulo_post):
     media = resp_up.json()
     media_id = media["id"]
 
-    requests.post(f"{API_BASE}/media/{media_id}", auth=AUTH, json={
+    post_json(f"{API_BASE}/media/{media_id}", AUTH, {
         "alt_text":    alt_text[:125],
         "caption":     legenda,
         "title":       titulo_post,
@@ -187,7 +191,7 @@ def obter_ou_criar_tags(tags_str):
                         encontrado = True
                         break
                 if not encontrado:
-                    resp2 = requests.post(f"{API_BASE}/tags", auth=AUTH, json={"name": tag})
+                    resp2 = post_json(f"{API_BASE}/tags", AUTH, {"name": tag})
                     if resp2.status_code in [200, 201] and resp2.text.strip():
                         ids.append(resp2.json()["id"])
         except Exception as e:
@@ -243,7 +247,10 @@ def converter_markdown_para_html(texto):
         s = linha.strip()
         if not s:
             fechar_p(); fechar_lista(); continue
-        if s.startswith("### "):
+        if re.match(r'^-{3,}$', s):
+            fechar_p(); fechar_lista()
+            html.append("<hr>")
+        elif s.startswith("### "):
             fechar_p(); fechar_lista()
             html.append(f"<h3>{formatar(s[4:])}</h3>")
         elif s.startswith("## "):
@@ -278,11 +285,27 @@ def converter_markdown_para_html(texto):
     return "\n".join(html)
 
 # ============================================================
+# HELPER — POST JSON COM ENCODING UTF-8 EXPLÍCITO
+# ============================================================
+
+def post_json(url, auth, payload, extra_headers=None):
+    """Envia POST JSON com encoding UTF-8 explícito no payload."""
+    headers = {"Content-Type": "application/json; charset=utf-8"}
+    if extra_headers:
+        headers.update(extra_headers)
+    return requests.post(
+        url,
+        auth=auth,
+        data=json.dumps(payload, ensure_ascii=False).encode("utf-8"),
+        headers=headers,
+    )
+
+# ============================================================
 # YOAST SEO
 # ============================================================
 
 def configurar_yoast(post_id, palavra_chave, titulo_seo, meta_description):
-    resp = requests.post(f"{API_BASE}/posts/{post_id}", auth=AUTH, json={"meta": {
+    resp = post_json(f"{API_BASE}/posts/{post_id}", AUTH, {"meta": {
         "_yoast_wpseo_focuskw":  palavra_chave,
         "_yoast_wpseo_title":    titulo_seo,
         "_yoast_wpseo_metadesc": meta_description,
@@ -348,7 +371,7 @@ def publicar_post(caminho_arquivo):
     if id_imagem:
         payload["featured_media"] = id_imagem
 
-    resp = requests.post(f"{API_BASE}/posts", auth=AUTH, json=payload)
+    resp = post_json(f"{API_BASE}/posts", AUTH, payload)
     if resp.status_code not in [200, 201]:
         print(f"❌ Erro ao criar post: {resp.status_code}")
         print(resp.text[:500])
