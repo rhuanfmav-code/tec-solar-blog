@@ -245,7 +245,8 @@ def converter_markdown_para_html(texto):
                 fechar_lista()
                 html.append("<ol>")
                 em_ol = True
-            html.append(f"<li>{formatar(re.sub(r'^\d+\.\s', '', s))}</li>")
+            item_ol = re.sub(r'^\d+\.\s', '', s)
+            html.append(f"<li>{formatar(item_ol)}</li>")
         else:
             fechar_lista()
             if not em_p:
