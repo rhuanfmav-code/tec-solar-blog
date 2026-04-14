@@ -22,7 +22,7 @@ canadian-solar-falha-101-tensao-cc-elevada-diagnostico
 
 ## [META DESCRIPTION]
 
-Canadian Solar exibindo Falha 101? Descubra se é string mal dimensionada ou falha no circuito de medição CC — diagnóstico em nível de placa.
+Canadian Solar CSI com Falha 101? Descubra se é string mal dimensionada ou falha no circuito de medição CC — diagnóstico em nível de placa.
 
 ---
 
