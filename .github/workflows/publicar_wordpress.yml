@@ -38,7 +38,11 @@ jobs:
           else
             CHANGED=$(git diff --name-only HEAD~1 HEAD 2>/dev/null | grep 'posts/post-' | head -1)
             if [ -z "$CHANGED" ]; then
-              CHANGED=$(ls -t posts/post-*.md 2>/dev/null | head -1)
+              CHANGED=$(git show --name-only --pretty=format: HEAD 2>/dev/null | grep 'posts/post-' | head -1)
+            fi
+            if [ -z "$CHANGED" ]; then
+              echo "Nenhum arquivo de post encontrado no commit atual. Abortando."
+              exit 1
             fi
             ARQUIVO="$CHANGED"
           fi
