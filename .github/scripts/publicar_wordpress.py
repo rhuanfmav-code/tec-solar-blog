@@ -161,8 +161,27 @@ def resolver_imagem_secundaria(titulo, slug, numero_post):
 # UPLOAD DE IMAGEM LOCAL
 # ============================================================
 
+def _upload_bytes(conteudo, nome_arquivo, mime_type):
+    """Envia bytes brutos para a API de mídia do WordPress. Retorna response."""
+    return requests.post(
+        f"{API_BASE}/media",
+        auth=AUTH,
+        headers={
+            "Content-Disposition": f'attachment; filename="{nome_arquivo}"',
+            "Content-Type":        mime_type,
+            "Content-Length":      str(len(conteudo)),
+        },
+        data=conteudo,
+    )
+
 def fazer_upload_imagem_local(caminho, alt_text, legenda, titulo_post):
-    """Lê imagem local WebP e faz upload no WordPress."""
+    """Lê imagem local WebP e faz upload no WordPress.
+    Se o upload WebP falhar (ex.: MIME não permitido no servidor),
+    converte automaticamente para JPEG via Pillow e tenta novamente.
+    """
+    from PIL import Image
+    import io
+
     caminho = Path(caminho)
     if not caminho.exists():
         raise FileNotFoundError(f"Imagem não encontrada: {caminho}")
@@ -173,28 +192,46 @@ def fazer_upload_imagem_local(caminho, alt_text, legenda, titulo_post):
     # Nome seguro para Content-Disposition (sem parênteses, espaços ou acentos)
     nome_seguro = re.sub(r'[^\w\-.]', '-', caminho.stem) + caminho.suffix
 
-    resp_up = requests.post(
-        f"{API_BASE}/media",
-        auth=AUTH,
-        headers={
-            "Content-Disposition": f'attachment; filename="{nome_seguro}"',
-            "Content-Type": "image/webp",
-        },
-        data=conteudo,
-    )
-    resp_up.raise_for_status()
+    # --- Tentativa 1: WebP original ---
+    resp_up = _upload_bytes(conteudo, nome_seguro, "image/webp")
+
+    if not resp_up.ok:
+        print(f"   Erro upload WebP: HTTP {resp_up.status_code}")
+        print(f"   Detalhe: {resp_up.text[:400]}")
+        # --- Tentativa 2: fallback JPEG via Pillow ---
+        print("   Convertendo para JPEG e tentando novamente...")
+        img = Image.open(caminho).convert("RGB")
+        buf = io.BytesIO()
+        img.save(buf, format="JPEG", quality=88)
+        buf.seek(0)
+        nome_jpeg = re.sub(r'[^\w\-.]', '-', caminho.stem) + '.jpg'
+        resp_up   = _upload_bytes(buf.getvalue(), nome_jpeg, "image/jpeg")
+
+        if not resp_up.ok:
+            print(f"   Erro upload JPEG: HTTP {resp_up.status_code}")
+            print(f"   Detalhe: {resp_up.text[:400]}")
+            resp_up.raise_for_status()
+
     media    = resp_up.json()
     media_id = media["id"]
     url      = media.get("source_url", "")
 
-    post_json(f"{API_BASE}/media/{media_id}", AUTH, {
-        "alt_text":    alt_text[:125],
-        "caption":     legenda,
-        "title":       titulo_post,
-        "description": alt_text,
-    })
+    # Atualizar metadados da mídia (alt text, legenda, título)
+    resp_meta = requests.post(
+        f"{API_BASE}/media/{media_id}",
+        auth=AUTH,
+        headers={"Content-Type": "application/json; charset=utf-8"},
+        data=json.dumps({
+            "alt_text":    alt_text[:125],
+            "caption":     legenda,
+            "title":       titulo_post,
+            "description": alt_text,
+        }, ensure_ascii=False).encode("utf-8"),
+    )
+    if not resp_meta.ok:
+        print(f"   AVISO metadados mídia: HTTP {resp_meta.status_code}")
 
-    print(f"   Upload OK: ID {media_id}")
+    print(f"   Upload OK: ID {media_id} — {url}")
     return media_id, url
 
 # ============================================================
@@ -265,6 +302,28 @@ def processar_links(conteudo, links_internos_str, links_externos_str):
     # Links internos: NÃO inserir href se o post de destino ainda não existe
     # O texto corre normalmente sem âncora
     return conteudo
+
+def renumerar_listas_ordenadas(texto):
+    """Renumera itens de listas ordenadas sequencialmente dentro de cada seção.
+    Reseta o contador apenas ao encontrar um heading (##) ou separador (---),
+    garantindo que itens separados por linhas em branco ou texto de continuação
+    mantenham numeração contínua em vez de reiniciar em 1.
+    """
+    linhas    = texto.split('\n')
+    resultado = []
+    contador  = 0
+
+    for linha in linhas:
+        s = linha.strip()
+        if re.match(r'^\d+\.\s', s):
+            contador += 1
+            linha = re.sub(r'^\d+\.', f'{contador}.', linha, count=1)
+        elif re.match(r'^#{1,6}\s', s) or re.match(r'^-{3,}$', s):
+            # Nova seção ou separador — zera o contador
+            contador = 0
+        resultado.append(linha)
+
+    return '\n'.join(resultado)
 
 def converter_markdown_para_html(texto):
     linhas = texto.split("\n")
@@ -358,8 +417,17 @@ def post_json(url, auth, payload, extra_headers=None):
 def obter_categoria():
     return 52
 
+def limpar_tag(tag):
+    """Remove lixo de início e fim da tag: ---, —, –, hífens, espaços e símbolos."""
+    tag = tag.strip()
+    tag = re.sub(r'[\s\-—–_]+$', '', tag)   # limpeza do final
+    tag = re.sub(r'^[\s\-—–_]+', '', tag)   # limpeza do início
+    tag = re.sub(r'-{2,}', '-', tag)         # múltiplos hífens consecutivos → um só
+    return tag.strip()
+
 def obter_ou_criar_tags(tags_str):
-    tags = [t.strip() for t in tags_str.split(",") if t.strip()]
+    tags = [limpar_tag(t) for t in tags_str.split(",")]
+    tags = [t for t in tags if t]
     ids  = []
     for tag in tags:
         try:
@@ -434,7 +502,8 @@ def publicar_post(caminho_arquivo):
 
     # ── Conteúdo ──────────────────────────────────────────────
     print("\n Processando conteúdo...")
-    conteudo_html = converter_markdown_para_html(dados["conteudo"])
+    conteudo_md   = renumerar_listas_ordenadas(dados["conteudo"])
+    conteudo_html = converter_markdown_para_html(conteudo_md)
     conteudo_html = processar_links(conteudo_html, dados["links_internos"], dados["links_externos"])
 
     if url_secundaria:
