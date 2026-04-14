@@ -4,9 +4,9 @@ on:
   workflow_dispatch:
     inputs:
       numero_post:
-        description: 'Número do post (ex: 03)'
+        description: 'Número do post (ex: 07)'
         required: true
-        default: '03'
+        default: '07'
   push:
     paths:
       - 'posts/post-**.md'
@@ -20,6 +20,8 @@ jobs:
     steps:
       - name: Checkout repositório
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
 
       - name: Configurar Python
         uses: actions/setup-python@v5

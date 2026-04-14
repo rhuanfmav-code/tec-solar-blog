@@ -149,8 +149,8 @@ IMAGEM PRINCIPAL:
 → URL para download: https://images.unsplash.com/photo-1508514177221-188b1cf16e9d?w=1200
 → Por que foi escolhida: Inversor solar instalado com conexões CC visíveis — representa o ponto de medição de tensão nos bornes de entrada descrito no diagnóstico da Falha 101
 → Nome do arquivo: canadian-solar-falha-101-tensao-cc-elevada.webp
-→ Alt Text (máx. 125 caracteres): Inversor solar Canadian Solar com entradas CC — diagnóstico de Falha 101 tensão CC elevada por string ou sensor com defeito
-→ Legenda: Fig. 1 — Bornes de entrada CC do inversor Canadian Solar: ponto de medição obrigatório antes de qualquer diagnóstico da Falha 101
+→ Alt Text (máx. 125 caracteres): Inversor on-grid Canadian Solar — diagnóstico da Falha 101 tensão CC elevada, verificação de Voc da string e circuito de medição
+→ Legenda: Fig. 1 — Bornes de entrada CC do inversor Canadian Solar CSI: primeiro ponto de medição no diagnóstico da Falha 101 por sobretensão
 → Onde inserir: Topo do post, antes da introdução
 → Converter para WebP — máximo 150 KB
 
@@ -162,7 +162,7 @@ IMAGEM SECUNDÁRIA:
 → URL para download: https://images.unsplash.com/photo-1581092580497-e0d23cbdf1dc?w=1200
 → Por que foi escolhida: Técnico com multímetro em bancada eletrônica — representa a etapa de medição do circuito de medição CC e comparação de valores descrita no diagnóstico
 → Nome do arquivo: diagnostico-circuito-medicao-cc-canadian-solar-falha101-2.webp
-→ Alt Text (máx. 125 caracteres): Técnico medindo tensão CC com multímetro nos bornes de inversor Canadian Solar para diagnóstico da Falha 101 sobretensão
-→ Legenda: Fig. 2 — Medição direta nos bornes CC com multímetro calibrado. Discrepância entre tensão real e valor reportado confirma deriva no circuito de medição interno
+→ Alt Text (máx. 125 caracteres): Técnico com multímetro medindo tensão CC em inversor Canadian Solar — diagnóstico de deriva no circuito de medição da Falha 101
+→ Legenda: Fig. 2 — Medição nos bornes CC com multímetro calibrado: discrepância entre tensão real e valor reportado pelo inversor confirma deriva no divisor resistivo
 → Onde inserir: Após H2 "Como identificar na prática"
 → Converter para WebP — máximo 150 KB
