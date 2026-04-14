@@ -215,6 +215,11 @@ Escolha apenas uma:
 [TAGS]
 ─────────────────────────────────────
 (3 a 5 tags técnicas separadas por vírgula)
+REGRA OBRIGATÓRIA DE TAGS:
+- Apenas texto limpo, sem caracteres especiais no final
+- Formato correto: diagnóstico CC, WEG E001, sobretensão inversor solar
+- PROIBIDO: tags terminando em ---, —, traços, hífens ou qualquer símbolo
+- PROIBIDO: espaços extras, quebras de linha ou separadores dentro da tag
 ─────────────────────────────────────
 [TEXTO DO POST — VERSÃO HUMANIZADA FINAL]
 ─────────────────────────────────────
@@ -223,6 +228,11 @@ Escolha apenas uma:
 ─────────────────────────────────────
 Formato:
 - Âncora: "[frase do texto]" → Link para: post sobre [tema] (Post XX)
+REGRA OBRIGATÓRIA DE LINKS INTERNOS:
+- Se o post de destino ainda NÃO existe, NÃO inserir link nenhum no texto
+- O texto corre normalmente, sem âncora, sem href, sem placeholder visível
+- PROIBIDO: href="#", href vazio, title="Link interno pendente" ou qualquer marcação de link com destino fictício
+- Inserir o link real somente quando o post de destino já estiver publicado
 ─────────────────────────────────────
 [LINKS EXTERNOS SUGERIDOS]
 ─────────────────────────────────────
