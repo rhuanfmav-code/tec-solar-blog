@@ -1,0 +1,14 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd /home/user/tec-solar-blog && git checkout main && git pull origin main --rebase 2>&1 || true"
+          }
+        ]
+      }
+    ]
+  }
+}

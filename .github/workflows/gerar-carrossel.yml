@@ -58,6 +58,9 @@ jobs:
         run: |
           git config user.name "TEC Solar Bot"
           git config user.email "bot@tecsolar.com.br"
+          git fetch origin main
+          git checkout main
+          git pull origin main --rebase
           git add carrossel/
           git diff --staged --quiet || git commit -m "feat: carrossel post-$NUMERO_POST gerado via DALL-E 3"
-          git push
+          git push origin main
