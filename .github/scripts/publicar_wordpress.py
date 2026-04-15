@@ -319,11 +319,54 @@ def renumerar_listas_ordenadas(texto):
             contador += 1
             linha = re.sub(r'^\d+\.', f'{contador}.', linha, count=1)
         elif re.match(r'^#{1,6}\s', s) or re.match(r'^-{3,}$', s):
-            # Nova seção ou separador — zera o contador
             contador = 0
         resultado.append(linha)
 
     return '\n'.join(resultado)
+
+
+def corrigir_numeracao_ol(html):
+    """Pós-processa o HTML para garantir numeração sequencial em listas
+    ordenadas que foram fragmentadas em múltiplos <ol> pelo conversor
+    (ocorre quando parágrafos de continuação separam os itens).
+
+    Estratégia: tokeniza o HTML em marcadores relevantes e, sempre que
+    um <ol> aparece após um </ol> anterior sem que um heading ou <hr>
+    tenha redefinido a seção, adiciona start=N para continuar a contagem.
+    """
+    # Tokeniza preservando os delimitadores como grupos capturados
+    partes = re.split(
+        r'(<ol[^>]*>|</ol>|<h[1-6][^>]*>|<hr[^>]*>|<li[^>]*>)',
+        html,
+    )
+
+    resultado = []
+    li_count  = 0      # total de <li> emitidos na cadeia atual
+    em_cadeia = False  # True após o primeiro <ol> da seção atual
+
+    for parte in partes:
+        if re.match(r'<ol', parte):
+            if em_cadeia:
+                # Continuação: injeta start= para prosseguir a contagem
+                resultado.append(f'<ol start="{li_count + 1}">')
+            else:
+                resultado.append('<ol>')
+                em_cadeia = True
+        elif parte == '</ol>':
+            resultado.append('</ol>')
+            # Não reseta em_cadeia — próximo <ol> sem heading = continuação
+        elif re.match(r'<h[1-6]', parte) or re.match(r'<hr', parte):
+            # Quebra de seção: reseta tudo
+            resultado.append(parte)
+            li_count  = 0
+            em_cadeia = False
+        elif re.match(r'<li', parte):
+            li_count += 1
+            resultado.append(parte)
+        else:
+            resultado.append(parte)
+
+    return ''.join(resultado)
 
 def converter_markdown_para_html(texto):
     linhas = texto.split("\n")
@@ -504,6 +547,7 @@ def publicar_post(caminho_arquivo):
     print("\n Processando conteúdo...")
     conteudo_md   = renumerar_listas_ordenadas(dados["conteudo"])
     conteudo_html = converter_markdown_para_html(conteudo_md)
+    conteudo_html = corrigir_numeracao_ol(conteudo_html)
     conteudo_html = processar_links(conteudo_html, dados["links_internos"], dados["links_externos"])
 
     if url_secundaria:
