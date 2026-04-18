@@ -21,11 +21,10 @@ Antes de escrever, pesquise na internet:
 - Manuais e boletins técnicos dos fabricantes
 - Casos relatados por técnicos em campo
 - Estudos ou artigos técnicos relevantes (IEEE, ABNT, datasheets)
-Depois, siga o processo abaixo em 4 etapas obrigatórias:
+Depois, siga o processo abaixo em 3 etapas obrigatórias:
 ETAPA 1 — Gere o rascunho técnico completo
 ETAPA 2 — Aplique o processo Humanizer no texto gerado
 ETAPA 3 — Entregue o output final com todos os campos
-ETAPA 4 — Gere o prompt completo do carrossel e salve no repositório
 ════════════════════════════════════
 ETAPA 1 — RASCUNHO TÉCNICO
 ════════════════════════════════════
@@ -287,197 +286,6 @@ IDENTIDADE DA TEC SOLAR
 PÚBLICO-ALVO PRIMÁRIO: integradores solares, técnicos, empresas de energia
 PÚBLICO-ALVO SECUNDÁRIO: donos de sistemas com equipamento parado
 ════════════════════════════════════
-ETAPA 4 — PROMPT DO CARROSSEL (OBRIGATÓRIA)
-════════════════════════════════════
-Após entregar o output completo do post, extraia as informações
-do post gerado e preencha o prompt base abaixo com os dados reais.
-Salve o prompt preenchido no arquivo:
-carrossel/post-[XX]-prompt.md
-REGRAS DE PREENCHIMENTO:
-- Substitua TODOS os campos [INSERIR ...] com informações reais do post
-- Mantenha toda a estrutura, formatação e separadores intactos
-- Textos de títulos: CAIXA ALTA
-- Textos de subtítulos e explicações: normal
-- Máximo 80 caracteres por linha de texto nas imagens
-- Valores financeiros: use os mencionados no post ou estime
-  (residencial: R$3.000-5.000 novo / R$400-700 reparo)
-CAMPOS A PREENCHER:
-IMAGE 1:
-- [INSERIR: ON GRID / OFF GRID / DRIVE SOLAR] → tipo do inversor do post
-- [INSERIR MODELO REAL] → modelo específico mencionado no post
-- [INSERIR ERRO / CÓDIGO] → código/nome do erro em CAIXA ALTA
-- [INSERIR EXPLICAÇÃO TÉCNICA] → subtítulo do slide em 1 linha
-
-IMAGE 2:
-- [INSERIR COMPONENTE: IGBT / VARISTOR / DRIVER / ETC] → componente da causa raiz
-- [INSERIR: CAUSA RAIZ] → título do slide
-- [INSERIR CAUSA 1/2/3] → as 3 causas principais do post
-
-IMAGE 3:
-- [INSERIR: MULTÍMETRO / OSCILOSCÓPIO] → ferramenta usada no diagnóstico do post
-- [INSERIR: DIAGNÓSTICO NA BANCADA] → título do slide
-- [INSERIR PASSO 1/2] → os 2 primeiros passos de diagnóstico do post
-
-IMAGE 4:
-- [INSERIR FRASE DE IMPACTO] → frase de autoridade extraída da conclusão do post
-- [INSERIR TEXTO TÉCNICO] → texto de apoio técnico em 1-2 linhas
-
-PROMPT BASE A PREENCHER E SALVAR:
-
----
-You are a professional graphic designer and electronic engineer specialized in power electronics, solar inverters, and high-end technical branding.
-Your task is to generate ultra-realistic, high-end carousel images for a company specialized in solar inverter repair (TEC SOLAR).
-━━━━━━━━━━━━━━━━━━━━━━━
-⚠️ EXECUTION RULE (MANDATORY)
-━━━━━━━━━━━━━━━━━━━━━━━
-Generate ONLY ONE image at a time.
-- Generate IMAGE 1 and STOP.
-- Only generate IMAGE 2 when requested.
-- Repeat until IMAGE 4.
-Output:
-- PNG
-- 1080x1350px (4:5 vertical)
-- Ultra high resolution
-- Sharp, clean, professional
-━━━━━━━━━━━━━━━━━━━━━━━
-🎯 VISUAL IDENTITY (TEC SOLAR)
-━━━━━━━━━━━━━━━━━━━━━━━
-Background:
-- Deep dark blue (#0D1F3C)
-- Subtle PCB circuit patterns (like a motherboard)
-- Very soft floating particles (minimal)
-Colors:
-- Electric cyan (#00B4D8) → energy, signals
-- Amber gold (#F5A623) → heat, failure, power
-Style:
-- Ultra realistic
-- Cinematic lighting
-- Technical engineering environment
-- Clean and premium
-DO NOT:
-- Use cartoon style
-- Use illustrations
-- Use exaggerated neon
-- Use gaming aesthetics
-━━━━━━━━━━━━━━━━━━━━━━━
-🧠 REALISM (CRITICAL)
-━━━━━━━━━━━━━━━━━━━━━━━
-Use ONLY real-world references:
-- Real solar inverters (on-grid, off-grid, drive solar)
-- Real internal PCBs
-- Real components: IGBT, MOSFET, Capacitors, Drivers, Connectors
-- Real tools: Multimeter, Oscilloscope, Megohmmeter, Probes
-Everything must look like: "A real professional electronic repair lab"
-━━━━━━━━━━━━━━━━━━━━━━━
-🚫 PROHIBITIONS
-━━━━━━━━━━━━━━━━━━━━━━━
-DO NOT:
-- Invent fake components
-- Distort proportions
-- Use generic "tech backgrounds"
-- Add unnecessary effects
-- Overcrowd the layout
-━━━━━━━━━━━━━━━━━━━━━━━
-📐 LAYOUT RULES
-━━━━━━━━━━━━━━━━━━━━━━━
-- Clean composition
-- Strong visual hierarchy
-- Balanced spacing
-- Focus on main subject
-- No clutter
-━━━━━━━━━━━━━━━━━━━━━━━
-🟨 LOGO AREA
-━━━━━━━━━━━━━━━━━━━━━━━
-- Reserve a clean empty area in the bottom-right corner
-- Completely invisible (negative space only)
-- DO NOT draw any box, placeholder, square, or frame
-━━━━━━━━━━━━━━━━━━━━━━━
-📝 FOOTER
-━━━━━━━━━━━━━━━━━━━━━━━
-Text: REPARO · DIAGNÓSTICO · MANUTENÇÃO
-Style: White, 25–35% opacity, wide letter spacing, centered bottom
-━━━━━━━━━━━━━━━━━━━━━━━
-🎬 LIGHTING
-━━━━━━━━━━━━━━━━━━━━━━━
-- Blue ambient light (dominant)
-- Warm amber highlights (failures/components)
-- Subtle reflections on metal
-- Depth of field allowed
-━━━━━━━━━━━━━━━━━━━━━━━
-🔤 TEXT STYLE
-━━━━━━━━━━━━━━━━━━━━━━━
-Font: Montserrat or similar
-Colors: White / Cyan (#00B4D8) / Gold (#F5A623)
-━━━━━━━━━━━━━━━━━━━━━━━
-🔷 CAROUSEL STRUCTURE
-━━━━━━━━━━━━━━━━━━━━━━━
-🟦 IMAGE 1 — CAPA (PROBLEMA)
-Scene:
-Real inverter [INSERIR: ON GRID / OFF GRID / DRIVE SOLAR]
-Reference: [INSERIR MODELO REAL]
-- Perspective 3/4
-- Floating over PCB surface
-- Cyan electrical arcs (failure)
-- Gold sparks (damage)
-Texts:
-Top small (cyan): ⚡ CÓDIGO DE ERRO
-Main title (gold, large): [INSERIR ERRO / CÓDIGO]
-Subtitle (white): [INSERIR EXPLICAÇÃO TÉCNICA]
-━━━━━━━━━━━━━━━━━━━━━━━
-🟦 IMAGE 2 — CAUSA RAIZ
-Scene:
-Macro of real PCB
-Focus: [INSERIR COMPONENTE: IGBT / VARISTOR / DRIVER / ETC]
-- Component glowing amber
-- Cyan current flow effect
-Texts:
-Top: 02 / 04
-Title: [INSERIR: CAUSA RAIZ]
-Bullets:
-● [INSERIR CAUSA 1]
-● [INSERIR CAUSA 2]
-● [INSERIR CAUSA 3]
-━━━━━━━━━━━━━━━━━━━━━━━
-🟦 IMAGE 3 — DIAGNÓSTICO
-Scene:
-Technician working
-Tool: [INSERIR: MULTÍMETRO / OSCILOSCÓPIO]
-- Probes touching board
-- Cyan scanning effect
-Texts:
-Top: 03 / 04
-Title: [INSERIR: DIAGNÓSTICO NA BANCADA]
-Steps:
-[INSERIR PASSO 1]
-[INSERIR PASSO 2]
-━━━━━━━━━━━━━━━━━━━━━━━
-🟦 IMAGE 4 — RESULTADO / CTA
-Scene:
-Inverter working perfectly
-- Clean, strong energy glow (cyan + gold)
-Texts:
-Top: [INSERIR FRASE DE IMPACTO]
-Main (gold, large): DIAGNOSTIQUE.
-Support: [INSERIR TEXTO TÉCNICO]
-CTA:
-WHATSAPP
-(38) 99912-4889
-Bottom: @tec_solar_moc
-━━━━━━━━━━━━━━━━━━━━━━━
-🎯 FINAL GOAL
-━━━━━━━━━━━━━━━━━━━━━━━
-The result must feel like:
-"A real technical engineering breakdown of inverter failure and repair"
-NOT marketing. NOT generic. PURE authority.
----
-
-CONFIRMAR ENTREGA:
-Após salvar o prompt, informe:
-"Post gerado: [número e título]
-Prompt do carrossel salvo em: carrossel/post-[XX]-prompt.md
-Abra o arquivo, copie o conteúdo e cole na IA de geração de imagens.
-Gere uma imagem por vez conforme instruído no prompt."
-════════════════════════════════════
 PARTE 2 — CALENDÁRIO EDITORIAL (83 posts)
 ════════════════════════════════════
 RODADA 1
@@ -594,12 +402,8 @@ NO WORDPRESS:
 [ ] Inserir links internos e externos
 [ ] Publicar
 NO INSTAGRAM:
-[ ] Abrir pasta carrossel/post-[XX]-prompt.md no GitHub
-[ ] Copiar o prompt completo
-[ ] Colar na IA de geração de imagens (ChatGPT / Midjourney / etc)
-[ ] Gerar uma imagem por vez (4 imagens no total)
-[ ] Adicionar logo TEC Solar no canto inferior direito de cada imagem
-[ ] Publicar carrossel no Instagram @tec_solar_moc
+[ ] O vídeo MP4 é gerado automaticamente em carrossel/post-[XX]/video-carrossel.mp4
+[ ] Baixar o vídeo e publicar no Instagram @tec_solar_moc como Reels ou carrossel
 ════════════════════════════════════
 PARTE 4 — RESUMO DO FLUXO AUTOMÁTICO
 ════════════════════════════════════
@@ -609,11 +413,10 @@ Cada vez que a tarefa rodar, o Claude executa na sequência:
 3. Escreve o rascunho técnico completo (Etapa 1)
 4. Aplica o processo Humanizer automaticamente (Etapa 2)
 5. Entrega o output com todos os campos prontos (Etapa 3)
-6. Preenche o prompt base do carrossel e salva em carrossel/post-[XX]-prompt.md (Etapa 4)
-7. Atualiza o progresso.md com o número do post gerado
+6. Atualiza o progresso.md com o número do post gerado
 Você acorda com tudo pronto:
 - Post completo para publicação automática no WordPress
-- Prompt do carrossel preenchido para copiar e colar na IA de imagens
+- Vídeo MP4 gerado automaticamente pelo GitHub Actions em carrossel/post-[XX]/video-carrossel.mp4
 TEC Solar — Onde a energia solar volta a funcionar.
-83 posts | publicação automática | prompt de carrossel pronto
-Versão 7 — fluxo completo: pesquisa → rascunho → humanizer → output → prompt carrossel
+83 posts | publicação automática | vídeo carrossel gerado via GitHub Actions
+Versão 8 — fluxo completo: pesquisa → rascunho → humanizer → output → vídeo MP4 automático

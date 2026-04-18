@@ -1,0 +1,71 @@
+name: Gerar Vídeo Carrossel Instagram
+
+on:
+  workflow_dispatch:
+    inputs:
+      numero_post:
+        description: 'Número do post (ex: 18)'
+        required: true
+        default: '18'
+  push:
+    paths:
+      - 'posts/post-**.md'
+
+jobs:
+  gerar-video:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repositório
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Instalar ffmpeg e dependências
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y ffmpeg
+          pip install moviepy pillow numpy requests
+
+      - name: Baixar fonte Montserrat
+        run: |
+          mkdir -p /usr/share/fonts/truetype/montserrat
+          BASE="https://github.com/JulietaUla/Montserrat/raw/master/fonts/ttf"
+          wget -q "$BASE/Montserrat-Black.ttf"   -O /usr/share/fonts/truetype/montserrat/Montserrat-Black.ttf
+          wget -q "$BASE/Montserrat-Bold.ttf"    -O /usr/share/fonts/truetype/montserrat/Montserrat-Bold.ttf
+          wget -q "$BASE/Montserrat-Regular.ttf" -O /usr/share/fonts/truetype/montserrat/Montserrat-Regular.ttf
+          fc-cache -f
+
+      - name: Detectar número do post
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            NUMERO_POST="${{ github.event.inputs.numero_post }}"
+          else
+            CHANGED=$(git diff --name-only HEAD~1 HEAD 2>/dev/null | grep 'posts/post-' | head -1)
+            if [ -z "$CHANGED" ]; then
+              CHANGED=$(git show --name-only --pretty=format: HEAD 2>/dev/null | grep 'posts/post-' | head -1)
+            fi
+            NUM=$(echo "$CHANGED" | grep -oE '[0-9]+' | tail -1)
+            NUMERO_POST=$(printf '%d' "$NUM")
+          fi
+          echo "NUMERO_POST=$NUMERO_POST" >> $GITHUB_ENV
+          echo "Post detectado: $NUMERO_POST"
+
+      - name: Gerar vídeo MP4
+        run: python3 .github/scripts/gerar_video_carrossel.py "$NUMERO_POST"
+
+      - name: Commit e push do vídeo
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          PASTA="carrossel/post-$(printf '%02d' $NUMERO_POST)"
+          git add "$PASTA/video-carrossel.mp4"
+          git diff --cached --quiet || git commit -m "Auto: vídeo carrossel post-$(printf '%02d' $NUMERO_POST)"
+          git push origin main
