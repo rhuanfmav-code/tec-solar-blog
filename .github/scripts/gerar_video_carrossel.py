@@ -238,9 +238,17 @@ def gerar_voiceover(script, api_key):
     if not api_key:
         print("⚠️  ELEVENLABS_API_KEY não configurado — vídeo sem áudio")
         return None
+
+    voice_id = os.environ.get("ELEVENLABS_VOICE_ID", "").strip()
+    if not voice_id:
+        voice_id = "pNInz6obpgDQGcFmaJgB"  # Adam (fallback público)
+        print(f"⚠️  ELEVENLABS_VOICE_ID vazio — usando voice_id padrão: {voice_id}")
+    else:
+        print(f"🎤  Voice ID: {voice_id}")
+
     try:
-        voice_id = os.environ.get("ELEVENLABS_VOICE_ID", "pNInz6obpgDQGcFmaJgB")
         url = f"https://api.elevenlabs.io/v1/text-to-speech/{voice_id}"
+        print(f"📡  POST {url}")
         resp = requests.post(
             url,
             headers={
@@ -260,11 +268,17 @@ def gerar_voiceover(script, api_key):
             },
             timeout=60,
         )
-        resp.raise_for_status()
+        print(f"📶  HTTP {resp.status_code} | Content-Type: {resp.headers.get('Content-Type','?')} | {len(resp.content)} bytes")
+        if not resp.ok:
+            try:
+                print(f"❌  Erro API ElevenLabs: {resp.json()}")
+            except Exception:
+                print(f"❌  Resposta bruta: {resp.text[:500]}")
+            resp.raise_for_status()
         tmp = tempfile.NamedTemporaryFile(suffix=".mp3", delete=False)
         tmp.write(resp.content)
         tmp.close()
-        print(f"✅  Voiceover gerado: {tmp.name}")
+        print(f"✅  Voiceover gerado: {tmp.name} ({len(resp.content)} bytes)")
         return tmp.name
     except Exception as exc:
         print(f"⚠️  ElevenLabs falhou: {exc} — vídeo sem áudio")
