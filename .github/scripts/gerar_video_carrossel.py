@@ -1,31 +1,34 @@
 """
-TEC Solar — Gerador de Vídeo Carrossel MP4
-4 slides x 5s = 20s | 1080x1350px | H.264
+TEC Solar — Gerador de Vídeo Carrossel MP4 v2.0
+Resolução: 1080x1920 (9:16) | 4 slides | Voiceover ElevenLabs
 """
 
 import os
 import re
 import sys
-import math
 import random
+import tempfile
+import requests
 import numpy as np
 from PIL import Image, ImageDraw, ImageFont
 
 try:
-    from moviepy import VideoClip, concatenate_videoclips
+    from moviepy import VideoClip, concatenate_videoclips, AudioFileClip
 except ImportError:
-    from moviepy.editor import VideoClip, concatenate_videoclips
+    from moviepy.editor import VideoClip, concatenate_videoclips, AudioFileClip
 
-# ── Caminhos ────────────────────────────────────────────────
+# ════════════════════════════════════════════════════════════
+# CAMINHOS E CONSTANTES
+# ════════════════════════════════════════════════════════════
+
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 REPO_ROOT  = os.path.dirname(os.path.dirname(SCRIPT_DIR))
+IMG_DIR    = os.path.join(REPO_ROOT, "imagens-padrao")
 
-# ── Dimensões e timing ──────────────────────────────────────
-W, H            = 1080, 1350
-FPS             = 24
-DURACAO_SLIDE   = 5.0
+W, H          = 1080, 1920
+FPS           = 24
+DURACAO_SLIDE = 5.0
 
-# ── Cores TEC Solar ─────────────────────────────────────────
 NAVY       = (13,  31,  60)
 NAVY_DARK  = (5,   13,  26)
 CIANO      = (0,  180, 216)
@@ -33,20 +36,77 @@ DOURADO    = (245, 166,  35)
 BRANCO     = (255, 255, 255)
 CINZA_FOOT = (190, 190, 190)
 
-# ── Mapeamento marca → imagem de fundo ─────────────────────
+OVERLAY_ALPHA = int(255 * 0.82)   # rgba(5,13,26, 0.82)
+
+# ════════════════════════════════════════════════════════════
+# MAPAS DE IMAGENS POR SLIDE
+# ════════════════════════════════════════════════════════════
+
+# Slide 1 — Capa: imagem da marca do post
 IMAGENS_MARCA = {
-    "canadian": "Inversor-Canadian-Bancada.webp",
-    "fronius":  "Inversor-Fronius-Bancada.webp",
-    "growatt":  "Inversor-Growatt-Bancada.webp",
-    "deye":     "Inversor-Deye-Bancada.webp",
-    "sma":      "Inversor-SMA-Bancada.webp",
-    "sungrow":  "Inversor-Sungrow-Bancada.webp",
-    "weg":      "Inversor-WEG-Bancada.webp",
-    "hoymiles": "Inversor-Hoymiles-Bancada.webp",
-    "drive":    "Drive-Solar-Bancada.webp",
-    "placa":    "Placa-Eletrônica-Bancada.webp",
-    "multi":    "Multi-Inversores-Bancada.webp",
+    "canadian": ["Inversor-Canadian-Bancada.webp",
+                 "Inversor-Canadian-Bancada (2).webp"],
+    "fronius":  ["Inversor-Fronius-Bancada.webp",
+                 "Inversor-Fronius-Bancada (2).webp",
+                 "Inversor-Fronius-Bancada (3).webp"],
+    "growatt":  ["Inversor-Growatt-Bancada.webp",
+                 "Inversor-Growatt-Bancada (2).webp"],
+    "deye":     ["Inversor-Deye-Bancada.webp",
+                 "Inversor-Deye-Bancada (2).webp",
+                 "Inversor-Deye-Bancada (3).webp"],
+    "sma":      ["Inversor-SMA-Bancada.webp",
+                 "Inversor-SMA-Bancada (2).webp"],
+    "sungrow":  ["Inversor-Sungrow-Bancada.webp"],
+    "weg":      ["Inversor-WEG-Bancada.webp"],
+    "hoymiles": ["Inversor-Hoymiles-Bancada.webp",
+                 "Inversor-Hoymiles-Bancada (2).webp"],
+    "drive":    ["Drive-Solar-Bancada.webp",
+                 "Drive-Solar-Bancada (2).webp",
+                 "Drive-Solar-Bancada (3).webp"],
 }
+
+# Slide 2 — Causa: placas eletrônicas
+IMAGENS_CAUSA = [
+    "Placa-Eletrônica-Bancada.webp",
+    "Placa-Eletrônica-Bancada (2).webp",
+    "Placa-Eletrônica-Bancada (3).webp",
+    "Placa-Eletrônica-Bancada (4).webp",
+    "Placa-Eletrônica-Bancada (5).webp",
+    "Placa-Eletrônica-Bancada (6).webp",
+    "Placa-Eletrônica-Bancada (7).webp",
+    "Placa-Eletrônica-Bancada (8).webp",
+]
+
+# Slide 3 — Diagnóstico: inversor aberto / bancada
+IMAGENS_DIAG = [
+    "Inversor-Placa-Eletrônica-Bancada.webp",
+    "Inversor-Placa-Eletrônica-Bancada (2).webp",
+    "Inversor-Placa-Eletrônica-Bancada (3).webp",
+    "Inversor-Placa-Eletrõnica-Bancada.webp",
+]
+
+# Slide 4 — CTA: múltiplos inversores
+IMAGENS_CTA = [
+    "Multi-Inversores-Bancada.webp",
+    "Multi-Inversores-Bancada (2).webp",
+    "Multi-Inversores-Bancada (3).webp",
+]
+
+NOMES_MARCA = {
+    "canadian": "Canadian Solar",
+    "fronius":  "Fronius",
+    "growatt":  "Growatt",
+    "deye":     "Deye",
+    "sma":      "SMA",
+    "sungrow":  "Sungrow",
+    "weg":      "WEG",
+    "hoymiles": "Hoymiles",
+    "drive":    "Drive Solar",
+}
+
+
+def sel(lista, num):
+    return lista[num % len(lista)]
 
 
 # ════════════════════════════════════════════════════════════
@@ -67,8 +127,7 @@ def get_font(size, bold=False):
         "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
         "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf",
     ]
-    lista = caminhos_bold if bold else caminhos_reg
-    for c in lista:
+    for c in (caminhos_bold if bold else caminhos_reg):
         if os.path.exists(c):
             return ImageFont.truetype(c, size)
     return ImageFont.load_default()
@@ -78,42 +137,37 @@ def get_font(size, bold=False):
 # PARSE DO POST MARKDOWN
 # ════════════════════════════════════════════════════════════
 
-def parse_post(caminho_md):
-    with open(caminho_md, encoding="utf-8") as f:
+def parse_post(md_path):
+    with open(md_path, encoding="utf-8") as f:
         texto = f.read()
 
-    # Título SEO
-    m = re.search(r'\[TÍTULO SEO[^\]]*\]\s*\n+\s*\n+(.+?)(?:\n|$)', texto)
-    titulo_seo = m.group(1).strip() if m else ""
+    def campo(label):
+        m = re.search(rf'\[{re.escape(label)}\]\s*\n+\s*\n+(.+?)(?:\n|$)', texto)
+        return m.group(1).strip() if m else ""
 
-    # Categoria
-    m = re.search(r'\[CATEGORIA\]\s*\n+\s*\n+(.+?)(?:\n|$)', texto)
-    categoria = m.group(1).strip() if m else "CÓDIGO DE ERRO"
+    titulo_seo = campo("TÍTULO SEO — Title Tag")
+    categoria  = campo("CATEGORIA")
 
-    # Código do erro
     m = re.search(
         r'(Falha\s+\d+|Erro\s+\d+|[EF]\d{2,4}|Arc\s+Fault|Grid\s+Lost|GFCI\s+Fault)',
         titulo_seo, re.IGNORECASE
     )
     codigo_erro = m.group(0).upper() if m else titulo_seo[:20].upper()
 
-    # Subtítulo = depois dos dois pontos no título SEO
     partes = titulo_seo.split(":", 1)
     subtitulo = partes[1].strip() if len(partes) > 1 else titulo_seo
 
-    # Detectar marca
     marcas = ["canadian", "fronius", "growatt", "deye", "sma",
               "sungrow", "weg", "hoymiles", "drive"]
     marca = next((mk for mk in marcas if mk in titulo_seo.lower()), None)
 
-    # Causas (primeiros 3 itens numerados da seção de causa)
-    m_sec = re.search(
+    m_causa = re.search(
         r'## [^\n]*[Cc]aus[^\n]*\n(.*?)(?=\n## |\Z)', texto, re.DOTALL
     )
     causas = []
-    if m_sec:
+    if m_causa:
         itens = re.findall(
-            r'(?m)^\d+\. +(.+?)(?=\n\d+\.|\n\n|\Z)', m_sec.group(1), re.DOTALL
+            r'(?m)^\d+\. +(.+?)(?=\n\d+\.|\n\n|\Z)', m_causa.group(1), re.DOTALL
         )
         for item in itens[:3]:
             parte = item.split("—", 1)[0].strip()
@@ -121,7 +175,6 @@ def parse_post(caminho_md):
     while len(causas) < 3:
         causas.append("")
 
-    # Passos de diagnóstico (primeiros 2 itens numerados)
     m_diag = re.search(
         r'## [^\n]*[Ii]dentificar[^\n]*\n(.*?)(?=\n## |\Z)', texto, re.DOTALL
     )
@@ -135,19 +188,91 @@ def parse_post(caminho_md):
     while len(passos) < 2:
         passos.append("")
 
+    # Extrair problema dos 2 primeiros parágrafos do corpo
+    m_intro = re.search(
+        r'\[TEXTO DO POST[^\]]*\]\s*\n+[-─]+\s*\n+(.*?)(?=\n---|\n##|\Z)',
+        texto, re.DOTALL
+    )
+    problema = ""
+    if m_intro:
+        paragrafos = [p.strip() for p in m_intro.group(1).split("\n\n") if p.strip()]
+        if paragrafos:
+            # Pega as primeiras 120 chars do primeiro parágrafo (sem negrito)
+            raw = re.sub(r'\*\*(.+?)\*\*', r'\1', paragrafos[0])
+            problema = raw[:120].rstrip(".,;: ")
+
     return {
-        "titulo_seo": titulo_seo,
+        "titulo_seo":  titulo_seo,
         "codigo_erro": codigo_erro,
         "subtitulo":   subtitulo,
         "categoria":   categoria.upper(),
         "causas":      causas,
         "passos":      passos,
         "marca":       marca,
+        "problema":    problema,
     }
 
 
 # ════════════════════════════════════════════════════════════
-# FUNDO E ELEMENTOS VISUAIS
+# VOICEOVER — ElevenLabs
+# ════════════════════════════════════════════════════════════
+
+def gerar_script_voz(dados):
+    nome_marca = NOMES_MARCA.get(dados["marca"], dados["titulo_seo"].split()[0])
+    codigo     = dados["codigo_erro"]
+    causa      = dados["causas"][0] if dados["causas"][0] else "a causa raiz está na placa"
+    return (
+        f"Seu inversor {nome_marca} exibindo {codigo}? "
+        f"A maioria dos técnicos reseta e fecha o chamado. O erro volta. "
+        f"O equipamento continua com defeito. "
+        f"Na nossa bancada, a causa real quase nunca é o que parece. "
+        f"{causa}. "
+        f"Antes de condenar o equipamento ou pedir um novo, "
+        f"você precisa de um diagnóstico em nível de placa. "
+        f"A TEC Solar atende todo o Brasil via logística reversa. "
+        f"Acesse nosso perfil, link na bio, e envie seu inversor para diagnóstico."
+    )
+
+
+def gerar_voiceover(script, api_key):
+    if not api_key:
+        print("⚠️  ELEVENLABS_API_KEY não configurado — vídeo sem áudio")
+        return None
+    try:
+        voice_id = os.environ.get("ELEVENLABS_VOICE_ID", "pNInz6obpgDQGcFmaJgB")
+        url = f"https://api.elevenlabs.io/v1/text-to-speech/{voice_id}"
+        resp = requests.post(
+            url,
+            headers={
+                "xi-api-key": api_key,
+                "Content-Type": "application/json",
+                "Accept": "audio/mpeg",
+            },
+            json={
+                "text": script,
+                "model_id": "eleven_multilingual_v2",
+                "voice_settings": {
+                    "stability": 0.50,
+                    "similarity_boost": 0.75,
+                    "style": 0.30,
+                    "use_speaker_boost": True,
+                },
+            },
+            timeout=60,
+        )
+        resp.raise_for_status()
+        tmp = tempfile.NamedTemporaryFile(suffix=".mp3", delete=False)
+        tmp.write(resp.content)
+        tmp.close()
+        print(f"✅  Voiceover gerado: {tmp.name}")
+        return tmp.name
+    except Exception as exc:
+        print(f"⚠️  ElevenLabs falhou: {exc} — vídeo sem áudio")
+        return None
+
+
+# ════════════════════════════════════════════════════════════
+# FUNDO — CROP FILL + OVERLAY
 # ════════════════════════════════════════════════════════════
 
 def fundo_gradiente():
@@ -162,83 +287,82 @@ def fundo_gradiente():
     return Image.fromarray(arr, "RGB").convert("RGBA")
 
 
-_SEGMENTOS_CIRC = [
-    (100, 200, 400, 200), (400, 200, 400, 350), (400, 350, 700, 350),
-    (700, 350, 700, 500), (700, 500, 920, 500),
-    (200, 620, 500, 620), (500, 620, 500, 820), (500, 820, 820, 820),
-    (140, 1000, 600, 1000), (600, 1000, 600, 1180),
-    (820, 720, 1040, 720), (1040, 720, 1040, 900),
-    (50,  420, 50,  720), (50,  720, 220, 720),
+def crop_fill(img, tw, th):
+    """Scale + center-crop para preencher tw×th sem bordas pretas."""
+    sw, sh = img.size
+    scale  = max(tw / sw, th / sh)
+    nw     = max(tw, int(sw * scale))
+    nh     = max(th, int(sh * scale))
+    img    = img.resize((nw, nh), Image.LANCZOS)
+    x      = (nw - tw) // 2
+    y      = (nh - th) // 2
+    return img.crop((x, y, x + tw, y + th))
+
+
+def load_bg(nome_arquivo):
+    path = os.path.join(IMG_DIR, nome_arquivo)
+    if os.path.exists(path):
+        return Image.open(path).convert("RGBA")
+    # Fallback: qualquer multi-inversores
+    for fb in IMAGENS_CTA:
+        fb_path = os.path.join(IMG_DIR, fb)
+        if os.path.exists(fb_path):
+            return Image.open(fb_path).convert("RGBA")
+    return None
+
+
+# Segmentos de circuito PCB (coordenadas para 1080×1920)
+_SEGS = [
+    (100, 284, 400, 284), (400, 284, 400, 497),
+    (400, 497, 700, 497), (700, 497, 700, 711),
+    (700, 711, 920, 711), (200, 881, 500, 881),
+    (500, 881, 500, 1165), (500, 1165, 820, 1165),
+    (140, 1422, 600, 1422), (600, 1422, 600, 1677),
+    (820, 1023, 1040, 1023), (1040, 1023, 1040, 1279),
+    (50,  597,  50,  1023), (50,  1023, 220, 1023),
 ]
 
 
 def linhas_circuito(draw, progresso=1.0):
-    total    = len(_SEGMENTOS_CIRC)
-    visivel  = max(1, int(total * progresso))
-    cor_line = (*CIANO, 50)
-    cor_no   = (*CIANO, 70)
+    visivel = max(1, int(len(_SEGS) * progresso))
     for i in range(visivel):
-        x1, y1, x2, y2 = _SEGMENTOS_CIRC[i]
-        draw.line([(x1, y1), (x2, y2)], fill=cor_line, width=1)
-        draw.ellipse([x2 - 3, y2 - 3, x2 + 3, y2 + 3], fill=cor_no)
+        x1, y1, x2, y2 = _SEGS[i]
+        draw.line([(x1, y1), (x2, y2)], fill=(*CIANO, 50), width=1)
+        draw.ellipse([x2 - 3, y2 - 3, x2 + 3, y2 + 3], fill=(*CIANO, 70))
 
 
 def particulas_cantos(draw, seed):
     random.seed(seed)
-    for _ in range(10):
+    for _ in range(12):
         side = random.choice(["tl", "tr", "bl", "br"])
-        if side == "tl":
-            x, y = random.randint(0, 160), random.randint(0, 220)
-        elif side == "tr":
-            x, y = random.randint(W - 160, W), random.randint(0, 220)
-        elif side == "bl":
-            x, y = random.randint(0, 160), random.randint(H - 220, H)
-        else:
-            x, y = random.randint(W - 160, W), random.randint(H - 220, H)
+        if side == "tl":   x, y = random.randint(0, 180), random.randint(0, 280)
+        elif side == "tr": x, y = random.randint(W - 180, W), random.randint(0, 280)
+        elif side == "bl": x, y = random.randint(0, 180), random.randint(H - 280, H)
+        else:              x, y = random.randint(W - 180, W), random.randint(H - 280, H)
         cor  = CIANO if random.random() > 0.3 else DOURADO
         r    = random.randint(2, 5)
         alph = random.randint(25, 80)
         draw.ellipse([x - r, y - r, x + r, y + r], fill=(*cor, alph))
 
 
-def carregar_imagem_marca(marca):
-    pasta = os.path.join(REPO_ROOT, "imagens-padrao")
-    candidatos = []
-    if marca and marca in IMAGENS_MARCA:
-        candidatos.append(IMAGENS_MARCA[marca])
-    candidatos += ["Multi-Inversores-Bancada.webp",
-                   "Placa-Eletrônica-Bancada.webp"]
-    for nome in candidatos:
-        c = os.path.join(pasta, nome)
-        if os.path.exists(c):
-            return Image.open(c).convert("RGBA")
-    return None
-
-
-def montar_base(marca, alpha_fundo=1.0, seed=0, prog_circ=1.0):
-    canvas = fundo_gradiente()
-
-    # Imagem de marca com overlay escuro rgba(5,13,26,0.75)
-    img = carregar_imagem_marca(marca)
+def montar_base(nome_img, alpha_fundo=1.0, seed=0, prog_circ=1.0):
+    """Fundo: imagem da marca + overlay escuro + circuito + partículas."""
+    img = load_bg(nome_img)
     if img:
-        ratio = min(W / img.width, H / img.height)
-        nw, nh = int(img.width * ratio), int(img.height * ratio)
-        img = img.resize((nw, nh), Image.LANCZOS)
-        ov  = Image.new("RGBA", (nw, nh), (5, 13, 26, int(255 * 0.75)))
-        img = Image.alpha_composite(img, ov)
-        canvas.paste(img, ((W - nw) // 2, (H - nh) // 2), img.split()[3])
+        img    = crop_fill(img, W, H)
+        ov     = Image.new("RGBA", (W, H), (*NAVY_DARK, OVERLAY_ALPHA))
+        canvas = Image.alpha_composite(img, ov)
+    else:
+        canvas = fundo_gradiente()
 
-    # Linhas de circuito
     circ = Image.new("RGBA", (W, H), (0, 0, 0, 0))
     linhas_circuito(ImageDraw.Draw(circ), prog_circ)
     canvas = Image.alpha_composite(canvas, circ)
 
-    # Partículas
     part = Image.new("RGBA", (W, H), (0, 0, 0, 0))
     particulas_cantos(ImageDraw.Draw(part), seed)
     canvas = Image.alpha_composite(canvas, part)
 
-    # Fade in do fundo
     if alpha_fundo < 1.0:
         dark = Image.new("RGBA", (W, H), (0, 0, 0, int(255 * (1 - alpha_fundo))))
         canvas = Image.alpha_composite(canvas, dark)
@@ -247,7 +371,7 @@ def montar_base(marca, alpha_fundo=1.0, seed=0, prog_circ=1.0):
 
 
 # ════════════════════════════════════════════════════════════
-# UTILITÁRIOS DE TEXTO
+# UTILITÁRIOS DE TEXTO E DECORAÇÃO
 # ════════════════════════════════════════════════════════════
 
 def wrap_text(draw, texto, font, max_w):
@@ -266,42 +390,42 @@ def wrap_text(draw, texto, font, max_w):
     return linhas or [texto]
 
 
-def draw_text_lines(draw, linhas, x, y, font, cor, align="left", alpha=255):
-    rgba = (*cor[:3], alpha)
-    y0   = y
+def draw_lines(draw, linhas, x, y, font, cor, align="left", alpha=255):
+    rgba  = (*cor[:3], alpha)
+    y_cur = y
     for linha in linhas:
         bb = draw.textbbox((0, 0), linha, font=font)
         xp = (W - bb[2]) // 2 if align == "center" else x
-        draw.text((xp, y0), linha, font=font, fill=rgba)
-        y0 += bb[3] + 8
-    return y0
+        draw.text((xp, y_cur), linha, font=font, fill=rgba)
+        y_cur += bb[3] + 10
+    return y_cur
 
 
 def add_rodape(canvas):
     layer = Image.new("RGBA", (W, H), (0, 0, 0, 0))
     draw  = ImageDraw.Draw(layer)
-    font  = get_font(22)
+    font  = get_font(24)
     txt   = "REPARO  ·  DIAGNÓSTICO  ·  MANUTENÇÃO"
     bb    = draw.textbbox((0, 0), txt, font=font)
-    draw.text(((W - bb[2]) // 2, H - 52), txt, font=font,
+    draw.text(((W - bb[2]) // 2, H - 65), txt, font=font,
               fill=(*CINZA_FOOT, 90))
     return Image.alpha_composite(canvas, layer)
 
 
 def add_logo(canvas):
-    logo_path = os.path.join(REPO_ROOT, "Design sem nome (21).png")
-    if not os.path.exists(logo_path):
+    path = os.path.join(REPO_ROOT, "Design sem nome (21).png")
+    if not os.path.exists(path):
         return canvas
-    logo  = Image.open(logo_path).convert("RGBA")
-    lw    = 130
-    lh    = int(logo.height * (lw / logo.width))
-    logo  = logo.resize((lw, lh), Image.LANCZOS)
-    canvas.paste(logo, (W - lw - 22, H - lh - 68), logo.split()[3])
+    logo = Image.open(path).convert("RGBA")
+    lw   = 140
+    lh   = int(logo.height * (lw / logo.width))
+    logo = logo.resize((lw, lh), Image.LANCZOS)
+    canvas.paste(logo, (W - lw - 24, H - lh - 84), logo.split()[3])
     return canvas
 
 
 # ════════════════════════════════════════════════════════════
-# ANIMAÇÕES (easing + progress helpers)
+# HELPERS DE ANIMAÇÃO
 # ════════════════════════════════════════════════════════════
 
 def eio(v):
@@ -315,71 +439,73 @@ def prog(t, s, e):
     return max(0.0, min(1.0, (t - s) / (e - s)))
 
 
-def fade_overlay(canvas, alpha_multiplier):
-    if alpha_multiplier >= 1.0:
+def fade_out(canvas, p_fadeout):
+    if p_fadeout >= 1.0:
         return canvas
-    black = Image.new("RGBA", (W, H), (0, 0, 0, int(255 * (1 - alpha_multiplier))))
-    return Image.alpha_composite(canvas, black)
+    blk = Image.new("RGBA", (W, H), (0, 0, 0, int(255 * (1 - p_fadeout))))
+    return Image.alpha_composite(canvas, blk)
 
 
 # ════════════════════════════════════════════════════════════
-# SLIDE 1 — CAPA
+# SLIDE 1 — CAPA  (imagem da marca, 1080x1920)
 # ════════════════════════════════════════════════════════════
 
 def frame_s1(t, dados):
-    pf  = eio(prog(t, 0.0, 0.30))
-    pc  = eio(prog(t, 0.3, 0.80))
-    pe  = eio(prog(t, 0.8, 1.50))
-    pt  = eio(prog(t, 1.5, 2.50))
-    ps  = eio(prog(t, 2.5, 3.50))
+    pf  = eio(prog(t, 0.0, 0.30))   # fade in fundo
+    pc  = eio(prog(t, 0.3, 0.80))   # circuito
+    pe  = eio(prog(t, 0.8, 1.50))   # eyebrow desliza
+    pt  = eio(prog(t, 1.5, 2.50))   # título
+    ps  = eio(prog(t, 2.5, 3.50))   # subtítulo
     pfo = 1.0 - eio(prog(t, 4.5, 5.00))
 
-    canvas = montar_base(dados["marca"], pf, int(t * 8), pc)
+    canvas = montar_base(dados["img_capa"], pf, int(t * 8), pc)
     layer  = Image.new("RGBA", (W, H), (0, 0, 0, 0))
     draw   = ImageDraw.Draw(layer)
 
-    # Eyebrow — desliza de baixo
-    font_e = get_font(28, bold=True)
-    txt_e  = f"⚡  {dados['categoria']}"
-    ey     = 80 + int((1 - pe) * 60)
-    bb     = draw.textbbox((0, 0), txt_e, font=font_e)
-    bw, bh = bb[2] + 44, bb[3] + 20
-    draw.rounded_rectangle([60, ey, 60 + bw, ey + bh],
-                            radius=20, outline=(*CIANO, int(255 * pe)), width=2)
-    draw.text((80, ey + 10), txt_e, font=font_e, fill=(*CIANO, int(255 * pe)))
+    # Eyebrow — desliza de baixo para cima
+    font_e  = get_font(30, bold=True)
+    txt_e   = f"⚡  {dados['categoria']}"
+    ey_final = 120
+    ey_y    = ey_final + int((1 - pe) * 70)
+    bb      = draw.textbbox((0, 0), txt_e, font=font_e)
+    bw, bh  = bb[2] + 48, bb[3] + 22
+    a_e     = int(255 * pe)
+    draw.rounded_rectangle([60, ey_y, 60 + bw, ey_y + bh],
+                            radius=22, outline=(*CIANO, a_e), width=2)
+    draw.text((84, ey_y + 11), txt_e, font=font_e, fill=(*CIANO, a_e))
 
-    # Título principal palavra a palavra
-    font_t  = get_font(96, bold=True)
+    # Título: código do erro — palavra por palavra
+    font_t   = get_font(100, bold=True)
     palavras = dados["codigo_erro"].split()
-    y       = 180
-    vis     = max(1, round(len(palavras) * pt))
-    for i, p in enumerate(palavras[:vis]):
-        a  = int(255 * pt)
-        bb = draw.textbbox((0, 0), p, font=font_t)
-        draw.text(((W - bb[2]) // 2, y), p, font=font_t, fill=(*DOURADO, a))
-        y += bb[3] + 10
+    y        = 220
+    vis      = max(1, round(len(palavras) * pt))
+    for pw in palavras[:vis]:
+        a_t = int(255 * pt)
+        bb  = draw.textbbox((0, 0), pw, font=font_t)
+        draw.text(((W - bb[2]) // 2, y), pw, font=font_t, fill=(*DOURADO, a_t))
+        y += bb[3] + 12
 
-    # Linha separadora
+    # Separador
     if pt > 0.4:
-        ly = y + 18
-        draw.rectangle([int(W * 0.18), ly, int(W * 0.82), ly + 2],
+        sep_y = y + 22
+        draw.rectangle([int(W * 0.18), sep_y, int(W * 0.82), sep_y + 2],
                        fill=(*CIANO, int(200 * pt)))
-        y = ly + 28
+        y = sep_y + 36
 
     # Subtítulo
-    font_s  = get_font(34, bold=True)
+    font_s  = get_font(36, bold=True)
     linhas  = wrap_text(draw, dados["subtitulo"], font_s, W - 120)
-    draw_text_lines(draw, linhas, 60, y, font_s, BRANCO, "center", int(255 * ps))
+    draw_lines(draw, linhas, 60, y, font_s, BRANCO, "center", int(255 * ps))
 
     canvas = Image.alpha_composite(canvas, layer)
     canvas = add_rodape(canvas)
     canvas = add_logo(canvas)
-    canvas = fade_overlay(canvas, pfo)
+    canvas = fade_out(canvas, pfo)
     return np.array(canvas.convert("RGB"))
 
 
 # ════════════════════════════════════════════════════════════
-# SLIDE 2 — CAUSA RAIZ
+# SLIDE 2 — CAUSA RAIZ  (placa eletrônica)
 # ════════════════════════════════════════════════════════════
 
 def frame_s2(t, dados):
@@ -389,50 +515,53 @@ def frame_s2(t, dados):
     pt  = eio(prog(t, 1.5, 2.50))
     pfo = 1.0 - eio(prog(t, 4.5, 5.00))
 
-    canvas = montar_base("placa", pf, int(t * 8) + 100, pc)
+    canvas = montar_base(dados["img_causa"], pf, int(t * 8) + 100, pc)
     layer  = Image.new("RGBA", (W, H), (0, 0, 0, 0))
     draw   = ImageDraw.Draw(layer)
 
-    # Contador
+    a_e = int(255 * pe)
+
+    # Contador canto superior direito
     font_c = get_font(26, bold=True)
-    a_c    = int(255 * pe)
-    draw.rounded_rectangle([W - 140, 50, W - 50, 92],
-                            radius=8, outline=(*CIANO, a_c), width=2)
-    draw.text((W - 130, 58), "02 / 04", font=font_c, fill=(*CIANO, a_c))
+    draw.rounded_rectangle([W - 148, 58, W - 52, 102],
+                            radius=8, outline=(*CIANO, a_e), width=2)
+    draw.text((W - 138, 66), "02 / 04", font=font_c, fill=(*CIANO, a_e))
 
     # Eyebrow
-    ey = 80 + int((1 - pe) * 50)
-    draw.text((60, ey), "⚡  CAUSA REAL", font=get_font(28, bold=True),
-              fill=(*CIANO, a_c))
+    ey_y = 128 + int((1 - pe) * 60)
+    draw.text((60, ey_y), "⚡  CAUSA REAL",
+              font=get_font(30, bold=True), fill=(*CIANO, a_e))
 
     # Título
-    font_t = get_font(88, bold=True)
+    font_t = get_font(90, bold=True)
     a_t    = int(255 * pt)
-    draw.text((60, 155), "A CAUSA", font=font_t, fill=(*BRANCO, a_t))
-    draw.text((60, 255), "RAIZ",    font=font_t, fill=(*DOURADO, a_t))
-    if pt > 0.3:
-        draw.rectangle([60, 360, 400, 362], fill=(*CIANO, int(200 * pt)))
+    draw.text((60, 260), "A CAUSA", font=font_t, fill=(*BRANCO, a_t))
+    draw.text((60, 362), "RAIZ",    font=font_t, fill=(*DOURADO, a_t))
 
-    # Bullets com aparecimento progressivo
-    font_b = get_font(30)
+    if pt > 0.3:
+        draw.rectangle([60, 470, 420, 472],
+                       fill=(*CIANO, int(200 * pt)))
+
+    # Bullets com aparecimento escalonado
+    font_b = get_font(32)
     for i, causa in enumerate(dados["causas"]):
         ps_b = eio(prog(t, 2.5 + i * 0.65, 3.15 + i * 0.65))
         ab   = int(255 * ps_b)
-        by   = 390 + i * 135
+        by   = 510 + i * 200
         cor  = CIANO if i < 2 else DOURADO
-        draw.ellipse([60, by + 10, 84, by + 34], fill=(*cor, ab))
-        linhas = wrap_text(draw, causa, font_b, W - 140)
-        draw_text_lines(draw, linhas, 100, by, font_b, BRANCO, "left", ab)
+        draw.ellipse([60, by + 10, 86, by + 36], fill=(*cor, ab))
+        ls = wrap_text(draw, causa, font_b, W - 148)
+        draw_lines(draw, ls, 104, by, font_b, BRANCO, "left", ab)
 
     canvas = Image.alpha_composite(canvas, layer)
     canvas = add_rodape(canvas)
     canvas = add_logo(canvas)
-    canvas = fade_overlay(canvas, pfo)
+    canvas = fade_out(canvas, pfo)
     return np.array(canvas.convert("RGB"))
 
 
 # ════════════════════════════════════════════════════════════
-# SLIDE 3 — DIAGNÓSTICO
+# SLIDE 3 — DIAGNÓSTICO  (bancada com multímetro)
 # ════════════════════════════════════════════════════════════
 
 def frame_s3(t, dados):
@@ -442,115 +571,119 @@ def frame_s3(t, dados):
     pt  = eio(prog(t, 1.5, 2.50))
     pfo = 1.0 - eio(prog(t, 4.5, 5.00))
 
-    canvas = montar_base(dados["marca"], pf, int(t * 8) + 200, pc)
+    canvas = montar_base(dados["img_diag"], pf, int(t * 8) + 200, pc)
     layer  = Image.new("RGBA", (W, H), (0, 0, 0, 0))
     draw   = ImageDraw.Draw(layer)
 
+    a_e = int(255 * pe)
+
     # Contador
-    a_c    = int(255 * pe)
     font_c = get_font(26, bold=True)
-    draw.rounded_rectangle([W - 140, 50, W - 50, 92],
-                            radius=8, outline=(*CIANO, a_c), width=2)
-    draw.text((W - 130, 58), "03 / 04", font=font_c, fill=(*CIANO, a_c))
+    draw.rounded_rectangle([W - 148, 58, W - 52, 102],
+                            radius=8, outline=(*CIANO, a_e), width=2)
+    draw.text((W - 138, 66), "03 / 04", font=font_c, fill=(*CIANO, a_e))
 
     # Eyebrow
-    ey = 80 + int((1 - pe) * 50)
-    draw.text((60, ey), "⚡  DIAGNÓSTICO", font=get_font(28, bold=True),
-              fill=(*CIANO, a_c))
+    ey_y = 128 + int((1 - pe) * 60)
+    draw.text((60, ey_y), "⚡  DIAGNÓSTICO",
+              font=get_font(30, bold=True), fill=(*CIANO, a_e))
 
     # Título
-    font_t = get_font(80, bold=True)
+    font_t = get_font(82, bold=True)
     a_t    = int(255 * pt)
-    draw.text((60, 155), "CHECKLIST",  font=font_t, fill=(*BRANCO, a_t))
-    draw.text((60, 247), "NA PRÁTICA", font=font_t, fill=(*DOURADO, a_t))
+    draw.text((60, 260), "CHECKLIST",  font=font_t, fill=(*BRANCO, a_t))
+    draw.text((60, 354), "NA PRÁTICA", font=font_t, fill=(*DOURADO, a_t))
+
     if pt > 0.3:
-        draw.rectangle([60, 342, 440, 344], fill=(*CIANO, int(200 * pt)))
+        draw.rectangle([60, 458, 450, 460],
+                       fill=(*CIANO, int(200 * pt)))
 
     # Passos
-    font_l = get_font(24, bold=True)
-    font_p = get_font(28)
+    font_l = get_font(26, bold=True)
+    font_p = get_font(30)
     for i, passo in enumerate(dados["passos"]):
         ps_p  = eio(prog(t, 2.5 + i * 0.9, 3.2 + i * 0.9))
         ap    = int(255 * ps_p)
-        py    = 365 + i * 220
-        draw.rectangle([60, py, 65, py + 88], fill=(*CIANO, ap))
-        draw.text((80, py), f"PASSO {i + 1}", font=font_l, fill=(*CIANO, ap))
-        linhas = wrap_text(draw, passo, font_p, W - 140)
-        draw_text_lines(draw, linhas, 80, py + 36, font_p, BRANCO, "left", ap)
+        py    = 490 + i * 300
+        draw.rectangle([60, py, 66, py + 90], fill=(*CIANO, ap))
+        draw.text((82, py), f"PASSO {i + 1}",
+                  font=font_l, fill=(*CIANO, ap))
+        ls = wrap_text(draw, passo, font_p, W - 148)
+        draw_lines(draw, ls, 82, py + 38, font_p, BRANCO, "left", ap)
 
     canvas = Image.alpha_composite(canvas, layer)
     canvas = add_rodape(canvas)
     canvas = add_logo(canvas)
-    canvas = fade_overlay(canvas, pfo)
+    canvas = fade_out(canvas, pfo)
     return np.array(canvas.convert("RGB"))
 
 
 # ════════════════════════════════════════════════════════════
-# SLIDE 4 — CTA
+# SLIDE 4 — CTA  (multi-inversores, duração dinâmica)
 # ════════════════════════════════════════════════════════════
 
 def frame_s4(t, dados):
-    pf    = eio(prog(t, 0.0, 0.30))
-    pc    = eio(prog(t, 0.3, 0.80))
-    pt    = eio(prog(t, 0.8, 1.80))
-    psrv  = eio(prog(t, 1.8, 2.80))
-    pcta  = eio(prog(t, 2.8, 3.80))
+    pf   = eio(prog(t, 0.0, 0.30))
+    pc   = eio(prog(t, 0.3, 0.80))
+    pt   = eio(prog(t, 0.8, 1.80))
+    psrv = eio(prog(t, 1.8, 2.80))
+    pcta = eio(prog(t, 2.8, 3.80))
 
-    canvas = montar_base(dados["marca"], pf, int(t * 8) + 300, pc)
+    canvas = montar_base(dados["img_cta"], pf, int(t * 8) + 300, pc)
     layer  = Image.new("RGBA", (W, H), (0, 0, 0, 0))
     draw   = ImageDraw.Draw(layer)
 
     # Acima
-    font_a = get_font(30)
+    font_a = get_font(32)
     txt_a  = "ANTES DE CONDENAR,"
     bb     = draw.textbbox((0, 0), txt_a, font=font_a)
-    draw.text(((W - bb[2]) // 2, 90), txt_a, font=font_a,
+    draw.text(((W - bb[2]) // 2, 200), txt_a, font=font_a,
               fill=(*BRANCO, int(180 * pt)))
 
     # DIAGNOSTIQUE.
-    font_d = get_font(92, bold=True)
+    font_d = get_font(96, bold=True)
     txt_d  = "DIAGNOSTIQUE."
     bb     = draw.textbbox((0, 0), txt_d, font=font_d)
-    draw.text(((W - bb[2]) // 2, 138), txt_d, font=font_d,
+    draw.text(((W - bb[2]) // 2, 258), txt_d, font=font_d,
               fill=(*DOURADO, int(255 * pt)))
 
     if pt > 0.5:
-        draw.rectangle([int(W * 0.14), 258, int(W * 0.86), 260],
+        draw.rectangle([int(W * 0.12), 410, int(W * 0.88), 412],
                        fill=(*CIANO, int(200 * pt)))
 
     # Linhas de serviço
-    font_s  = get_font(30)
+    font_s   = get_font(32)
     servicos = [
         "Diagnóstico eletrônico em nível de componente.",
         "Laudo técnico detalhado — mesmo sem reparo.",
         "Atendemos todo o Brasil via logística reversa.",
     ]
     for i, srv in enumerate(servicos):
-        ps_i = eio(prog(t, 1.8 + i * 0.32, 2.3 + i * 0.32))
+        ps_i = eio(prog(t, 1.8 + i * 0.33, 2.3 + i * 0.33))
         bb   = draw.textbbox((0, 0), srv, font=font_s)
-        draw.text(((W - bb[2]) // 2, 280 + i * 50), srv, font=font_s,
+        draw.text(((W - bb[2]) // 2, 440 + i * 65), srv, font=font_s,
                   fill=(*BRANCO, int(200 * ps_i)))
 
-    # Caixa CTA
-    cta_y = H - 370
+    # Caixa WhatsApp
+    cta_y = H - 500
     a_cta = int(255 * pcta)
-    draw.rounded_rectangle([80, cta_y, W - 80, cta_y + 185],
-                            radius=16, outline=(*CIANO, a_cta), width=2)
+    draw.rounded_rectangle([80, cta_y, W - 80, cta_y + 200],
+                            radius=18, outline=(*CIANO, a_cta), width=2)
 
-    font_wl = get_font(24)
+    font_wl = get_font(26)
     bb      = draw.textbbox((0, 0), "WHATSAPP", font=font_wl)
-    draw.text(((W - bb[2]) // 2, cta_y + 18), "WHATSAPP",
+    draw.text(((W - bb[2]) // 2, cta_y + 20), "WHATSAPP",
               font=font_wl, fill=(*BRANCO, int(140 * pcta)))
 
-    font_wn = get_font(58, bold=True)
+    font_wn = get_font(62, bold=True)
     numero  = "(38) 99912-4889"
     bb      = draw.textbbox((0, 0), numero, font=font_wn)
-    draw.text(((W - bb[2]) // 2, cta_y + 58), numero,
+    draw.text(((W - bb[2]) // 2, cta_y + 64), numero,
               font=font_wn, fill=(*BRANCO, a_cta))
 
-    font_ig = get_font(28)
+    font_ig = get_font(30)
     bb      = draw.textbbox((0, 0), "@tec_solar_moc", font=font_ig)
-    draw.text(((W - bb[2]) // 2, cta_y + 133), "@tec_solar_moc",
+    draw.text(((W - bb[2]) // 2, cta_y + 148), "@tec_solar_moc",
               font=font_ig, fill=(*CIANO, int(200 * pcta)))
 
     canvas = Image.alpha_composite(canvas, layer)
@@ -559,41 +692,103 @@ def frame_s4(t, dados):
     return np.array(canvas.convert("RGB"))
 
 
+
 # ════════════════════════════════════════════════════════════
-# GERAÇÃO DO VÍDEO
+# GERAÇÃO DO VÍDEO COMPLETO
 # ════════════════════════════════════════════════════════════
 
-def gerar_video(numero_post, caminho_md):
-    dados = parse_post(caminho_md)
+def gerar_video(numero_post, md_path):
+    dados = parse_post(md_path)
     print(f"Post {numero_post:02d} — {dados['titulo_seo']}")
     print(f"Marca: {dados['marca']} | Código: {dados['codigo_erro']}")
+
+    # Selecionar imagens por slide
+    marca = dados["marca"]
+    lista_capa = IMAGENS_MARCA.get(marca, IMAGENS_CTA)
+    dados["img_capa"]  = sel(lista_capa,      numero_post)
+    dados["img_causa"] = sel(IMAGENS_CAUSA,   numero_post)
+    dados["img_diag"]  = sel(IMAGENS_DIAG,    numero_post)
+    dados["img_cta"]   = sel(IMAGENS_CTA,     numero_post)
+
     print(f"Causas: {dados['causas']}")
     print(f"Passos: {dados['passos']}")
+    print(f"Imagens: capa={dados['img_capa']} | causa={dados['img_causa']}")
 
+    # ── Voiceover ElevenLabs ─────────────────────────────────
+    api_key    = os.environ.get("ELEVENLABS_API_KEY")
+    script_voz = gerar_script_voz(dados)
+    print(f"Script voz ({len(script_voz.split())} palavras):\n{script_voz[:120]}...")
+    audio_path = gerar_voiceover(script_voz, api_key)
+
+    audio_clip      = None
+    slide4_duration = DURACAO_SLIDE
+
+    if audio_path:
+        try:
+            audio_clip = AudioFileClip(audio_path)
+            total_base = 3 * DURACAO_SLIDE  # primeiros 3 slides = 15s
+            if audio_clip.duration > total_base + DURACAO_SLIDE:
+                # Áudio mais longo que o vídeo base — estende último slide
+                slide4_duration = audio_clip.duration - total_base
+                print(f"⏱  Slide 4 estendido para {slide4_duration:.1f}s")
+            elif audio_clip.duration < total_base:
+                # Áudio termina antes do slide 3 — mantém 5s por slide
+                slide4_duration = DURACAO_SLIDE
+            else:
+                slide4_duration = max(DURACAO_SLIDE, audio_clip.duration - total_base)
+        except Exception as exc:
+            print(f"⚠️  Erro ao carregar áudio: {exc}")
+            audio_clip = None
+
+    # ── Clips ────────────────────────────────────────────────
     clips = [
         VideoClip(lambda t, d=dados: frame_s1(t, d), duration=DURACAO_SLIDE),
         VideoClip(lambda t, d=dados: frame_s2(t, d), duration=DURACAO_SLIDE),
         VideoClip(lambda t, d=dados: frame_s3(t, d), duration=DURACAO_SLIDE),
-        VideoClip(lambda t, d=dados: frame_s4(t, d), duration=DURACAO_SLIDE),
+        VideoClip(lambda t, d=dados: frame_s4(t, d), duration=slide4_duration),
     ]
-
     video = concatenate_videoclips(clips)
 
+    # ── Sincronizar áudio ────────────────────────────────────
+    if audio_clip:
+        try:
+            if audio_clip.duration > video.duration:
+                # Cortar áudio no fim do vídeo
+                try:
+                    audio_clip = audio_clip.subclipped(0, video.duration)
+                except AttributeError:
+                    audio_clip = audio_clip.subclip(0, video.duration)
+            video = video.with_audio(audio_clip)
+            print(f"🔊  Áudio sincronizado ({audio_clip.duration:.1f}s)")
+        except Exception as exc:
+            print(f"⚠️  Erro ao sincronizar áudio: {exc}")
+
+    # ── Exportar MP4 ─────────────────────────────────────────
     pasta = os.path.join(REPO_ROOT, f"carrossel/post-{numero_post:02d}")
     os.makedirs(pasta, exist_ok=True)
     saida = os.path.join(pasta, "video-carrossel.mp4")
 
-    video.write_videofile(
-        saida,
+    kwargs = dict(
         fps=FPS,
         codec="libx264",
-        audio=False,
         preset="fast",
         pixel_format="yuv420p",
         ffmpeg_params=["-crf", "28"],
         logger=None,
     )
+    if audio_clip:
+        kwargs["audio"]       = True
+        kwargs["audio_codec"] = "aac"
+    else:
+        kwargs["audio"] = False
+
+    video.write_videofile(saida, **kwargs)
     print(f"✅  Vídeo salvo: {saida}")
+
+    # Limpar temp
+    if audio_path and os.path.exists(audio_path):
+        os.unlink(audio_path)
+
     return saida
 
 
