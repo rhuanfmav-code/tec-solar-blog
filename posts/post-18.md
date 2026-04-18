@@ -164,3 +164,4 @@ IMAGEM SECUNDÁRIA:
 <!-- trigger-video-workflow -->
 
 <!-- debug-elevenlabs-v2 -->
+<!-- trigger-adam-voice -->

@@ -61,7 +61,6 @@ jobs:
       - name: Gerar vídeo MP4
         env:
           ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY }}
-          ELEVENLABS_VOICE_ID: ${{ secrets.ELEVENLABS_VOICE_ID }}
         run: python3 .github/scripts/gerar_video_carrossel.py "$NUMERO_POST"
 
       - name: Commit e push do vídeo

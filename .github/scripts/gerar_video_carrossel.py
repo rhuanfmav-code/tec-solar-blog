@@ -239,12 +239,8 @@ def gerar_voiceover(script, api_key):
         print("⚠️  ELEVENLABS_API_KEY não configurado — vídeo sem áudio")
         return None
 
-    voice_id = os.environ.get("ELEVENLABS_VOICE_ID", "").strip()
-    if not voice_id:
-        voice_id = "pNInz6obpgDQGcFmaJgB"  # Adam (fallback público)
-        print(f"⚠️  ELEVENLABS_VOICE_ID vazio — usando voice_id padrão: {voice_id}")
-    else:
-        print(f"🎤  Voice ID: {voice_id}")
+    voice_id = "pNInz6obpgDQGcFmaJgB"  # Adam — disponível no plano gratuito
+    print(f"🎤  Voice ID: {voice_id} (Adam)")
 
     try:
         url = f"https://api.elevenlabs.io/v1/text-to-speech/{voice_id}"
