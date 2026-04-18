@@ -54,7 +54,17 @@ H2: Quando o Reparo é Viável
 - Argumento financeiro: custo de reparo vs. inversor novo
 H2: Conclusão
 - Mensagem central: "Antes de condenar, diagnostique"
-- Envie seu inversor para a TEC Solar. Realizamos diagnóstico eletrônico completo em nível de placa e devolvemos um laudo técnico detalhado — mesmo que o reparo não seja viável. Atendemos todo o Brasil via logística reversa. [Falar com a TEC Solar no WhatsApp](https://wa.me/5538998891587) | [@tec_solar_moc](https://www.instagram.com/tec_solar_moc/)
+- Use OBRIGATORIAMENTE o bloco de CTA abaixo, sem alterações:
+
+Condenaram seu inversor por causa desse erro?
+
+Antes de comprar equipamento novo, envie para a nossa bancada. A TEC Solar realiza diagnóstico eletrônico completo em nível de componente — abrimos o inversor, medimos a placa, identificamos a causa raiz e entregamos um laudo técnico detalhado.
+
+Se o reparo for viável, você recebe o equipamento funcionando por uma fração do custo de substituição. Se não for, o laudo serve de base para qualquer decisão.
+
+Atendemos todo o Brasil via logística reversa.
+
+👉 [Envie seu inversor agora](https://wa.me/5538998891587) | [Falar no WhatsApp](https://wa.me/5538998891587)
 PARÂMETROS DO RASCUNHO:
 - 900 a 1200 palavras
 - Parágrafos curtos: máximo 3 a 4 linhas
