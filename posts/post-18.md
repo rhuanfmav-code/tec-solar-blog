@@ -160,3 +160,5 @@ IMAGEM SECUNDÁRIA:
 → Legenda: Fig. 2 — O megohmmeter aplicando 500 VDC é o instrumento correto para diagnóstico de isolamento em strings fotovoltaicos; o multímetro convencional não detecta falhas sob tensão real de operação
 → Onde inserir: Após H2 "Como identificar na prática"
 → Converter para WebP — máximo 150 KB
+
+<!-- trigger-video-workflow -->
