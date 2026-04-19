@@ -20,6 +20,8 @@ except ImportError:
     from moviepy.editor import (VideoClip, concatenate_videoclips, AudioFileClip,
                                 CompositeAudioClip, concatenate_audioclips)
 
+print("Script versão 2.0 — com efeitos 3D e animações")
+
 # ════════════════════════════════════════════════════════════
 # CAMINHOS E CONSTANTES
 # ════════════════════════════════════════════════════════════

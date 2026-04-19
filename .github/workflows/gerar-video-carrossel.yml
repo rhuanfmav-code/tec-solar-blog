@@ -27,12 +27,13 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+          cache: false
 
       - name: Instalar ffmpeg e dependências
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y ffmpeg
-          pip install moviepy pillow numpy requests
+          pip install --no-cache-dir --force-reinstall moviepy pillow numpy requests
 
       - name: Baixar fonte Montserrat
         run: |
