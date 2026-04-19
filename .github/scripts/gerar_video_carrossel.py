@@ -6,6 +6,7 @@ Resolução: 1080x1920 (9:16) | 4 slides | Voiceover ElevenLabs
 import os
 import re
 import sys
+import math
 import random
 import tempfile
 import requests
@@ -456,55 +457,110 @@ def fade_out(canvas, p_fadeout):
     return Image.alpha_composite(canvas, blk)
 
 
+def draw_text_3d(draw, text, font, y, alpha=255):
+    """Título com 4 camadas de sombra deslocada criando ilusão 3D."""
+    bb = draw.textbbox((0, 0), text, font=font)
+    x  = (W - bb[2]) // 2
+    for ox, oy, a_frac in [(6, 6, 0.25), (4, 4, 0.35), (2, 3, 0.50), (1, 1, 0.65)]:
+        draw.text((x + ox, y + oy), text, font=font,
+                  fill=(*NAVY_DARK, int(alpha * a_frac)))
+    draw.text((x, y), text, font=font, fill=(*DOURADO, alpha))
+    return bb[3]
+
+
+def draw_glow_text(draw, text, font, y, glow_alpha):
+    """Halo difuso ao redor do texto simulando brilho."""
+    if glow_alpha <= 0:
+        return
+    bb = draw.textbbox((0, 0), text, font=font)
+    x  = (W - bb[2]) // 2
+    for ox, oy in [(-5,0),(5,0),(0,-5),(0,5),(-4,-4),(4,4),(-4,4),(4,-4),
+                   (-7,0),(7,0),(0,-7),(0,7)]:
+        draw.text((x + ox, y + oy), text, font=font,
+                  fill=(*DOURADO, glow_alpha))
+
+
+def draw_lightning_arcs(draw, t, alpha):
+    """Raios elétricos irregulares nos quatro cantos."""
+    if alpha <= 0:
+        return
+    random.seed(int(t * 10))
+    zones = [
+        (20,  20,  220, 320),
+        (W - 220, 20,  W - 20, 320),
+        (20,  H - 320, 220, H - 20),
+        (W - 220, H - 320, W - 20, H - 20),
+    ]
+    for (x1, y1, x2, y2) in zones:
+        for _ in range(random.randint(1, 3)):
+            pts = [(random.randint(x1, x2), random.randint(y1, y2))]
+            for _ in range(random.randint(3, 6)):
+                nx = max(x1, min(x2, pts[-1][0] + random.randint(-35, 35)))
+                ny = max(y1, min(y2, pts[-1][1] + random.randint(-35, 35)))
+                pts.append((nx, ny))
+            draw.line(pts, fill=(*CIANO, alpha), width=1)
+
+
 # ════════════════════════════════════════════════════════════
 # SLIDE 1 — CAPA  (imagem da marca, 1080x1920)
 # ════════════════════════════════════════════════════════════
 
 def frame_s1(t, dados):
-    pf  = eio(prog(t, 0.0, 0.30))   # fade in fundo
-    pc  = eio(prog(t, 0.3, 0.80))   # circuito
-    pe  = eio(prog(t, 0.8, 1.50))   # eyebrow desliza
-    pt  = eio(prog(t, 1.5, 2.50))   # título
+    pf  = eio(prog(t, 0.0, 0.30))
+    pc  = eio(prog(t, 0.3, 0.80))
+    pe  = eio(prog(t, 0.8, 1.50))
+    pt  = eio(prog(t, 1.5, 2.50))   # zoom + 3D do título
     ps  = eio(prog(t, 2.5, 3.50))   # subtítulo
     pfo = 1.0 - eio(prog(t, 4.5, 5.00))
+    # Glow pulsa continuamente; arcos flickeiam
+    pgl   = 0.5 + 0.5 * math.sin(t * 3.0)
+    arc_a = int((35 + 45 * pgl) * pt)
 
     canvas = montar_base(dados["img_capa"], pf, int(t * 8), pc)
-    layer  = Image.new("RGBA", (W, H), (0, 0, 0, 0))
-    draw   = ImageDraw.Draw(layer)
 
-    # Eyebrow — desliza de baixo para cima
-    font_e  = get_font(30, bold=True)
-    txt_e   = f"⚡  {dados['categoria']}"
+    # ── Raios elétricos nos cantos ──────────────────────────
+    arc_layer = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+    draw_lightning_arcs(ImageDraw.Draw(arc_layer), t, arc_a)
+    canvas = Image.alpha_composite(canvas, arc_layer)
+
+    layer = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+    draw  = ImageDraw.Draw(layer)
+
+    # ── Eyebrow — desliza de baixo para cima ───────────────
+    font_e   = get_font(30, bold=True)
+    txt_e    = f"⚡  {dados['categoria']}"
     ey_final = 120
-    ey_y    = ey_final + int((1 - pe) * 70)
-    bb      = draw.textbbox((0, 0), txt_e, font=font_e)
-    bw, bh  = bb[2] + 48, bb[3] + 22
-    a_e     = int(255 * pe)
+    ey_y     = ey_final + int((1 - pe) * 70)
+    bb       = draw.textbbox((0, 0), txt_e, font=font_e)
+    bw, bh   = bb[2] + 48, bb[3] + 22
+    a_e      = int(255 * pe)
     draw.rounded_rectangle([60, ey_y, 60 + bw, ey_y + bh],
                             radius=22, outline=(*CIANO, a_e), width=2)
     draw.text((84, ey_y + 11), txt_e, font=font_e, fill=(*CIANO, a_e))
 
-    # Título: código do erro — palavra por palavra
-    font_t   = get_font(100, bold=True)
-    palavras = dados["codigo_erro"].split()
-    y        = 220
-    vis      = max(1, round(len(palavras) * pt))
+    # ── Título: zoom (80→100px) + glow pulsante + 3D ──────
+    font_size = max(60, int(80 + 20 * pt))   # zoom 80 → 100
+    font_t    = get_font(font_size, bold=True)
+    palavras  = dados["codigo_erro"].split()
+    y         = 220
+    vis       = max(1, round(len(palavras) * pt)) if pt < 1.0 else len(palavras)
+    a_t       = int(255 * pt)
+    glow_a    = int(55 * pgl * pt)
     for pw in palavras[:vis]:
-        a_t = int(255 * pt)
-        bb  = draw.textbbox((0, 0), pw, font=font_t)
-        draw.text(((W - bb[2]) // 2, y), pw, font=font_t, fill=(*DOURADO, a_t))
-        y += bb[3] + 12
+        draw_glow_text(draw, pw, font_t, y, glow_a)
+        h = draw_text_3d(draw, pw, font_t, y, a_t)
+        y += h + 12
 
-    # Separador
+    # ── Separador ──────────────────────────────────────────
     if pt > 0.4:
         sep_y = y + 22
         draw.rectangle([int(W * 0.18), sep_y, int(W * 0.82), sep_y + 2],
                        fill=(*CIANO, int(200 * pt)))
         y = sep_y + 36
 
-    # Subtítulo
-    font_s  = get_font(36, bold=True)
-    linhas  = wrap_text(draw, dados["subtitulo"], font_s, W - 120)
+    # ── Subtítulo ──────────────────────────────────────────
+    font_s = get_font(36, bold=True)
+    linhas = wrap_text(draw, dados["subtitulo"], font_s, W - 120)
     draw_lines(draw, linhas, 60, y, font_s, BRANCO, "center", int(255 * ps))
 
     canvas = Image.alpha_composite(canvas, layer)
