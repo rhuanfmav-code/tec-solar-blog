@@ -983,7 +983,7 @@ def gerar_video(numero_post, md_path):
         try:
             bg_raw    = AudioFileClip(bg_path).subclip(0, duracao_total)
             bg_music  = bg_raw.audio_fadeout(2)
-            bg_music  = bg_music.volumex(0.15)
+            bg_music  = bg_music.volumex(0.07)
             if voiceover:
                 audio_final = CompositeAudioClip([voiceover, bg_music])
             else:
