@@ -14,9 +14,11 @@ import numpy as np
 from PIL import Image, ImageDraw, ImageFont
 
 try:
-    from moviepy import VideoClip, concatenate_videoclips, AudioFileClip
+    from moviepy import (VideoClip, concatenate_videoclips, AudioFileClip,
+                         CompositeAudioClip, concatenate_audioclips)
 except ImportError:
-    from moviepy.editor import VideoClip, concatenate_videoclips, AudioFileClip
+    from moviepy.editor import (VideoClip, concatenate_videoclips, AudioFileClip,
+                                CompositeAudioClip, concatenate_audioclips)
 
 # ════════════════════════════════════════════════════════════
 # CAMINHOS E CONSTANTES
@@ -868,19 +870,61 @@ def gerar_video(numero_post, md_path):
     ]
     video = concatenate_videoclips(clips)
 
-    # ── Sincronizar áudio ────────────────────────────────────
+    # ── Cortar voiceover se exceder duração do vídeo ────────
     if audio_clip:
         try:
             if audio_clip.duration > video.duration:
-                # Cortar áudio no fim do vídeo
                 try:
                     audio_clip = audio_clip.subclipped(0, video.duration)
                 except AttributeError:
                     audio_clip = audio_clip.subclip(0, video.duration)
-            video = video.with_audio(audio_clip)
-            print(f"🔊  Áudio sincronizado ({audio_clip.duration:.1f}s)")
         except Exception as exc:
-            print(f"⚠️  Erro ao sincronizar áudio: {exc}")
+            print(f"⚠️  Erro ao cortar voiceover: {exc}")
+            audio_clip = None
+
+    # ── Música de fundo ──────────────────────────────────────
+    bg_clip = None
+    bg_path = os.path.join(REPO_ROOT, "audio-fundo.mp3")
+    if os.path.exists(bg_path):
+        try:
+            bg_raw  = AudioFileClip(bg_path)
+            total_d = video.duration
+            # Loop se necessário
+            if bg_raw.duration < total_d:
+                n_loops = math.ceil(total_d / bg_raw.duration)
+                bg_raw  = concatenate_audioclips([bg_raw] * n_loops)
+            # Cortar exato
+            try:
+                bg_raw = bg_raw.subclipped(0, total_d)
+            except AttributeError:
+                bg_raw = bg_raw.subclip(0, total_d)
+            # Volume 15%
+            bg_raw = bg_raw.multiply_volume(0.15)
+            # Fade out nos últimos 2s
+            try:
+                bg_clip = bg_raw.audio_fadeout(2.0)
+            except Exception:
+                bg_clip = bg_raw
+            print(f"🎵  Música de fundo carregada ({total_d:.1f}s, vol=15%)")
+        except Exception as exc:
+            print(f"⚠️  Erro ao carregar música de fundo: {exc}")
+            bg_clip = None
+
+    # ── Mixar voiceover + música ─────────────────────────────
+    if audio_clip and bg_clip:
+        try:
+            mixed = CompositeAudioClip([audio_clip, bg_clip])
+            video = video.with_audio(mixed)
+            print(f"🔊  Áudio mixado: voiceover 100% + música 15%")
+        except Exception as exc:
+            print(f"⚠️  Erro ao mixar: {exc} — aplicando só voiceover")
+            video = video.with_audio(audio_clip)
+    elif audio_clip:
+        video = video.with_audio(audio_clip)
+        print(f"🔊  Voiceover aplicado ({audio_clip.duration:.1f}s)")
+    elif bg_clip:
+        video = video.with_audio(bg_clip)
+        print(f"🎵  Apenas música de fundo")
 
     # ── Exportar MP4 ─────────────────────────────────────────
     pasta = os.path.join(REPO_ROOT, f"carrossel/post-{numero_post:02d}")

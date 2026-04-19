@@ -167,3 +167,4 @@ IMAGEM SECUNDÁRIA:
 → Converter para WebP — máximo 150 KB
 
 <!-- trigger-audio-ajuste -->
+<!-- trigger-musica-fundo -->
