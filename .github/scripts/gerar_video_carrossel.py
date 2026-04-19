@@ -228,15 +228,16 @@ def gerar_script_voz(dados):
     codigo     = dados["codigo_erro"]
     causa      = dados["causas"][0] if dados["causas"][0] else "a causa raiz está na placa"
     return (
-        f"Seu inversor {nome_marca} exibindo {codigo}? "
-        f"A maioria dos técnicos reseta e fecha o chamado. O erro volta. "
-        f"O equipamento continua com defeito. "
-        f"Na nossa bancada, a causa real quase nunca é o que parece. "
+        f"Seu inversor {nome_marca}... exibindo {codigo}? "
+        f"A maioria dos técnicos reseta, e fecha o chamado. "
+        f"O erro volta. O equipamento continua com defeito. "
+        f"Na nossa bancada... a causa real quase nunca é o que parece. "
         f"{causa}. "
-        f"Antes de condenar o equipamento ou pedir um novo, "
+        f"Antes de condenar o equipamento... ou pedir um novo, "
         f"você precisa de um diagnóstico em nível de placa. "
-        f"A TEC Solar atende todo o Brasil via logística reversa. "
-        f"Acesse nosso perfil, link na bio, e envie seu inversor para diagnóstico."
+        f"A TEC Solar atende todo o Brasil, via logística reversa. "
+        f"Acesse nosso perfil... link na bio... "
+        f"e envie seu inversor para diagnóstico."
     )
 
 
@@ -262,7 +263,7 @@ def gerar_voiceover(script, api_key):
                 "text": script,
                 "model_id": "eleven_multilingual_v2",
                 "voice_settings": {
-                    "stability": 0.50,
+                    "stability": 0.75,
                     "similarity_boost": 0.75,
                     "style": 0.30,
                     "use_speaker_boost": True,

@@ -165,3 +165,5 @@ IMAGEM SECUNDÁRIA:
 → Legenda: Fig. 2 — O megohmmeter aplicando 500 VDC entre o polo CC e o frame aterrado é o único teste válido para falha de isolamento; leituras abaixo de 1 MΩ indicam o painel como responsável pela Falha F04
 → Onde inserir: Após H2 "Como identificar na prática"
 → Converter para WebP — máximo 150 KB
+
+<!-- trigger-audio-ajuste -->
