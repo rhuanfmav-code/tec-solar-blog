@@ -165,3 +165,4 @@ IMAGEM SECUNDÁRIA:
 
 <!-- debug-elevenlabs-v2 -->
 <!-- trigger-adam-voice -->
+
