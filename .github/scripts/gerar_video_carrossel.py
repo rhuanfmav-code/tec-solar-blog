@@ -21,6 +21,14 @@ except ImportError:
                                 CompositeAudioClip, concatenate_audioclips)
 
 print("Script versão 2.0 — com efeitos 3D e animações")
+print("numpy:", np.__version__)
+
+# Flags de efeitos visuais — usados no diagnóstico de log
+EFEITO_3D_ATIVO = True   # draw_text_3d: sombra 4 camadas no título
+ANIMACAO_ATIVA  = True   # subtítulo aparece linha por linha
+RAIOS_ATIVOS    = True   # draw_lightning_arcs nos 4 cantos da capa
+print("=== EFEITOS ATIVOS: 3D={}, ANIMACAO={}, RAIOS={}".format(
+      EFEITO_3D_ATIVO, ANIMACAO_ATIVA, RAIOS_ATIVOS))
 
 # ════════════════════════════════════════════════════════════
 # CAMINHOS E CONSTANTES
@@ -221,6 +229,33 @@ def parse_post(md_path):
         "marca":       marca,
         "problema":    problema,
     }
+
+
+# ════════════════════════════════════════════════════════════
+# ÁUDIO HELPERS
+# ════════════════════════════════════════════════════════════
+
+def set_volume_safe(clip, volume):
+    """Ajusta volume de AudioClip compatível com MoviePy 1.x e 2.x.
+
+    Tenta volumex (1.x) → multiply_volume (2.x) → fl numpy (fallback).
+    """
+    try:
+        result = clip.volumex(volume)
+        print(f"🔊  set_volume_safe: volumex({volume}) — MoviePy 1.x")
+        return result
+    except AttributeError:
+        pass
+    try:
+        result = clip.multiply_volume(volume)
+        print(f"🔊  set_volume_safe: multiply_volume({volume}) — MoviePy 2.x")
+        return result
+    except AttributeError:
+        pass
+    # Fallback universal: escala array numpy via fl()
+    result = clip.fl(lambda gf, t: gf(t) * volume, keep_duration=True)
+    print(f"🔊  set_volume_safe: fl numpy fallback ({volume})")
+    return result
 
 
 # ════════════════════════════════════════════════════════════
@@ -889,13 +924,6 @@ def gerar_video(numero_post, md_path):
     bg_path = os.path.join(REPO_ROOT, "audio-fundo.mp3")
     if os.path.exists(bg_path):
         try:
-            import moviepy as _mp_mod
-            _mp_ver = tuple(int(x) for x in _mp_mod.__version__.split(".")[:2])
-        except Exception:
-            _mp_ver = (1, 0)
-        print(f"🎬  MoviePy versão detectada: {_mp_ver}")
-
-        try:
             bg_raw  = AudioFileClip(bg_path)
             total_d = video.duration
             # Loop se necessário
@@ -912,22 +940,8 @@ def gerar_video(numero_post, md_path):
                 bg_raw = bg_raw.audio_fadein(1.0).audio_fadeout(2.0)
             except Exception as fe:
                 print(f"⚠️  Fade in/out ignorado: {fe}")
-            # Volume 15% — MoviePy 2.x usa multiply_volume; 1.x usa volumex
-            # Fallback final: escala numpy diretamente via AudioClip
-            if _mp_ver >= (2, 0):
-                try:
-                    bg_clip = bg_raw.multiply_volume(0.15)
-                    print("🔊  Volume via multiply_volume (MoviePy 2.x)")
-                except AttributeError:
-                    bg_clip = bg_raw.volumex(0.15)
-                    print("🔊  Volume via volumex (fallback 1.x)")
-            else:
-                try:
-                    bg_clip = bg_raw.volumex(0.15)
-                    print("🔊  Volume via volumex (MoviePy 1.x)")
-                except AttributeError:
-                    bg_clip = bg_raw.multiply_volume(0.15)
-                    print("🔊  Volume via multiply_volume (fallback 2.x)")
+            # Volume 15% — usa set_volume_safe (volumex → multiply_volume → fl numpy)
+            bg_clip = set_volume_safe(bg_raw, 0.15)
             print(f"🎵  Música de fundo carregada ({total_d:.1f}s, vol=15%)")
         except Exception as exc:
             print(f"⚠️  Erro ao carregar música de fundo: {exc}")
