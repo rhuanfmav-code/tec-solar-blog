@@ -889,6 +889,13 @@ def gerar_video(numero_post, md_path):
     bg_path = os.path.join(REPO_ROOT, "audio-fundo.mp3")
     if os.path.exists(bg_path):
         try:
+            import moviepy as _mp_mod
+            _mp_ver = tuple(int(x) for x in _mp_mod.__version__.split(".")[:2])
+        except Exception:
+            _mp_ver = (1, 0)
+        print(f"🎬  MoviePy versão detectada: {_mp_ver}")
+
+        try:
             bg_raw  = AudioFileClip(bg_path)
             total_d = video.duration
             # Loop se necessário
@@ -900,13 +907,27 @@ def gerar_video(numero_post, md_path):
                 bg_raw = bg_raw.subclipped(0, total_d)
             except AttributeError:
                 bg_raw = bg_raw.subclip(0, total_d)
-            # Volume 15%
-            bg_raw = bg_raw.volumex(0.15)
-            # Fade out nos últimos 2s
+            # Fade in 1s + fade out 2s
             try:
-                bg_clip = bg_raw.audio_fadeout(2.0)
-            except Exception:
-                bg_clip = bg_raw
+                bg_raw = bg_raw.audio_fadein(1.0).audio_fadeout(2.0)
+            except Exception as fe:
+                print(f"⚠️  Fade in/out ignorado: {fe}")
+            # Volume 15% — MoviePy 2.x usa multiply_volume; 1.x usa volumex
+            # Fallback final: escala numpy diretamente via AudioClip
+            if _mp_ver >= (2, 0):
+                try:
+                    bg_clip = bg_raw.multiply_volume(0.15)
+                    print("🔊  Volume via multiply_volume (MoviePy 2.x)")
+                except AttributeError:
+                    bg_clip = bg_raw.volumex(0.15)
+                    print("🔊  Volume via volumex (fallback 1.x)")
+            else:
+                try:
+                    bg_clip = bg_raw.volumex(0.15)
+                    print("🔊  Volume via volumex (MoviePy 1.x)")
+                except AttributeError:
+                    bg_clip = bg_raw.multiply_volume(0.15)
+                    print("🔊  Volume via multiply_volume (fallback 2.x)")
             print(f"🎵  Música de fundo carregada ({total_d:.1f}s, vol=15%)")
         except Exception as exc:
             print(f"⚠️  Erro ao carregar música de fundo: {exc}")
