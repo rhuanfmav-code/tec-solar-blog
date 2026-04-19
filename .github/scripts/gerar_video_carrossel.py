@@ -552,6 +552,26 @@ def draw_progress_bar_fill(draw, progress):
     draw.rectangle([0, H - 8, bar_w, H - 4], fill=(*CIANO, 180))
 
 
+def draw_palavras_animadas(draw, texto, font, x_start, y_start, t, t_inicio, cor, max_w):
+    """Revela palavras uma a uma: 0.25s por palavra, fade-in de 0.1s cada.
+    Retorna o tempo logo após a última palavra (para encadear próximo bloco).
+    """
+    palavras = texto.split()
+    x, y     = x_start, y_start
+    t_p      = t_inicio
+    for palavra in palavras:
+        bb_p = draw.textbbox((0, 0), palavra + " ", font=font)
+        w_p  = bb_p[2]
+        if x + w_p > x_start + max_w and x > x_start:
+            x  = x_start
+            y += bb_p[3] + 8
+        alpha = int(255 * eio(prog(t, t_p, t_p + 0.1)))
+        draw.text((x, y), palavra, font=font, fill=(*cor[:3], alpha))
+        x  += w_p
+        t_p += 0.25
+    return t_p
+
+
 def transicao_lateral(clip1, clip2, duracao=0.4):
     """Transição slide lateral direita→esquerda entre dois VideoClips."""
     def make_frame(t):
@@ -688,16 +708,16 @@ def frame_s2(t, dados):
         draw.rectangle([60, 470, 420, 472],
                        fill=(*CIANO, int(200 * pt)))
 
-    # Bullets linha por linha (0.8s de intervalo)
+    # Bullets palavra por palavra
     font_b = get_font(32)
+    t_now  = 2.5
     for i, causa in enumerate(dados["causas"]):
-        ps_b = eio(prog(t, 2.5 + i * 0.8, 3.1 + i * 0.8))
-        ab   = int(255 * ps_b)
-        by   = 510 + i * 200
-        cor  = CIANO if i < 2 else DOURADO
-        draw.ellipse([60, by + 10, 86, by + 36], fill=(*cor, ab))
-        ls = wrap_text(draw, causa, font_b, W - 148)
-        draw_lines(draw, ls, 104, by, font_b, BRANCO, "left", ab)
+        by  = 510 + i * 200
+        cor = CIANO if i < 2 else DOURADO
+        ab0 = int(255 * eio(prog(t, t_now, t_now + 0.15)))
+        draw.ellipse([60, by + 10, 86, by + 36], fill=(*cor, ab0))
+        t_now = draw_palavras_animadas(draw, causa, font_b, 104, by, t, t_now, BRANCO, W - 148)
+        t_now += 0.3
 
     draw_progress_bar_fill(draw, pp)
 
@@ -748,18 +768,17 @@ def frame_s3(t, dados):
         draw.rectangle([60, 458, 450, 460],
                        fill=(*CIANO, int(200 * pt)))
 
-    # Passos linha por linha (0.8s de intervalo)
+    # Passos palavra por palavra
     font_l = get_font(26, bold=True)
     font_p = get_font(30)
+    t_now  = 2.5
     for i, passo in enumerate(dados["passos"]):
-        ps_p = eio(prog(t, 2.5 + i * 0.8, 3.1 + i * 0.8))
-        ap   = int(255 * ps_p)
-        py   = 490 + i * 300
-        draw.rectangle([60, py, 66, py + 90], fill=(*CIANO, ap))
-        draw.text((82, py), f"PASSO {i + 1}",
-                  font=font_l, fill=(*CIANO, ap))
-        ls = wrap_text(draw, passo, font_p, W - 148)
-        draw_lines(draw, ls, 82, py + 38, font_p, BRANCO, "left", ap)
+        py  = 490 + i * 300
+        ap0 = int(255 * eio(prog(t, t_now, t_now + 0.15)))
+        draw.rectangle([60, py, 66, py + 90], fill=(*CIANO, ap0))
+        draw.text((82, py), f"PASSO {i + 1}", font=font_l, fill=(*CIANO, ap0))
+        t_now = draw_palavras_animadas(draw, passo, font_p, 82, py + 38, t, t_now, BRANCO, W - 148)
+        t_now += 0.3
 
     draw_progress_bar_fill(draw, pp)
 
@@ -831,11 +850,14 @@ def frame_s4(t, dados):
     draw.text(((W - bb[2]) // 2, cta_y + 20), "WHATSAPP",
               font=font_wl, fill=(*BRANCO, int(140 * pcta)))
 
-    font_wn = get_font(62, bold=True)
-    numero  = "(38) 99912-4889"
+    font_wn = get_font(74, bold=True)
+    numero  = "(38) 99889-1587"
     bb      = draw.textbbox((0, 0), numero, font=font_wn)
-    draw.text(((W - bb[2]) // 2, cta_y + 64), numero,
-              font=font_wn, fill=(*BRANCO, a_cta))
+    xn      = (W - bb[2]) // 2
+    yn      = cta_y + 64
+    for bx, by_b in [(-2, 0), (2, 0), (0, -2), (0, 2), (-2, -2), (2, -2), (-2, 2), (2, 2)]:
+        draw.text((xn + bx, yn + by_b), numero, font=font_wn, fill=(*BRANCO, a_cta))
+    draw.text((xn, yn), numero, font=font_wn, fill=(*DOURADO, a_cta))
 
     font_ig = get_font(30)
     bb      = draw.textbbox((0, 0), "@tec_solar_moc", font=font_ig)
@@ -861,13 +883,20 @@ def gerar_video(numero_post, md_path):
     print(f"Post {numero_post:02d} — {dados['titulo_seo']}")
     print(f"Marca: {dados['marca']} | Código: {dados['codigo_erro']}")
 
-    # Selecionar imagens por slide
-    marca = dados["marca"]
-    lista_capa = IMAGENS_MARCA.get(marca, IMAGENS_CTA)
-    dados["img_capa"]  = sel(lista_capa,      numero_post)
-    dados["img_causa"] = sel(IMAGENS_CAUSA,   numero_post)
-    dados["img_diag"]  = sel(IMAGENS_DIAG,    numero_post)
-    dados["img_cta"]   = sel(IMAGENS_CTA,     numero_post)
+    # Selecionar imagens por slide (sem duplicatas entre slides)
+    marca      = dados["marca"]
+    lista_capa = IMAGENS_MARCA.get(marca, IMAGENS_MARCA.get("Sungrow", IMAGENS_CTA))
+    img_capa   = sel(lista_capa,    numero_post)
+    img_causa  = sel(IMAGENS_CAUSA, numero_post)
+    img_diag   = sel(IMAGENS_DIAG,  numero_post)
+    img_cta    = sel(IMAGENS_CTA,   numero_post)
+    # Se capa == cta (fallback duplicado), usar próximo índice em IMAGENS_CTA
+    if img_capa == img_cta:
+        img_cta = IMAGENS_CTA[(numero_post + 1) % len(IMAGENS_CTA)]
+    dados["img_capa"]  = img_capa
+    dados["img_causa"] = img_causa
+    dados["img_diag"]  = img_diag
+    dados["img_cta"]   = img_cta
 
     print(f"Causas: {dados['causas']}")
     print(f"Passos: {dados['passos']}")
