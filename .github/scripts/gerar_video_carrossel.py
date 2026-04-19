@@ -374,13 +374,22 @@ def particulas_cantos(draw, seed):
         draw.ellipse([x - r, y - r, x + r, y + r], fill=(*cor, alph))
 
 
-def montar_base(nome_img, alpha_fundo=1.0, seed=0, prog_circ=1.0):
-    """Fundo: imagem da marca + overlay escuro + circuito + partículas."""
+def montar_base(nome_img, alpha_fundo=1.0, seed=0, prog_circ=1.0, t=0.0, dur=1.0):
+    """Fundo: Ken Burns 1.0→1.15 + overlay preto 65% + circuito + partículas."""
     img = load_bg(nome_img)
     if img:
-        img    = crop_fill(img, W, H)
-        ov     = Image.new("RGBA", (W, H), (*NAVY_DARK, OVERLAY_ALPHA))
-        canvas = Image.alpha_composite(img, ov)
+        # Ken Burns: zoom lento de 1.0 → 1.15 ao longo do slide
+        base   = crop_fill(img, W, H)
+        scale  = 1.0 + 0.15 * (t / max(dur, 0.01))
+        new_w  = int(W * scale)
+        new_h  = int(H * scale)
+        zoomed = base.resize((new_w, new_h), Image.LANCZOS)
+        ox     = (new_w - W) // 2
+        oy     = (new_h - H) // 2
+        img_crop = zoomed.crop((ox, oy, ox + W, oy + H))
+        # Overlay preto 65% sobre a imagem com Ken Burns
+        overlay = Image.new("RGBA", (W, H), (0, 0, 0, int(255 * 0.65)))
+        canvas  = Image.alpha_composite(img_crop.convert("RGBA"), overlay)
     else:
         canvas = fundo_gradiente()
 
@@ -543,6 +552,25 @@ def draw_progress_bar_fill(draw, progress):
     draw.rectangle([0, H - 8, bar_w, H - 4], fill=(*CIANO, 180))
 
 
+def transicao_lateral(clip1, clip2, duracao=0.4):
+    """Transição slide lateral direita→esquerda entre dois VideoClips."""
+    def make_frame(t):
+        if t < duracao:
+            progresso = t / duracao
+            frame1 = clip1.get_frame(clip1.duration - max(duracao - t, 0.001))
+            frame2 = clip2.get_frame(0)
+            offset = int(W * progresso)
+            frame  = np.zeros((H, W, 3), dtype=np.uint8)
+            if offset < W:
+                frame[:, :W - offset] = frame1[:, offset:]
+                frame[:, W - offset:] = frame2[:, :offset]
+            else:
+                frame = frame2
+            return frame
+        return clip2.get_frame(t - duracao)
+    return VideoClip(make_frame, duration=clip2.duration + duracao)
+
+
 # ════════════════════════════════════════════════════════════
 # SLIDE 1 — CAPA  (imagem da marca, 1080x1920)
 # ════════════════════════════════════════════════════════════
@@ -558,7 +586,7 @@ def frame_s1(t, dados):
     pgl   = 0.5 + 0.5 * math.sin(t * 3.0)
     arc_a = int((35 + 45 * pgl) * pt)
 
-    canvas = montar_base(dados["img_capa"], pf, int(t * 8), pc)
+    canvas = montar_base(dados["img_capa"], pf, int(t * 8), pc, t=t, dur=DUR_S1)
 
     # ── Raios elétricos nos cantos ──────────────────────────
     arc_layer = Image.new("RGBA", (W, H), (0, 0, 0, 0))
@@ -633,7 +661,7 @@ def frame_s2(t, dados):
     pfo = 1.0 - eio(prog(t, 9.5, 10.00))
     pp  = pause_progress(t, 6.5, DUR_S2)
 
-    canvas = montar_base(dados["img_causa"], pf, int(t * 8) + 100, pc)
+    canvas = montar_base(dados["img_causa"], pf, int(t * 8) + 100, pc, t=t, dur=DUR_S2)
     layer  = Image.new("RGBA", (W, H), (0, 0, 0, 0))
     draw   = ImageDraw.Draw(layer)
 
@@ -693,7 +721,7 @@ def frame_s3(t, dados):
     pfo = 1.0 - eio(prog(t, 9.5, 10.00))
     pp  = pause_progress(t, 6.5, DUR_S3)
 
-    canvas = montar_base(dados["img_diag"], pf, int(t * 8) + 200, pc)
+    canvas = montar_base(dados["img_diag"], pf, int(t * 8) + 200, pc, t=t, dur=DUR_S3)
     layer  = Image.new("RGBA", (W, H), (0, 0, 0, 0))
     draw   = ImageDraw.Draw(layer)
 
@@ -757,7 +785,7 @@ def frame_s4(t, dados):
     pfo  = 1.0 - eio(prog(t, dur - 0.5, dur))
     pp   = pause_progress(t, dur - PAUSE_DUR - FADE_DUR, dur)
 
-    canvas = montar_base(dados["img_cta"], pf, int(t * 8) + 300, pc)
+    canvas = montar_base(dados["img_cta"], pf, int(t * 8) + 300, pc, t=t, dur=dados.get("dur_s4", DUR_S4))
     layer  = Image.new("RGBA", (W, H), (0, 0, 0, 0))
     draw   = ImageDraw.Draw(layer)
 
@@ -872,13 +900,17 @@ def gerar_video(numero_post, md_path):
     dados["dur_s4"] = slide4_duration
 
     # ── Clips ────────────────────────────────────────────────
-    clips = [
-        VideoClip(lambda t, d=dados: frame_s1(t, d), duration=DUR_S1),
-        VideoClip(lambda t, d=dados: frame_s2(t, d), duration=DUR_S2),
-        VideoClip(lambda t, d=dados: frame_s3(t, d), duration=DUR_S3),
-        VideoClip(lambda t, d=dados: frame_s4(t, d), duration=slide4_duration),
-    ]
-    video = concatenate_videoclips(clips)
+    c1 = VideoClip(lambda t, d=dados: frame_s1(t, d), duration=DUR_S1)
+    c2 = VideoClip(lambda t, d=dados: frame_s2(t, d), duration=DUR_S2)
+    c3 = VideoClip(lambda t, d=dados: frame_s3(t, d), duration=DUR_S3)
+    c4 = VideoClip(lambda t, d=dados: frame_s4(t, d), duration=slide4_duration)
+    # Transições laterais entre slides (direita → esquerda, 0.4s)
+    video = concatenate_videoclips([
+        c1,
+        transicao_lateral(c1, c2),
+        transicao_lateral(c2, c3),
+        transicao_lateral(c3, c4),
+    ])
 
     # ── Cortar voiceover se exceder duração do vídeo ────────
     if audio_clip:
