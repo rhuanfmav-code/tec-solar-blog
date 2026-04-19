@@ -31,7 +31,9 @@ FPS           = 24
 DUR_S1 = 8.0    # capa
 DUR_S2 = 10.0   # causa
 DUR_S3 = 10.0   # diagnóstico
-DUR_S4 = 8.0    # CTA (base; estende com áudio)
+DUR_S4    = 8.0    # CTA (base; estende com áudio)
+FADE_DUR  = 0.5    # fade entre slides
+PAUSE_DUR = 3.0    # pausa estática após última linha
 
 NAVY       = (13,  31,  60)
 NAVY_DARK  = (5,   13,  26)
@@ -504,6 +506,30 @@ def draw_lightning_arcs(draw, t, alpha):
             draw.line(pts, fill=(*CIANO, alpha), width=1)
 
 
+def fade_in(canvas, t):
+    """Fade in nos primeiros FADE_DUR segundos de cada slide."""
+    if t >= FADE_DUR:
+        return canvas
+    dark = Image.new("RGBA", (W, H), (0, 0, 0, int(255 * (1.0 - t / FADE_DUR))))
+    return Image.alpha_composite(canvas, dark)
+
+
+def pause_progress(t, anim_end, slide_dur):
+    """Progresso da barra de pausa (0→1): começa em anim_end, termina em slide_dur-FADE_DUR."""
+    pause_end = slide_dur - FADE_DUR
+    if t <= anim_end:
+        return 0.0
+    return min(1.0, (t - anim_end) / max(0.01, pause_end - anim_end))
+
+
+def draw_progress_bar_fill(draw, progress):
+    """Linha ciano fina na base do slide se preenchendo durante a pausa."""
+    if progress <= 0:
+        return
+    bar_w = int(W * min(1.0, progress))
+    draw.rectangle([0, H - 8, bar_w, H - 4], fill=(*CIANO, 180))
+
+
 # ════════════════════════════════════════════════════════════
 # SLIDE 1 — CAPA  (imagem da marca, 1080x1920)
 # ════════════════════════════════════════════════════════════
@@ -513,8 +539,8 @@ def frame_s1(t, dados):
     pc  = eio(prog(t, 0.3, 0.80))
     pe  = eio(prog(t, 0.8, 1.50))
     pt  = eio(prog(t, 1.5, 2.50))   # zoom + 3D do título
-    ps  = eio(prog(t, 2.5, 3.50))   # subtítulo
     pfo = 1.0 - eio(prog(t, 7.5, 8.00))
+    pp  = pause_progress(t, 4.5, DUR_S1)
     # Glow pulsa continuamente; arcos flickeiam
     pgl   = 0.5 + 0.5 * math.sin(t * 3.0)
     arc_a = int((35 + 45 * pgl) * pt)
@@ -561,14 +587,23 @@ def frame_s1(t, dados):
                        fill=(*CIANO, int(200 * pt)))
         y = sep_y + 36
 
-    # ── Subtítulo ──────────────────────────────────────────
+    # ── Subtítulo linha por linha (0.8s de intervalo) ─────
     font_s = get_font(36, bold=True)
     linhas = wrap_text(draw, dados["subtitulo"], font_s, W - 120)
-    draw_lines(draw, linhas, 60, y, font_s, BRANCO, "center", int(255 * ps))
+    for i, linha in enumerate(linhas):
+        ps_i = eio(prog(t, 2.5 + i * 0.8, 3.0 + i * 0.8))
+        bb_l = draw.textbbox((0, 0), linha, font=font_s)
+        draw.text(((W - bb_l[2]) // 2, y), linha, font=font_s,
+                  fill=(*BRANCO, int(255 * ps_i)))
+        y += bb_l[3] + 10
+
+    # ── Barra de progresso durante pausa ──────────────────
+    draw_progress_bar_fill(draw, pp)
 
     canvas = Image.alpha_composite(canvas, layer)
     canvas = add_rodape(canvas)
     canvas = add_logo(canvas)
+    canvas = fade_in(canvas, t)
     canvas = fade_out(canvas, pfo)
     return np.array(canvas.convert("RGB"))
 
@@ -583,6 +618,7 @@ def frame_s2(t, dados):
     pe  = eio(prog(t, 0.8, 1.50))
     pt  = eio(prog(t, 1.5, 2.50))
     pfo = 1.0 - eio(prog(t, 9.5, 10.00))
+    pp  = pause_progress(t, 6.5, DUR_S2)
 
     canvas = montar_base(dados["img_causa"], pf, int(t * 8) + 100, pc)
     layer  = Image.new("RGBA", (W, H), (0, 0, 0, 0))
@@ -611,10 +647,10 @@ def frame_s2(t, dados):
         draw.rectangle([60, 470, 420, 472],
                        fill=(*CIANO, int(200 * pt)))
 
-    # Bullets com aparecimento escalonado
+    # Bullets linha por linha (0.8s de intervalo)
     font_b = get_font(32)
     for i, causa in enumerate(dados["causas"]):
-        ps_b = eio(prog(t, 2.5 + i * 0.65, 3.15 + i * 0.65))
+        ps_b = eio(prog(t, 2.5 + i * 0.8, 3.1 + i * 0.8))
         ab   = int(255 * ps_b)
         by   = 510 + i * 200
         cor  = CIANO if i < 2 else DOURADO
@@ -622,9 +658,12 @@ def frame_s2(t, dados):
         ls = wrap_text(draw, causa, font_b, W - 148)
         draw_lines(draw, ls, 104, by, font_b, BRANCO, "left", ab)
 
+    draw_progress_bar_fill(draw, pp)
+
     canvas = Image.alpha_composite(canvas, layer)
     canvas = add_rodape(canvas)
     canvas = add_logo(canvas)
+    canvas = fade_in(canvas, t)
     canvas = fade_out(canvas, pfo)
     return np.array(canvas.convert("RGB"))
 
@@ -639,6 +678,7 @@ def frame_s3(t, dados):
     pe  = eio(prog(t, 0.8, 1.50))
     pt  = eio(prog(t, 1.5, 2.50))
     pfo = 1.0 - eio(prog(t, 9.5, 10.00))
+    pp  = pause_progress(t, 6.5, DUR_S3)
 
     canvas = montar_base(dados["img_diag"], pf, int(t * 8) + 200, pc)
     layer  = Image.new("RGBA", (W, H), (0, 0, 0, 0))
@@ -667,22 +707,25 @@ def frame_s3(t, dados):
         draw.rectangle([60, 458, 450, 460],
                        fill=(*CIANO, int(200 * pt)))
 
-    # Passos
+    # Passos linha por linha (0.8s de intervalo)
     font_l = get_font(26, bold=True)
     font_p = get_font(30)
     for i, passo in enumerate(dados["passos"]):
-        ps_p  = eio(prog(t, 2.5 + i * 0.9, 3.2 + i * 0.9))
-        ap    = int(255 * ps_p)
-        py    = 490 + i * 300
+        ps_p = eio(prog(t, 2.5 + i * 0.8, 3.1 + i * 0.8))
+        ap   = int(255 * ps_p)
+        py   = 490 + i * 300
         draw.rectangle([60, py, 66, py + 90], fill=(*CIANO, ap))
         draw.text((82, py), f"PASSO {i + 1}",
                   font=font_l, fill=(*CIANO, ap))
         ls = wrap_text(draw, passo, font_p, W - 148)
         draw_lines(draw, ls, 82, py + 38, font_p, BRANCO, "left", ap)
 
+    draw_progress_bar_fill(draw, pp)
+
     canvas = Image.alpha_composite(canvas, layer)
     canvas = add_rodape(canvas)
     canvas = add_logo(canvas)
+    canvas = fade_in(canvas, t)
     canvas = fade_out(canvas, pfo)
     return np.array(canvas.convert("RGB"))
 
@@ -699,6 +742,7 @@ def frame_s4(t, dados):
     psrv = eio(prog(t, 1.8, 2.80))
     pcta = eio(prog(t, 2.8, 3.80))
     pfo  = 1.0 - eio(prog(t, dur - 0.5, dur))
+    pp   = pause_progress(t, dur - PAUSE_DUR - FADE_DUR, dur)
 
     canvas = montar_base(dados["img_cta"], pf, int(t * 8) + 300, pc)
     layer  = Image.new("RGBA", (W, H), (0, 0, 0, 0))
@@ -730,7 +774,7 @@ def frame_s4(t, dados):
         "Atendemos todo o Brasil via logística reversa.",
     ]
     for i, srv in enumerate(servicos):
-        ps_i = eio(prog(t, 1.8 + i * 0.33, 2.3 + i * 0.33))
+        ps_i = eio(prog(t, 1.8 + i * 0.8, 2.4 + i * 0.8))
         bb   = draw.textbbox((0, 0), srv, font=font_s)
         draw.text(((W - bb[2]) // 2, 440 + i * 65), srv, font=font_s,
                   fill=(*BRANCO, int(200 * ps_i)))
@@ -757,9 +801,12 @@ def frame_s4(t, dados):
     draw.text(((W - bb[2]) // 2, cta_y + 148), "@tec_solar_moc",
               font=font_ig, fill=(*CIANO, int(200 * pcta)))
 
+    draw_progress_bar_fill(draw, pp)
+
     canvas = Image.alpha_composite(canvas, layer)
     canvas = add_rodape(canvas)
     canvas = add_logo(canvas)
+    canvas = fade_in(canvas, t)
     canvas = fade_out(canvas, pfo)
     return np.array(canvas.convert("RGB"))
 
