@@ -71,4 +71,5 @@ jobs:
           PASTA="carrossel/post-$(printf '%02d' $NUMERO_POST)"
           git add "$PASTA/video-carrossel.mp4"
           git diff --cached --quiet || git commit -m "Auto: vídeo carrossel post-$(printf '%02d' $NUMERO_POST)"
+          git pull --rebase origin main
           git push origin main
