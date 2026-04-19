@@ -922,21 +922,14 @@ def gerar_video(numero_post, md_path):
     os.makedirs(pasta, exist_ok=True)
     saida = os.path.join(pasta, "video-carrossel.mp4")
 
-    kwargs = dict(
-        fps=FPS,
+    video.write_videofile(
+        saida,
+        fps=30,
         codec="libx264",
-        preset="fast",
-        pixel_format="yuv420p",
-        ffmpeg_params=["-crf", "28"],
+        audio_codec="aac",
+        threads=4,
         logger=None,
     )
-    if audio_clip:
-        kwargs["audio"]       = True
-        kwargs["audio_codec"] = "aac"
-    else:
-        kwargs["audio"] = False
-
-    video.write_videofile(saida, **kwargs)
     print(f"✅  Vídeo salvo: {saida}")
 
     # Limpar temp
