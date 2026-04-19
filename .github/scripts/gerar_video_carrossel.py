@@ -28,7 +28,10 @@ IMG_DIR    = os.path.join(REPO_ROOT, "imagens-padrao")
 
 W, H          = 1080, 1920
 FPS           = 24
-DURACAO_SLIDE = 5.0
+DUR_S1 = 8.0    # capa
+DUR_S2 = 10.0   # causa
+DUR_S3 = 10.0   # diagnóstico
+DUR_S4 = 8.0    # CTA (base; estende com áudio)
 
 NAVY       = (13,  31,  60)
 NAVY_DARK  = (5,   13,  26)
@@ -511,7 +514,7 @@ def frame_s1(t, dados):
     pe  = eio(prog(t, 0.8, 1.50))
     pt  = eio(prog(t, 1.5, 2.50))   # zoom + 3D do título
     ps  = eio(prog(t, 2.5, 3.50))   # subtítulo
-    pfo = 1.0 - eio(prog(t, 4.5, 5.00))
+    pfo = 1.0 - eio(prog(t, 7.5, 8.00))
     # Glow pulsa continuamente; arcos flickeiam
     pgl   = 0.5 + 0.5 * math.sin(t * 3.0)
     arc_a = int((35 + 45 * pgl) * pt)
@@ -579,7 +582,7 @@ def frame_s2(t, dados):
     pc  = eio(prog(t, 0.3, 0.80))
     pe  = eio(prog(t, 0.8, 1.50))
     pt  = eio(prog(t, 1.5, 2.50))
-    pfo = 1.0 - eio(prog(t, 4.5, 5.00))
+    pfo = 1.0 - eio(prog(t, 9.5, 10.00))
 
     canvas = montar_base(dados["img_causa"], pf, int(t * 8) + 100, pc)
     layer  = Image.new("RGBA", (W, H), (0, 0, 0, 0))
@@ -635,7 +638,7 @@ def frame_s3(t, dados):
     pc  = eio(prog(t, 0.3, 0.80))
     pe  = eio(prog(t, 0.8, 1.50))
     pt  = eio(prog(t, 1.5, 2.50))
-    pfo = 1.0 - eio(prog(t, 4.5, 5.00))
+    pfo = 1.0 - eio(prog(t, 9.5, 10.00))
 
     canvas = montar_base(dados["img_diag"], pf, int(t * 8) + 200, pc)
     layer  = Image.new("RGBA", (W, H), (0, 0, 0, 0))
@@ -689,11 +692,13 @@ def frame_s3(t, dados):
 # ════════════════════════════════════════════════════════════
 
 def frame_s4(t, dados):
+    dur  = dados.get("dur_s4", DUR_S4)
     pf   = eio(prog(t, 0.0, 0.30))
     pc   = eio(prog(t, 0.3, 0.80))
     pt   = eio(prog(t, 0.8, 1.80))
     psrv = eio(prog(t, 1.8, 2.80))
     pcta = eio(prog(t, 2.8, 3.80))
+    pfo  = 1.0 - eio(prog(t, dur - 0.5, dur))
 
     canvas = montar_base(dados["img_cta"], pf, int(t * 8) + 300, pc)
     layer  = Image.new("RGBA", (W, H), (0, 0, 0, 0))
@@ -755,8 +760,8 @@ def frame_s4(t, dados):
     canvas = Image.alpha_composite(canvas, layer)
     canvas = add_rodape(canvas)
     canvas = add_logo(canvas)
+    canvas = fade_out(canvas, pfo)
     return np.array(canvas.convert("RGB"))
-
 
 
 # ════════════════════════════════════════════════════════════
@@ -787,30 +792,30 @@ def gerar_video(numero_post, md_path):
     audio_path = gerar_voiceover(script_voz, api_key)
 
     audio_clip      = None
-    slide4_duration = DURACAO_SLIDE
+    slide4_duration = DUR_S4
 
     if audio_path:
         try:
             audio_clip = AudioFileClip(audio_path)
-            total_base = 3 * DURACAO_SLIDE  # primeiros 3 slides = 15s
-            if audio_clip.duration > total_base + DURACAO_SLIDE:
-                # Áudio mais longo que o vídeo base — estende último slide
+            total_base = DUR_S1 + DUR_S2 + DUR_S3   # 28s
+            if audio_clip.duration > total_base + DUR_S4:
                 slide4_duration = audio_clip.duration - total_base
                 print(f"⏱  Slide 4 estendido para {slide4_duration:.1f}s")
             elif audio_clip.duration < total_base:
-                # Áudio termina antes do slide 3 — mantém 5s por slide
-                slide4_duration = DURACAO_SLIDE
+                slide4_duration = DUR_S4
             else:
-                slide4_duration = max(DURACAO_SLIDE, audio_clip.duration - total_base)
+                slide4_duration = max(DUR_S4, audio_clip.duration - total_base)
         except Exception as exc:
             print(f"⚠️  Erro ao carregar áudio: {exc}")
             audio_clip = None
 
+    dados["dur_s4"] = slide4_duration
+
     # ── Clips ────────────────────────────────────────────────
     clips = [
-        VideoClip(lambda t, d=dados: frame_s1(t, d), duration=DURACAO_SLIDE),
-        VideoClip(lambda t, d=dados: frame_s2(t, d), duration=DURACAO_SLIDE),
-        VideoClip(lambda t, d=dados: frame_s3(t, d), duration=DURACAO_SLIDE),
+        VideoClip(lambda t, d=dados: frame_s1(t, d), duration=DUR_S1),
+        VideoClip(lambda t, d=dados: frame_s2(t, d), duration=DUR_S2),
+        VideoClip(lambda t, d=dados: frame_s3(t, d), duration=DUR_S3),
         VideoClip(lambda t, d=dados: frame_s4(t, d), duration=slide4_duration),
     ]
     video = concatenate_videoclips(clips)
