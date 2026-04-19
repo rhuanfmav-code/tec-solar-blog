@@ -934,7 +934,7 @@ def gerar_video(numero_post, md_path):
 
     if audio_path:
         try:
-            audio_clip = AudioFileClip(audio_path).volumex(2.5)
+            audio_clip = AudioFileClip(audio_path).volumex(7.5)
             total_base = DUR_S1 + DUR_S2 + DUR_S3   # 28s
             if audio_clip.duration > total_base + DUR_S4:
                 slide4_duration = audio_clip.duration - total_base
