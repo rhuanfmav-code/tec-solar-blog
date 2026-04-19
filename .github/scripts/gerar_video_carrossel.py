@@ -232,33 +232,6 @@ def parse_post(md_path):
 
 
 # ════════════════════════════════════════════════════════════
-# ÁUDIO HELPERS
-# ════════════════════════════════════════════════════════════
-
-def set_volume_safe(clip, volume):
-    """Ajusta volume de AudioClip compatível com MoviePy 1.x e 2.x.
-
-    Tenta volumex (1.x) → multiply_volume (2.x) → fl numpy (fallback).
-    """
-    try:
-        result = clip.volumex(volume)
-        print(f"🔊  set_volume_safe: volumex({volume}) — MoviePy 1.x")
-        return result
-    except AttributeError:
-        pass
-    try:
-        result = clip.multiply_volume(volume)
-        print(f"🔊  set_volume_safe: multiply_volume({volume}) — MoviePy 2.x")
-        return result
-    except AttributeError:
-        pass
-    # Fallback universal: escala array numpy via fl()
-    result = clip.fl(lambda gf, t: gf(t) * volume, keep_duration=True)
-    print(f"🔊  set_volume_safe: fl numpy fallback ({volume})")
-    return result
-
-
-# ════════════════════════════════════════════════════════════
 # VOICEOVER — ElevenLabs
 # ════════════════════════════════════════════════════════════
 
@@ -919,49 +892,30 @@ def gerar_video(numero_post, md_path):
             print(f"⚠️  Erro ao cortar voiceover: {exc}")
             audio_clip = None
 
-    # ── Música de fundo ──────────────────────────────────────
-    bg_clip = None
-    bg_path = os.path.join(REPO_ROOT, "audio-fundo.mp3")
+    # ── Música de fundo + mixagem ───────────────────────────
+    bg_path       = os.path.join(REPO_ROOT, "audio-fundo.mp3")
+    duracao_total = video.duration
+    voiceover     = audio_clip
+
     if os.path.exists(bg_path):
         try:
-            bg_raw  = AudioFileClip(bg_path)
-            total_d = video.duration
-            # Loop se necessário
-            if bg_raw.duration < total_d:
-                n_loops = math.ceil(total_d / bg_raw.duration)
-                bg_raw  = concatenate_audioclips([bg_raw] * n_loops)
-            # Cortar exato
-            try:
-                bg_raw = bg_raw.subclipped(0, total_d)
-            except AttributeError:
-                bg_raw = bg_raw.subclip(0, total_d)
-            # Fade in 1s + fade out 2s
-            try:
-                bg_raw = bg_raw.audio_fadein(1.0).audio_fadeout(2.0)
-            except Exception as fe:
-                print(f"⚠️  Fade in/out ignorado: {fe}")
-            # Volume 15% — usa set_volume_safe (volumex → multiply_volume → fl numpy)
-            bg_clip = set_volume_safe(bg_raw, 0.15)
-            print(f"🎵  Música de fundo carregada ({total_d:.1f}s, vol=15%)")
-        except Exception as exc:
-            print(f"⚠️  Erro ao carregar música de fundo: {exc}")
-            bg_clip = None
+            bg_raw    = AudioFileClip(bg_path).subclip(0, duracao_total)
+            bg_music  = bg_raw.audio_fadeout(2)
+            bg_music  = bg_music.volumex(0.15)
+            if voiceover:
+                audio_final = CompositeAudioClip([voiceover, bg_music])
+            else:
+                audio_final = bg_music
+            print("Música de fundo aplicada com sucesso")
+        except Exception as e:
+            print(f"Música de fundo ignorada: {e}")
+            audio_final = voiceover
+    else:
+        audio_final = voiceover
 
-    # ── Mixar voiceover + música ─────────────────────────────
-    if audio_clip and bg_clip:
-        try:
-            mixed = CompositeAudioClip([audio_clip, bg_clip])
-            video = video.with_audio(mixed)
-            print(f"🔊  Áudio mixado: voiceover 100% + música 15%")
-        except Exception as exc:
-            print(f"⚠️  Erro ao mixar: {exc} — aplicando só voiceover")
-            video = video.with_audio(audio_clip)
-    elif audio_clip:
-        video = video.with_audio(audio_clip)
-        print(f"🔊  Voiceover aplicado ({audio_clip.duration:.1f}s)")
-    elif bg_clip:
-        video = video.with_audio(bg_clip)
-        print(f"🎵  Apenas música de fundo")
+    if audio_final:
+        video = video.with_audio(audio_final)
+        print(f"🔊  Áudio final aplicado ao vídeo")
 
     # ── Exportar MP4 ─────────────────────────────────────────
     pasta = os.path.join(REPO_ROOT, f"carrossel/post-{numero_post:02d}")
