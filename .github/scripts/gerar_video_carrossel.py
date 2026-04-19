@@ -914,7 +914,7 @@ def gerar_video(numero_post, md_path):
         audio_final = voiceover
 
     if audio_final:
-        video = video.with_audio(audio_final)
+        video = video.set_audio(audio_final)
         print(f"🔊  Áudio final aplicado ao vídeo")
 
     # ── Exportar MP4 ─────────────────────────────────────────
