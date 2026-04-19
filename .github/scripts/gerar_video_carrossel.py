@@ -850,14 +850,35 @@ def frame_s4(t, dados):
     draw.text(((W - bb[2]) // 2, cta_y + 20), "WHATSAPP",
               font=font_wl, fill=(*BRANCO, int(140 * pcta)))
 
-    font_wn = get_font(74, bold=True)
-    numero  = "(38) 99889-1587"
-    bb      = draw.textbbox((0, 0), numero, font=font_wn)
-    xn      = (W - bb[2]) // 2
-    yn      = cta_y + 64
+    font_wn   = get_font(74, bold=True)
+    numero    = "(38) 99889-1587"
+    bb        = draw.textbbox((0, 0), numero, font=font_wn)
+    xn        = (W - bb[2]) // 2
+    yn        = cta_y + 64
+    # Desenhar número em camada temporária para aplicar pulse
+    num_layer = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+    num_draw  = ImageDraw.Draw(num_layer)
     for bx, by_b in [(-2, 0), (2, 0), (0, -2), (0, 2), (-2, -2), (2, -2), (-2, 2), (2, 2)]:
-        draw.text((xn + bx, yn + by_b), numero, font=font_wn, fill=(*BRANCO, a_cta))
-    draw.text((xn, yn), numero, font=font_wn, fill=(*DOURADO, a_cta))
+        num_draw.text((xn + bx, yn + by_b), numero, font=font_wn, fill=(*BRANCO, a_cta))
+    num_draw.text((xn, yn), numero, font=font_wn, fill=(*DOURADO, a_cta))
+    # Pulse senoidal: 1.5 Hz, ±5% de escala
+    pulse = 1.0 + 0.05 * math.sin(t * 2 * math.pi * 1.5)
+    pad   = 20
+    rx0   = max(0, xn - pad)
+    ry0   = max(0, yn - pad)
+    rx1   = min(W, xn + bb[2] + pad)
+    ry1   = min(H, yn + bb[3] + pad)
+    rw, rh = rx1 - rx0, ry1 - ry0
+    if rw > 0 and rh > 0 and a_cta > 0:
+        region = num_layer.crop((rx0, ry0, rx1, ry1))
+        nw     = max(1, int(rw * pulse))
+        nh     = max(1, int(rh * pulse))
+        scaled = region.resize((nw, nh), Image.LANCZOS)
+        ox     = rx0 + (rw - nw) // 2
+        oy     = ry0 + (rh - nh) // 2
+        layer.alpha_composite(scaled, (max(0, ox), max(0, oy)))
+    else:
+        layer.alpha_composite(num_layer)
 
     font_ig = get_font(30)
     bb      = draw.textbbox((0, 0), "@tec_solar_moc", font=font_ig)
