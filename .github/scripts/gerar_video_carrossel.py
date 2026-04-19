@@ -899,7 +899,7 @@ def gerar_video(numero_post, md_path):
             except AttributeError:
                 bg_raw = bg_raw.subclip(0, total_d)
             # Volume 15%
-            bg_raw = bg_raw.multiply_volume(0.15)
+            bg_raw = bg_raw.volumex(0.15)
             # Fade out nos últimos 2s
             try:
                 bg_clip = bg_raw.audio_fadeout(2.0)
