@@ -32,23 +32,15 @@ jobs:
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y ffmpeg
-          pip install --force-reinstall --no-cache-dir \
-            setuptools "moviepy==1.0.3" "imageio==2.28.1" "imageio-ffmpeg==0.4.8" \
-            Pillow numpy scipy
+          pip install --upgrade pip setuptools wheel
+          pip install --force-reinstall --no-cache-dir "imageio-ffmpeg==0.4.7"
+          pip install --force-reinstall --no-cache-dir "imageio==2.27.0"
+          pip install --force-reinstall --no-cache-dir "moviepy==1.0.3"
+          pip install --force-reinstall --no-cache-dir Pillow numpy scipy
 
       - name: Debug MoviePy e ambiente
         run: |
-          python3 -c "
-          import moviepy, numpy as np
-          print('MoviePy versão:', moviepy.__version__)
-          print('numpy versão:', np.__version__)
-          try:
-              from moviepy.editor import AudioFileClip
-          except ImportError:
-              from moviepy import AudioFileClip
-          print('AudioFileClip métodos de volume:', [m for m in dir(AudioFileClip) if 'volume' in m.lower()])
-          print('AudioFileClip métodos de fade:', [m for m in dir(AudioFileClip) if 'fade' in m.lower()])
-          "
+          python3 -c "import setuptools; import imageio_ffmpeg; import moviepy; print('moviepy:', moviepy.__version__); print('OK')"
 
       - name: Baixar fonte Montserrat
         run: |
