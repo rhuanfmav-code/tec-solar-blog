@@ -127,6 +127,53 @@ def sel(lista, num):
     return lista[num % len(lista)]
 
 
+def selecionar_imagens(marca, numero_post):
+    """Seleciona 4 imagens únicas por slide, priorizando por marca e tipo."""
+    try:
+        todos = sorted([f for f in os.listdir(IMG_DIR) if f.lower().endswith(".webp")])
+    except FileNotFoundError:
+        return None, None, None, None
+
+    marca_low = (marca or "").lower()
+    usadas    = set()
+
+    def candidatos(keywords):
+        kw = [k.lower() for k in keywords]
+        return [f for f in todos if any(k in f.lower() for k in kw)]
+
+    def escolher(cands):
+        livres = [f for f in cands if f not in usadas]
+        if not livres:
+            livres = [f for f in todos if f not in usadas]
+        if not livres:
+            livres = todos
+        escolha = livres[numero_post % len(livres)]
+        usadas.add(escolha)
+        return escolha
+
+    # Slide 1 (capa): brand-specific → fallback Inversor
+    capa_cands = candidatos([marca_low]) if marca_low else []
+    if not capa_cands:
+        capa_cands = candidatos(["inversor"])
+    img_capa = escolher(capa_cands or todos)
+
+    # Slide 4 (CTA): brand-specific (arquivo diferente da capa) → Multi-Inversores → Inversor
+    cta_cands = candidatos([marca_low]) if marca_low else []
+    if not cta_cands:
+        cta_cands = candidatos(["multi-inversores", "inversor"])
+    img_cta = escolher(cta_cands or todos)
+
+    # Slide 2 (causa): Placa ou Bancada
+    causa_cands = candidatos(["placa", "bancada"])
+    img_causa = escolher(causa_cands or todos)
+
+    # Slide 3 (diag): Placa ou Bancada (diferente do slide 2)
+    diag_cands = candidatos(["placa", "bancada"])
+    img_diag = escolher(diag_cands or todos)
+
+    return img_capa, img_causa, img_diag, img_cta
+
+
 # ════════════════════════════════════════════════════════════
 # FONTES
 # ════════════════════════════════════════════════════════════
@@ -628,35 +675,43 @@ def frame_s1(t, dados):
                             radius=22, outline=(*CIANO, a_e), width=2)
     draw.text((84, ey_y + 11), txt_e, font=font_e, fill=(*CIANO, a_e))
 
-    # ── Título: zoom (80→100px) + glow pulsante + 3D ──────
-    font_size = max(60, int(80 + 20 * pt))   # zoom 80 → 100
-    font_t    = get_font(font_size, bold=True)
-    palavras  = dados["codigo_erro"].split()
-    y         = 220
-    vis       = max(1, round(len(palavras) * pt)) if pt < 1.0 else len(palavras)
-    a_t       = int(255 * pt)
-    glow_a    = int(55 * pgl * pt)
-    for pw in palavras[:vis]:
-        draw_glow_text(draw, pw, font_t, y, glow_a)
-        h = draw_text_3d(draw, pw, font_t, y, a_t)
-        y += h + 12
+    a_t    = int(255 * pt)
+    glow_a = int(55 * pgl * pt)
 
-    # ── Separador ──────────────────────────────────────────
+    # ── Linha 1: "ANTES DE CONDENAR," (pequena, ciano) ────
+    font_l1 = get_font(38)
+    txt_l1  = "ANTES DE CONDENAR,"
+    bb_l1   = draw.textbbox((0, 0), txt_l1, font=font_l1)
+    draw.text(((W - bb_l1[2]) // 2, 220), txt_l1, font=font_l1,
+              fill=(*CIANO, int(255 * pe)))
+
+    # ── Linha 2: MARCA + CÓDIGO (≥110px, bold, dourado, 3D) ──
+    nome_marca = NOMES_MARCA.get(dados["marca"], (dados["marca"] or "").upper())
+    txt_l2     = f"{nome_marca} {dados['codigo_erro']}".strip()
+    fs2        = 110
+    font_l2    = get_font(fs2, bold=True)
+    # Auto-reduz se o texto não couber na largura
+    while draw.textbbox((0, 0), txt_l2, font=font_l2)[2] > W - 80 and fs2 > 70:
+        fs2    -= 5
+        font_l2 = get_font(fs2, bold=True)
+    draw_glow_text(draw, txt_l2, font_l2, 295, glow_a)
+    draw_text_3d(draw, txt_l2, font_l2, 295, a_t)
+
+    # ── Separador ─────────────────────────────────────────
     if pt > 0.4:
-        sep_y = y + 22
-        draw.rectangle([int(W * 0.18), sep_y, int(W * 0.82), sep_y + 2],
+        draw.rectangle([int(W * 0.18), 452, int(W * 0.82), 454],
                        fill=(*CIANO, int(200 * pt)))
-        y = sep_y + 36
 
-    # ── Subtítulo linha por linha (0.8s de intervalo) ─────
-    font_s = get_font(36, bold=True)
-    linhas = wrap_text(draw, dados["subtitulo"], font_s, W - 120)
+    # ── Linha 3: subtítulo palavra por palavra (branco) ───
+    font_l3 = get_font(36, bold=True)
+    linhas  = wrap_text(draw, dados["subtitulo"], font_l3, W - 120)
+    y3      = 478
     for i, linha in enumerate(linhas):
         ps_i = eio(prog(t, 2.5 + i * 0.8, 3.0 + i * 0.8))
-        bb_l = draw.textbbox((0, 0), linha, font=font_s)
-        draw.text(((W - bb_l[2]) // 2, y), linha, font=font_s,
+        bb_l = draw.textbbox((0, 0), linha, font=font_l3)
+        draw.text(((W - bb_l[2]) // 2, y3), linha, font=font_l3,
                   fill=(*BRANCO, int(255 * ps_i)))
-        y += bb_l[3] + 10
+        y3 += bb_l[3] + 10
 
     # ── Barra de progresso durante pausa ──────────────────
     draw_progress_bar_fill(draw, pp)
@@ -904,16 +959,8 @@ def gerar_video(numero_post, md_path):
     print(f"Post {numero_post:02d} — {dados['titulo_seo']}")
     print(f"Marca: {dados['marca']} | Código: {dados['codigo_erro']}")
 
-    # Selecionar imagens por slide (sem duplicatas entre slides)
-    marca      = dados["marca"]
-    lista_capa = IMAGENS_MARCA.get(marca, IMAGENS_MARCA.get("Sungrow", IMAGENS_CTA))
-    img_capa   = sel(lista_capa,    numero_post)
-    img_causa  = sel(IMAGENS_CAUSA, numero_post)
-    img_diag   = sel(IMAGENS_DIAG,  numero_post)
-    img_cta    = sel(IMAGENS_CTA,   numero_post)
-    # Se capa == cta (fallback duplicado), usar próximo índice em IMAGENS_CTA
-    if img_capa == img_cta:
-        img_cta = IMAGENS_CTA[(numero_post + 1) % len(IMAGENS_CTA)]
+    # Selecionar imagens por slide (brand-aware, sem duplicatas)
+    img_capa, img_causa, img_diag, img_cta = selecionar_imagens(dados["marca"], numero_post)
     dados["img_capa"]  = img_capa
     dados["img_causa"] = img_causa
     dados["img_diag"]  = img_diag
