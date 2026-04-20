@@ -475,6 +475,23 @@ def wrap_text(draw, texto, font, max_w):
     return linhas or [texto]
 
 
+def quebrar_titulo(texto, font, largura_max, draw):
+    palavras = texto.split()
+    linhas, linha_atual = [], ""
+    for palavra in palavras:
+        teste = (linha_atual + " " + palavra).strip()
+        bbox  = draw.textbbox((0, 0), teste, font=font)
+        if bbox[2] - bbox[0] <= largura_max:
+            linha_atual = teste
+        else:
+            if linha_atual:
+                linhas.append(linha_atual)
+            linha_atual = palavra
+    if linha_atual:
+        linhas.append(linha_atual)
+    return linhas or [texto]
+
+
 def draw_lines(draw, linhas, x, y, font, cor, align="left", alpha=255):
     rgba  = (*cor[:3], alpha)
     y_cur = y
@@ -666,8 +683,8 @@ def frame_s1(t, dados):
     # ── Eyebrow — desliza de baixo para cima ───────────────
     font_e   = get_font(30, bold=True)
     txt_e    = f"⚡  {dados['categoria']}"
-    ey_final = 120
-    ey_y     = ey_final + int((1 - pe) * 70)
+    ey_final = 60
+    ey_y     = ey_final + int((1 - pe) * 60)
     bb       = draw.textbbox((0, 0), txt_e, font=font_e)
     bw, bh   = bb[2] + 48, bb[3] + 22
     a_e      = int(255 * pe)
@@ -678,34 +695,37 @@ def frame_s1(t, dados):
     a_t    = int(255 * pt)
     glow_a = int(55 * pgl * pt)
 
-    # ── Linha 1: "ANTES DE CONDENAR," (pequena, ciano) ────
-    font_l1 = get_font(38)
+    # ── Linha 1: "ANTES DE CONDENAR," (ciano, 36px) ───────
+    font_l1 = get_font(36)
     txt_l1  = "ANTES DE CONDENAR,"
     bb_l1   = draw.textbbox((0, 0), txt_l1, font=font_l1)
-    draw.text(((W - bb_l1[2]) // 2, 220), txt_l1, font=font_l1,
+    draw.text(((W - bb_l1[2]) // 2, 115), txt_l1, font=font_l1,
               fill=(*CIANO, int(255 * pe)))
 
-    # ── Linha 2: MARCA + CÓDIGO (≥110px, bold, dourado, 3D) ──
+    # ── Linha 2: MARCA + CÓDIGO (dourado bold, tamanho por comprimento) ──
     nome_marca = NOMES_MARCA.get(dados["marca"], (dados["marca"] or "").upper())
     txt_l2     = f"{nome_marca} {dados['codigo_erro']}".strip()
-    fs2        = 110
-    font_l2    = get_font(fs2, bold=True)
-    # Auto-reduz se o texto não couber na largura
-    while draw.textbbox((0, 0), txt_l2, font=font_l2)[2] > W - 80 and fs2 > 70:
-        fs2    -= 5
-        font_l2 = get_font(fs2, bold=True)
-    draw_glow_text(draw, txt_l2, font_l2, 295, glow_a)
-    draw_text_3d(draw, txt_l2, font_l2, 295, a_t)
+    n_chars    = len(txt_l2)
+    if n_chars <= 12:
+        fs2 = 110
+    elif n_chars <= 18:
+        fs2 = 85
+    else:
+        fs2 = 68
+    font_l2 = get_font(fs2, bold=True)
+    draw_glow_text(draw, txt_l2, font_l2, 168, glow_a)
+    l2_h    = draw_text_3d(draw, txt_l2, font_l2, 168, a_t)
 
     # ── Separador ─────────────────────────────────────────
+    y_sep = 168 + l2_h + 12
     if pt > 0.4:
-        draw.rectangle([int(W * 0.18), 452, int(W * 0.82), 454],
+        draw.rectangle([int(W * 0.18), y_sep, int(W * 0.82), y_sep + 2],
                        fill=(*CIANO, int(200 * pt)))
 
-    # ── Linha 3: subtítulo palavra por palavra (branco) ───
-    font_l3 = get_font(36, bold=True)
-    linhas  = wrap_text(draw, dados["subtitulo"], font_l3, W - 120)
-    y3      = 478
+    # ── Linha 3: descrição curta (branco, 42px, máx 2 linhas) ─
+    font_l3 = get_font(42, bold=True)
+    linhas  = quebrar_titulo(dados["subtitulo"], font_l3, W - 80, draw)[:2]
+    y3      = y_sep + 18
     for i, linha in enumerate(linhas):
         ps_i = eio(prog(t, 2.5 + i * 0.8, 3.0 + i * 0.8))
         bb_l = draw.textbbox((0, 0), linha, font=font_l3)
