@@ -1003,6 +1003,12 @@ def frame_s4(t, dados):
 
 def gerar_video(numero_post, md_path):
     dados = parse_post(md_path)
+    print(f"=== DEBUG TITULO ===")
+    print(f"titulo_completo: '{dados.get('titulo', '')}'")
+    print(f"marca: '{dados.get('marca', '')}'")
+    print(f"codigo: '{dados.get('codigo', '')}'")
+    print(f"subtitulo_capa: '{dados.get('subtitulo', '')}'")
+    print(f"===================")
     print(f"Post {numero_post:02d} — {dados['titulo_seo']}")
     print(f"Marca: {dados['marca']} | Código: {dados['codigo_erro']}")
 
