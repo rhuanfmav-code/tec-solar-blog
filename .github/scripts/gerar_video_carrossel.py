@@ -736,7 +736,6 @@ def frame_s1(t, dados):
     draw.text((84, ey_y + 11), txt_e, font=font_e, fill=(*CIANO, a_e))
 
     a_t    = int(255 * pt)
-    glow_a = int(55 * pgl * pt)
 
     # ── Linha 1: "ANTES DE CONDENAR," (ciano, 36px) ───────
     font_l1 = get_font(36)
@@ -745,37 +744,44 @@ def frame_s1(t, dados):
     draw.text(((W - bb_l1[2]) // 2, 115), txt_l1, font=font_l1,
               fill=(*CIANO, int(255 * pe)))
 
-    # ── Linha 2: MARCA + CÓDIGO (dourado bold, quebra automática) ────
-    nome_marca    = NOMES_MARCA.get(dados["marca"], (dados["marca"] or "").upper())
-    titulo_linha2 = f"{nome_marca} {dados['codigo_erro']}".strip()
-    n_chars       = len(titulo_linha2)
-    if n_chars <= 15:
-        font_size_titulo = 72
-    elif n_chars <= 25:
-        font_size_titulo = 58
-    else:
-        font_size_titulo = 46
-    print(f"TITULO CAPA: '{titulo_linha2}' | font_size={font_size_titulo} | largura_max={W - 80}")
-    font_l2  = get_font(font_size_titulo, bold=True)
-    cor_l2   = (*DOURADO, a_t)
-    y_apos_l2 = desenhar_titulo_capa(draw, titulo_linha2, font_l2, W, 168, cor_l2)
+    # ── Linha 2: "INVERSOR " + marca (ciano, bold, 58px) ──
+    nome_marca_up  = NOMES_MARCA.get(dados["marca"], (dados["marca"] or "").upper()).upper()
+    linha_inversor = f"INVERSOR {nome_marca_up}".strip()
+    font_l2        = get_font(58, bold=True)
+    bb_l2          = draw.textbbox((0, 0), linha_inversor, font=font_l2)
+    draw.text(((W - bb_l2[2]) // 2, 168), linha_inversor, font=font_l2,
+              fill=(*CIANO, a_t))
+    y_apos_l2 = 168 + bb_l2[3] + 8
+
+    # ── Linha 3: código curto (dourado, bold, 72/54px, word-wrap) ──
+    linha_falha   = dados["codigo_erro"]
+    fs_falha      = 54 if len(linha_falha) > 15 else 72
+    font_l3_falha = get_font(fs_falha, bold=True)
+    print(f"CAPA: inversor='{linha_inversor}' | falha='{linha_falha}'")
+    linhas_falha  = quebrar_titulo(linha_falha, font_l3_falha, W - 80, draw)
+    y3f = y_apos_l2 + 10
+    for linha in linhas_falha:
+        bb_f = draw.textbbox((0, 0), linha, font=font_l3_falha)
+        draw.text(((W - bb_f[2]) // 2, y3f), linha, font=font_l3_falha,
+                  fill=(*DOURADO, a_t))
+        y3f += bb_f[3] + 8
 
     # ── Separador ─────────────────────────────────────────
-    y_sep = y_apos_l2 + 12
+    y_sep = y3f + 12
     if pt > 0.4:
         draw.rectangle([int(W * 0.18), y_sep, int(W * 0.82), y_sep + 2],
                        fill=(*CIANO, int(200 * pt)))
 
-    # ── Linha 3: descrição curta (branco, 42px, máx 2 linhas) ─
-    font_l3 = get_font(42, bold=True)
-    linhas  = quebrar_titulo(dados["subtitulo"], font_l3, W - 80, draw)[:2]
-    y3      = y_sep + 18
+    # ── Linha 4: subtítulo (branco, 42px, máx 2 linhas) ──
+    font_l4 = get_font(42, bold=True)
+    linhas  = quebrar_titulo(dados["subtitulo"], font_l4, W - 80, draw)[:2]
+    y4      = y_sep + 18
     for i, linha in enumerate(linhas):
         ps_i = eio(prog(t, 2.5 + i * 0.8, 3.0 + i * 0.8))
-        bb_l = draw.textbbox((0, 0), linha, font=font_l3)
-        draw.text(((W - bb_l[2]) // 2, y3), linha, font=font_l3,
+        bb_l = draw.textbbox((0, 0), linha, font=font_l4)
+        draw.text(((W - bb_l[2]) // 2, y4), linha, font=font_l4,
                   fill=(*BRANCO, int(255 * ps_i)))
-        y3 += bb_l[3] + 10
+        y4 += bb_l[3] + 10
 
     # ── Barra de progresso durante pausa ──────────────────
     draw_progress_bar_fill(draw, pp)
