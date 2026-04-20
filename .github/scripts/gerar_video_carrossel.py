@@ -571,6 +571,32 @@ def draw_glow_text(draw, text, font, y, glow_alpha):
                   fill=(*DOURADO, glow_alpha))
 
 
+def desenhar_titulo_capa(draw, texto, font, W, y_inicio, cor):
+    """Desenha título com quebra automática de linha e sombra simples."""
+    palavras = texto.split()
+    linhas, linha_atual = [], ""
+    for palavra in palavras:
+        teste = (linha_atual + " " + palavra).strip()
+        bbox  = draw.textbbox((0, 0), teste, font=font)
+        if bbox[2] - bbox[0] <= W - 80:
+            linha_atual = teste
+        else:
+            if linha_atual:
+                linhas.append(linha_atual)
+            linha_atual = palavra
+    if linha_atual:
+        linhas.append(linha_atual)
+
+    y = y_inicio
+    for linha in linhas:
+        bbox = draw.textbbox((0, 0), linha, font=font)
+        x    = (W - (bbox[2] - bbox[0])) // 2
+        draw.text((x + 2, y + 2), linha, font=font, fill=(0, 0, 0, 180))
+        draw.text((x, y), linha, font=font, fill=cor)
+        y += (bbox[3] - bbox[1]) + 8
+    return y
+
+
 def draw_lightning_arcs(draw, t, alpha):
     """Raios elétricos irregulares nos quatro cantos."""
     if alpha <= 0:
@@ -702,23 +728,23 @@ def frame_s1(t, dados):
     draw.text(((W - bb_l1[2]) // 2, 115), txt_l1, font=font_l1,
               fill=(*CIANO, int(255 * pe)))
 
-    # ── Linha 2: MARCA + CÓDIGO (dourado bold, tamanho por comprimento) ──
+    # ── Linha 2: MARCA + CÓDIGO (dourado bold, quebra automática) ────
     nome_marca    = NOMES_MARCA.get(dados["marca"], (dados["marca"] or "").upper())
     titulo_linha2 = f"{nome_marca} {dados['codigo_erro']}".strip()
     n_chars       = len(titulo_linha2)
-    if n_chars <= 12:
+    if n_chars <= 15:
         font_size_titulo = 72
-    elif n_chars <= 18:
-        font_size_titulo = 60
+    elif n_chars <= 25:
+        font_size_titulo = 58
     else:
-        font_size_titulo = 50
+        font_size_titulo = 46
     print(f"TITULO CAPA: '{titulo_linha2}' | font_size={font_size_titulo} | largura_max={W - 80}")
-    font_l2 = get_font(font_size_titulo, bold=True)
-    draw_glow_text(draw, titulo_linha2, font_l2, 168, glow_a)
-    l2_h    = draw_text_3d(draw, titulo_linha2, font_l2, 168, a_t)
+    font_l2  = get_font(font_size_titulo, bold=True)
+    cor_l2   = (*DOURADO, a_t)
+    y_apos_l2 = desenhar_titulo_capa(draw, titulo_linha2, font_l2, W, 168, cor_l2)
 
     # ── Separador ─────────────────────────────────────────
-    y_sep = 168 + l2_h + 12
+    y_sep = y_apos_l2 + 12
     if pt > 0.4:
         draw.rectangle([int(W * 0.18), y_sep, int(W * 0.82), y_sep + 2],
                        fill=(*CIANO, int(200 * pt)))
