@@ -169,3 +169,4 @@ IMAGEM SECUNDÁRIA:
 <!-- trigger-audio-ajuste -->
 <!-- trigger-musica-fundo -->
 <!-- trigger-rebase-fix -->
+
