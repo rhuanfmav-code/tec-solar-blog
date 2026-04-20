@@ -161,7 +161,7 @@ IMAGEM SECUNDÁRIA:
 → Converter para WebP — máximo 150 KB
 
 <!-- trigger-video-workflow -->
-<!-- retrigger: modo-educacional -->
+<!-- retrigger: fix-subtitulo-slides-vazios -->
 
 <!-- debug-elevenlabs-v2 -->
 <!-- trigger-adam-voice -->
