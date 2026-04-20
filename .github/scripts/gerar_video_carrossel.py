@@ -703,18 +703,19 @@ def frame_s1(t, dados):
               fill=(*CIANO, int(255 * pe)))
 
     # ── Linha 2: MARCA + CÓDIGO (dourado bold, tamanho por comprimento) ──
-    nome_marca = NOMES_MARCA.get(dados["marca"], (dados["marca"] or "").upper())
-    txt_l2     = f"{nome_marca} {dados['codigo_erro']}".strip()
-    n_chars    = len(txt_l2)
+    nome_marca    = NOMES_MARCA.get(dados["marca"], (dados["marca"] or "").upper())
+    titulo_linha2 = f"{nome_marca} {dados['codigo_erro']}".strip()
+    n_chars       = len(titulo_linha2)
     if n_chars <= 12:
-        fs2 = 110
+        font_size_titulo = 72
     elif n_chars <= 18:
-        fs2 = 85
+        font_size_titulo = 60
     else:
-        fs2 = 68
-    font_l2 = get_font(fs2, bold=True)
-    draw_glow_text(draw, txt_l2, font_l2, 168, glow_a)
-    l2_h    = draw_text_3d(draw, txt_l2, font_l2, 168, a_t)
+        font_size_titulo = 50
+    print(f"TITULO CAPA: '{titulo_linha2}' | font_size={font_size_titulo} | largura_max={W - 80}")
+    font_l2 = get_font(font_size_titulo, bold=True)
+    draw_glow_text(draw, titulo_linha2, font_l2, 168, glow_a)
+    l2_h    = draw_text_3d(draw, titulo_linha2, font_l2, 168, a_t)
 
     # ── Separador ─────────────────────────────────────────
     y_sep = 168 + l2_h + 12
