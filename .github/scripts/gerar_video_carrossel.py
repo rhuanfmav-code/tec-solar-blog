@@ -217,7 +217,24 @@ def parse_post(md_path):
         r'(Falha\s+\d+|Erro\s+\d+|[EF]\d{2,4}|Arc\s+Fault|Grid\s+Lost|GFCI\s+Fault)',
         titulo_seo, re.IGNORECASE
     )
-    codigo_erro = m.group(0).upper() if m else titulo_seo[:20].upper()
+    if m:
+        codigo_erro = m.group(0).upper()
+    else:
+        # Extrai o texto antes do "—" na parte após o primeiro ":"
+        # Ex: "Drive Solar: Driver de IGBT — descrição" → "DRIVER DE IGBT"
+        parte_apos_dois_pontos = titulo_seo.split(":", 1)[-1].strip()
+        codigo_bruto = parte_apos_dois_pontos.split("—", 1)[0].strip()
+        # Trunca à última palavra completa dentro de 25 caracteres
+        if len(codigo_bruto) > 25:
+            palavras_cod, acumulado = codigo_bruto.split(), ""
+            for p in palavras_cod:
+                candidato = (acumulado + " " + p).strip()
+                if len(candidato) <= 25:
+                    acumulado = candidato
+                else:
+                    break
+            codigo_bruto = acumulado or palavras_cod[0]
+        codigo_erro = codigo_bruto.upper()
 
     partes = titulo_seo.split(":", 1)
     subtitulo = partes[1].strip() if len(partes) > 1 else titulo_seo
@@ -578,7 +595,7 @@ def desenhar_titulo_capa(draw, texto, font, W, y_inicio, cor):
     for palavra in palavras:
         teste = (linha_atual + " " + palavra).strip()
         bbox  = draw.textbbox((0, 0), teste, font=font)
-        if bbox[2] - bbox[0] <= W - 80:
+        if bbox[2] - bbox[0] <= W - 120:
             linha_atual = teste
         else:
             if linha_atual:
