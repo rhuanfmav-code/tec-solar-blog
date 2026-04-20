@@ -744,27 +744,74 @@ def frame_s1(t, dados):
     draw.text(((W - bb_l1[2]) // 2, 115), txt_l1, font=font_l1,
               fill=(*CIANO, int(255 * pe)))
 
-    # ── Linha 2: "INVERSOR " + marca (ciano, bold, 58px) ──
-    nome_marca_up  = NOMES_MARCA.get(dados["marca"], (dados["marca"] or "").upper()).upper()
-    linha_inversor = f"INVERSOR {nome_marca_up}".strip()
-    font_l2        = get_font(58, bold=True)
-    bb_l2          = draw.textbbox((0, 0), linha_inversor, font=font_l2)
-    draw.text(((W - bb_l2[2]) // 2, 168), linha_inversor, font=font_l2,
-              fill=(*CIANO, a_t))
-    y_apos_l2 = 168 + bb_l2[3] + 8
+    # ── MODO CAPA: falha/erro vs educacional ──────────────
+    modo_falha = bool(dados.get("marca")) and bool(dados.get("codigo_erro"))
+    if modo_falha:
+        linha2 = f"INVERSOR {NOMES_MARCA.get(dados['marca'], (dados['marca'] or '').upper()).upper()}".strip()
+        linha3 = dados["codigo_erro"].upper()
+    else:
+        titulo = dados["titulo_seo"]
+        sep_match = re.search(r'[:—]', titulo)
+        if sep_match:
+            linha2 = titulo[:sep_match.start()].strip()
+            linha3 = titulo[sep_match.end():].strip()
+        else:
+            linha2 = titulo
+            linha3 = ""
 
-    # ── Linha 3: código curto (dourado, bold, 72/54px, word-wrap) ──
-    linha_falha   = dados["codigo_erro"]
-    fs_falha      = 54 if len(linha_falha) > 15 else 72
-    font_l3_falha = get_font(fs_falha, bold=True)
-    print(f"CAPA: inversor='{linha_inversor}' | falha='{linha_falha}'")
-    linhas_falha  = quebrar_titulo(linha_falha, font_l3_falha, W - 80, draw)
-    y3f = y_apos_l2 + 10
-    for linha in linhas_falha:
-        bb_f = draw.textbbox((0, 0), linha, font=font_l3_falha)
-        draw.text(((W - bb_f[2]) // 2, y3f), linha, font=font_l3_falha,
-                  fill=(*DOURADO, a_t))
-        y3f += bb_f[3] + 8
+    print(f"MODO CAPA: {'falha' if modo_falha else 'educacional'} | linha2='{linha2}' | linha3='{linha3}'")
+
+    y_cur = 168
+
+    if modo_falha:
+        # Linha 2: "INVERSOR MARCA" — ciano, 48px
+        font_l2   = get_font(48, bold=True)
+        linhas_l2 = quebrar_titulo(linha2, font_l2, W - 80, draw)
+        for lh in linhas_l2:
+            bb_lh = draw.textbbox((0, 0), lh, font=font_l2)
+            draw.text(((W - bb_lh[2]) // 2, y_cur), lh, font=font_l2,
+                      fill=(*CIANO, a_t))
+            y_cur += bb_lh[3] + 8
+        y_cur += 10
+        # Linha 3: código — dourado, 72px (54 se >15 chars)
+        fs_l3   = 54 if len(linha3) > 15 else 72
+        font_l3 = get_font(fs_l3, bold=True)
+        linhas_l3 = quebrar_titulo(linha3, font_l3, W - 80, draw)
+        for lh in linhas_l3:
+            bb_lh = draw.textbbox((0, 0), lh, font=font_l3)
+            draw.text(((W - bb_lh[2]) // 2, y_cur), lh, font=font_l3,
+                      fill=(*DOURADO, a_t))
+            y_cur += bb_lh[3] + 8
+    else:
+        if linha3:
+            # Parte antes do separador — dourado, 58px
+            font_l2   = get_font(58, bold=True)
+            linhas_l2 = quebrar_titulo(linha2, font_l2, W - 80, draw)
+            for lh in linhas_l2:
+                bb_lh = draw.textbbox((0, 0), lh, font=font_l2)
+                draw.text(((W - bb_lh[2]) // 2, y_cur), lh, font=font_l2,
+                          fill=(*DOURADO, a_t))
+                y_cur += bb_lh[3] + 8
+            y_cur += 6
+            # Parte depois do separador — branco, 42px
+            font_l3   = get_font(42, bold=True)
+            linhas_l3 = quebrar_titulo(linha3, font_l3, W - 80, draw)
+            for lh in linhas_l3:
+                bb_lh = draw.textbbox((0, 0), lh, font=font_l3)
+                draw.text(((W - bb_lh[2]) // 2, y_cur), lh, font=font_l3,
+                          fill=(*BRANCO, a_t))
+                y_cur += bb_lh[3] + 8
+        else:
+            # Sem separador: título inteiro em dourado, 52px
+            font_l2   = get_font(52, bold=True)
+            linhas_l2 = quebrar_titulo(linha2, font_l2, W - 80, draw)
+            for lh in linhas_l2:
+                bb_lh = draw.textbbox((0, 0), lh, font=font_l2)
+                draw.text(((W - bb_lh[2]) // 2, y_cur), lh, font=font_l2,
+                          fill=(*DOURADO, a_t))
+                y_cur += bb_lh[3] + 8
+
+    y3f = y_cur
 
     # ── Separador ─────────────────────────────────────────
     y_sep = y3f + 12
