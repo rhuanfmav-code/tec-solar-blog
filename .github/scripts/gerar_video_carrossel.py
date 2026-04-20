@@ -270,6 +270,40 @@ def parse_post(md_path):
     while len(passos) < 2:
         passos.append("")
 
+    # ── Coletar H2/H3 do corpo para fallback de posts educacionais ──
+    h2_h3_all = [h.strip() for h in re.findall(r'^#{2,3}\s+(.+)', texto, re.MULTILINE)
+                 if not h.strip().startswith('[')]
+
+    # Fallback causas: primeiros 3 H2/H3, depois frases do corpo
+    if all(c == "" for c in causas):
+        fallback_c = h2_h3_all[:3]
+        if not fallback_c:
+            m_c = re.search(
+                r'\[TEXTO DO POST[^\]]*\]\s*\n+[-─]+\s*\n+(.*)', texto, re.DOTALL
+            )
+            if m_c:
+                corpo = re.sub(r'\*\*(.+?)\*\*', r'\1', m_c.group(1))
+                sents = [s.strip() for s in re.split(r'(?<=[.!?])\s+', corpo)
+                         if len(s.strip()) > 20 and not s.strip().startswith('#')]
+                fallback_c = [s[:75] for s in sents[:3]]
+        causas = (fallback_c + ["", "", ""])[:3]
+
+    # Fallback passos: próximos 2 H2/H3 (diferentes dos usados em causas)
+    if all(p == "" for p in passos):
+        fallback_p = h2_h3_all[3:5]
+        if not fallback_p:
+            fallback_p = h2_h3_all[:2]
+        if not fallback_p:
+            m_p = re.search(
+                r'\[TEXTO DO POST[^\]]*\]\s*\n+[-─]+\s*\n+(.*)', texto, re.DOTALL
+            )
+            if m_p:
+                corpo = re.sub(r'\*\*(.+?)\*\*', r'\1', m_p.group(1))
+                sents = [s.strip() for s in re.split(r'(?<=[.!?])\s+', corpo)
+                         if len(s.strip()) > 20 and not s.strip().startswith('#')]
+                fallback_p = [s[:100] for s in sents[3:5]]
+        passos = (fallback_p + ["", ""])[:2]
+
     # Extrair problema dos 2 primeiros parágrafos do corpo
     m_intro = re.search(
         r'\[TEXTO DO POST[^\]]*\]\s*\n+[-─]+\s*\n+(.*?)(?=\n---|\n##|\Z)',
@@ -754,7 +788,7 @@ def frame_s1(t, dados):
         sep_match = re.search(r'[:—]', titulo)
         if sep_match:
             linha2 = titulo[:sep_match.start()].strip()
-            linha3 = titulo[sep_match.end():].strip()
+            linha3 = dados["subtitulo"]   # subtitulo já é a parte após ":" — não re-extrair
         else:
             linha2 = titulo
             linha3 = ""
@@ -819,16 +853,17 @@ def frame_s1(t, dados):
         draw.rectangle([int(W * 0.18), y_sep, int(W * 0.82), y_sep + 2],
                        fill=(*CIANO, int(200 * pt)))
 
-    # ── Linha 4: subtítulo (branco, 42px, máx 2 linhas) ──
-    font_l4 = get_font(42, bold=True)
-    linhas  = quebrar_titulo(dados["subtitulo"], font_l4, W - 80, draw)[:2]
-    y4      = y_sep + 18
-    for i, linha in enumerate(linhas):
-        ps_i = eio(prog(t, 2.5 + i * 0.8, 3.0 + i * 0.8))
-        bb_l = draw.textbbox((0, 0), linha, font=font_l4)
-        draw.text(((W - bb_l[2]) // 2, y4), linha, font=font_l4,
-                  fill=(*BRANCO, int(255 * ps_i)))
-        y4 += bb_l[3] + 10
+    # ── Linha 4: subtítulo — apenas no modo falha/erro (educacional já mostra em linha3) ──
+    if modo_falha:
+        font_l4 = get_font(42, bold=True)
+        linhas  = quebrar_titulo(dados["subtitulo"], font_l4, W - 80, draw)[:2]
+        y4      = y_sep + 18
+        for i, linha in enumerate(linhas):
+            ps_i = eio(prog(t, 2.5 + i * 0.8, 3.0 + i * 0.8))
+            bb_l = draw.textbbox((0, 0), linha, font=font_l4)
+            draw.text(((W - bb_l[2]) // 2, y4), linha, font=font_l4,
+                      fill=(*BRANCO, int(255 * ps_i)))
+            y4 += bb_l[3] + 10
 
     # ── Barra de progresso durante pausa ──────────────────
     draw_progress_bar_fill(draw, pp)
