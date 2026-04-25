@@ -214,14 +214,22 @@ def _truncar_causa(texto, max_chars=55):
 
 
 def _extrair_causas(texto):
-    """Extrai causas da seção de causa raiz. Nunca retorna títulos H2/H3."""
-    # Coletar todos os títulos H2/H3 normalizados para filtrar
+    """Extrai causas numeradas da seção 'O que causa'. Toma o texto ANTES de ' — '."""
     todos_titulos = {
         re.sub(r'\*+', '', h).strip().lower()
         for h in re.findall(r'^#{2,3}\s+(.+)', texto, re.MULTILINE)
     }
 
-    causas = []
+    causas_lista = []
+
+    def _parte_antes_traco(item_txt):
+        """Retorna o texto antes de ' — ' (traço duplo com espaços), ou o item inteiro."""
+        txt = re.sub(r'\s+', ' ', item_txt.strip())
+        if ' — ' in txt:
+            return txt.split(' — ', 1)[0].strip()
+        if ' - ' in txt:
+            return txt.split(' - ', 1)[0].strip()
+        return txt
 
     # 1. Localizar seção com palavras-chave de causa
     m = re.search(
@@ -230,52 +238,82 @@ def _extrair_causas(texto):
     )
     if m:
         secao = re.sub(r'\*\*(.+?)\*\*', r'\1', m.group(1))
-        secao = re.sub(r'\*(.+?)\*', r'\1', secao)
+        secao = re.sub(r'\*(.+?)\*',     r'\1', secao)
 
-        # Pegar itens de lista: "- ", "* " ou "1. "
-        itens = re.findall(
-            r'(?m)^(?:[-*]|\d+\.)\s+(.+?)(?=\n(?:[-*]|\d+\.)\s|\n\n|\Z)',
+        # Prioridade 1: itens numerados — "1. ", "2. ", "3. " etc.
+        itens_num = re.findall(
+            r'(?m)^\d+\.\s+(.+?)(?=\n\d+\.\s|\n\n|\Z)',
             secao, re.DOTALL
         )
-        for item in itens:
-            # Parte antes de — ou : para brevidade
-            parte = re.split(r'[—:]', item.strip(), maxsplit=1)[0].strip()
-            parte = re.sub(r'\s+', ' ', parte)
-            if parte.lower() in todos_titulos or len(parte) < 6:
-                continue
-            causas.append(_truncar_causa(parte))
+        for item in itens_num:
+            parte = _parte_antes_traco(item)
+            parte = re.sub(r'\s+', ' ', parte).strip()
+            if parte.lower() not in todos_titulos and len(parte) >= 6:
+                causas_lista.append(_truncar_causa(parte))
 
-        # Se não encontrou lista, pegar frases do parágrafo
-        if not causas:
+        # Prioridade 2: itens com bullet (se não encontrou numerados)
+        if not causas_lista:
+            itens_bullet = re.findall(
+                r'(?m)^[-*]\s+(.+?)(?=\n[-*]\s|\n\n|\Z)',
+                secao, re.DOTALL
+            )
+            for item in itens_bullet:
+                parte = _parte_antes_traco(item)
+                parte = re.sub(r'\s+', ' ', parte).strip()
+                if parte.lower() not in todos_titulos and len(parte) >= 6:
+                    causas_lista.append(_truncar_causa(parte))
+
+        # Prioridade 3: frases do parágrafo (se ainda não encontrou)
+        if not causas_lista:
             frases = [s.strip() for s in re.split(r'(?<=[.!?])\s+', secao)
                       if len(s.strip()) > 20 and not s.strip().startswith('#')]
             for frase in frases[:4]:
                 parte = re.sub(r'\s+', ' ', frase)
                 if parte.lower() not in todos_titulos:
-                    causas.append(_truncar_causa(parte))
+                    causas_lista.append(_truncar_causa(parte))
 
-    # 2. Fallback: qualquer lista no corpo do post
-    if not causas:
+    # 2. Fallback: listas numeradas no corpo do post
+    if not causas_lista:
         m_corpo = re.search(
             r'\[TEXTO DO POST[^\]]*\]\s*\n+[-─]+\s*\n+(.*)', texto, re.DOTALL
         )
         if m_corpo:
             corpo = re.sub(r'\*\*(.+?)\*\*', r'\1', m_corpo.group(1))
-            corpo = re.sub(r'\*(.+?)\*', r'\1', corpo)
+            corpo = re.sub(r'\*(.+?)\*',     r'\1', corpo)
+            itens = re.findall(
+                r'(?m)^\d+\.\s+(.+?)(?=\n\d+\.\s|\n\n|\Z)',
+                corpo, re.DOTALL
+            )
+            for item in itens[:6]:
+                parte = _parte_antes_traco(item)
+                parte = re.sub(r'\s+', ' ', parte).strip()
+                if parte.lower() not in todos_titulos and len(parte) >= 6:
+                    causas_lista.append(_truncar_causa(parte))
+                    if len(causas_lista) >= 3:
+                        break
+
+    # 3. Fallback: qualquer lista no corpo
+    if not causas_lista:
+        m_corpo = re.search(
+            r'\[TEXTO DO POST[^\]]*\]\s*\n+[-─]+\s*\n+(.*)', texto, re.DOTALL
+        )
+        if m_corpo:
+            corpo = re.sub(r'\*\*(.+?)\*\*', r'\1', m_corpo.group(1))
+            corpo = re.sub(r'\*(.+?)\*',     r'\1', corpo)
             itens = re.findall(
                 r'(?m)^(?:[-*]|\d+\.)\s+(.+?)(?=\n(?:[-*]|\d+\.)\s|\n\n|\Z)',
                 corpo, re.DOTALL
             )
-            for item in itens[:8]:
-                parte = re.split(r'[—:]', item.strip(), maxsplit=1)[0].strip()
-                parte = re.sub(r'\s+', ' ', parte)
+            for item in itens[:6]:
+                parte = _parte_antes_traco(item)
+                parte = re.sub(r'\s+', ' ', parte).strip()
                 if parte.lower() not in todos_titulos and len(parte) >= 6:
-                    causas.append(_truncar_causa(parte))
-                    if len(causas) >= 6:
+                    causas_lista.append(_truncar_causa(parte))
+                    if len(causas_lista) >= 3:
                         break
 
-    # 3. Fallback final: primeiras frases do corpo (nunca títulos)
-    if not causas:
+    # 4. Fallback final: primeiras frases do corpo
+    if not causas_lista:
         m_corpo = re.search(
             r'\[TEXTO DO POST[^\]]*\]\s*\n+[-─]+\s*\n+(.*)', texto, re.DOTALL
         )
@@ -285,10 +323,12 @@ def _extrair_causas(texto):
                       if len(s.strip()) > 20 and not s.strip().startswith('#')]
             for frase in frases[:4]:
                 if frase.lower() not in todos_titulos:
-                    causas.append(_truncar_causa(frase))
+                    causas_lista.append(_truncar_causa(frase))
 
-    print(f"CAUSAS EXTRAIDAS: {causas}")
-    return causas
+    # Máximo 3 causas
+    causas_lista = causas_lista[:3]
+    print(f"CAUSAS EXTRAIDAS: {causas_lista}")
+    return causas_lista
 
 
 def parse_post(md_path):
@@ -973,16 +1013,50 @@ def frame_s2(t, dados):
         draw.rectangle([60, 470, 420, 472],
                        fill=(*CIANO, int(200 * pt)))
 
-    # Bullets palavra por palavra
-    font_b = get_font(32)
-    t_now  = 2.5
-    for i, causa in enumerate(dados["causas"]):
-        by  = 510 + i * 200
-        cor = CIANO if i < 2 else DOURADO
-        ab0 = int(255 * eio(prog(t, t_now, t_now + 0.15)))
-        draw.ellipse([60, by + 10, 86, by + 36], fill=(*cor, ab0))
-        t_now = draw_palavras_animadas(draw, causa, font_b, 104, by, t, t_now, BRANCO, W - 148)
-        t_now += 0.3
+    # Causas: label "CAUSA X" (ciano, 28pt bold) + texto (branco, 36pt)
+    # Cada bloco aparece progressivamente com 1.5s de intervalo entre eles
+    # Duração mínima do slide: 3 causas × 1.5s + 3s leitura = 7.5s de conteúdo
+    font_label = get_font(28, bold=True)
+    font_causa = get_font(36)
+    INTERVAL   = 1.5   # segundos entre o início de cada bloco
+    T_START    = 2.5   # quando o primeiro bloco começa a aparecer
+    FADE_BLOCK = 0.3   # duração do fade-in de cada bloco
+
+    causas_exibir = [c for c in dados["causas"][:3] if c]
+    y_bloco = 510
+
+    for i, causa in enumerate(causas_exibir):
+        t_inicio_bloco = T_START + i * INTERVAL
+        alpha_bloco    = int(255 * eio(prog(t, t_inicio_bloco,
+                                           t_inicio_bloco + FADE_BLOCK)))
+
+        # Label: "CAUSA 1", "CAUSA 2", "CAUSA 3" — ciano #00B4D8, 28pt bold
+        label_txt = f"CAUSA {i + 1}"
+        bb_label  = draw.textbbox((0, 0), label_txt, font=font_label)
+        draw.text((60, y_bloco), label_txt, font=font_label,
+                  fill=(*CIANO, alpha_bloco))
+        label_h = bb_label[3] - bb_label[1]
+
+        # Texto da causa — branco #FFFFFF, 36pt, abaixo do label
+        causa_y  = y_bloco + label_h + 8
+        linhas_c = wrap_text(draw, causa, font_causa, W - 120)
+        bb_text  = draw.textbbox((0, 0), linhas_c[0], font=font_causa)
+        line_h   = bb_text[3] - bb_text[1]
+        for j, linha in enumerate(linhas_c):
+            draw.text((60, causa_y + j * (line_h + 6)), linha,
+                      font=font_causa, fill=(*BRANCO, alpha_bloco))
+        texto_h = len(linhas_c) * (line_h + 6)
+
+        # Separador ciano fino entre causas (exceto após a última)
+        if i < len(causas_exibir) - 1:
+            sep_y = causa_y + texto_h + 18
+            sep_a = int(180 * eio(prog(t, t_inicio_bloco + FADE_BLOCK,
+                                       t_inicio_bloco + FADE_BLOCK + 0.3)))
+            draw.rectangle([60, sep_y, W - 60, sep_y + 2],
+                           fill=(*CIANO, sep_a))
+            y_bloco = sep_y + 2 + 18
+        else:
+            y_bloco = causa_y + texto_h + 20
 
     draw_progress_bar_fill(draw, pp)
 
