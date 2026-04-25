@@ -162,8 +162,4 @@ IMAGEM SECUNDÁRIA:
 → Converter para WebP — máximo 150 KB
 
 <!-- trigger-video-workflow -->
-
-<!-- debug-elevenlabs-v2 -->
-<!-- trigger-adam-voice -->
-
-
+<!-- trigger-v3-fixed -->
