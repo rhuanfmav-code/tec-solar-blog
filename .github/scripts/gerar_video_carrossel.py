@@ -202,6 +202,95 @@ def get_font(size, bold=False):
 # PARSE DO POST MARKDOWN
 # ════════════════════════════════════════════════════════════
 
+def _truncar_causa(texto, max_chars=55):
+    """Trunca à última palavra completa antes de max_chars e adiciona '...'."""
+    texto = re.sub(r'\*+', '', texto)
+    texto = re.sub(r'\s+', ' ', texto).strip()
+    if len(texto) <= max_chars:
+        return texto
+    partes = texto[:max_chars].rsplit(' ', 1)
+    base = partes[0] if len(partes) > 1 else texto[:max_chars]
+    return base.rstrip('.,;:') + '...'
+
+
+def _extrair_causas(texto):
+    """Extrai causas da seção de causa raiz. Nunca retorna títulos H2/H3."""
+    # Coletar todos os títulos H2/H3 normalizados para filtrar
+    todos_titulos = {
+        re.sub(r'\*+', '', h).strip().lower()
+        for h in re.findall(r'^#{2,3}\s+(.+)', texto, re.MULTILINE)
+    }
+
+    causas = []
+
+    # 1. Localizar seção com palavras-chave de causa
+    m = re.search(
+        r'^#{2,3}\s+[^\n]*(?:caus[ao]|por\s*que|origem|motivo)[^\n]*\n(.*?)(?=\n#{2,3}\s|\Z)',
+        texto, re.DOTALL | re.MULTILINE | re.IGNORECASE
+    )
+    if m:
+        secao = re.sub(r'\*\*(.+?)\*\*', r'\1', m.group(1))
+        secao = re.sub(r'\*(.+?)\*', r'\1', secao)
+
+        # Pegar itens de lista: "- ", "* " ou "1. "
+        itens = re.findall(
+            r'(?m)^(?:[-*]|\d+\.)\s+(.+?)(?=\n(?:[-*]|\d+\.)\s|\n\n|\Z)',
+            secao, re.DOTALL
+        )
+        for item in itens:
+            # Parte antes de — ou : para brevidade
+            parte = re.split(r'[—:]', item.strip(), maxsplit=1)[0].strip()
+            parte = re.sub(r'\s+', ' ', parte)
+            if parte.lower() in todos_titulos or len(parte) < 6:
+                continue
+            causas.append(_truncar_causa(parte))
+
+        # Se não encontrou lista, pegar frases do parágrafo
+        if not causas:
+            frases = [s.strip() for s in re.split(r'(?<=[.!?])\s+', secao)
+                      if len(s.strip()) > 20 and not s.strip().startswith('#')]
+            for frase in frases[:4]:
+                parte = re.sub(r'\s+', ' ', frase)
+                if parte.lower() not in todos_titulos:
+                    causas.append(_truncar_causa(parte))
+
+    # 2. Fallback: qualquer lista no corpo do post
+    if not causas:
+        m_corpo = re.search(
+            r'\[TEXTO DO POST[^\]]*\]\s*\n+[-─]+\s*\n+(.*)', texto, re.DOTALL
+        )
+        if m_corpo:
+            corpo = re.sub(r'\*\*(.+?)\*\*', r'\1', m_corpo.group(1))
+            corpo = re.sub(r'\*(.+?)\*', r'\1', corpo)
+            itens = re.findall(
+                r'(?m)^(?:[-*]|\d+\.)\s+(.+?)(?=\n(?:[-*]|\d+\.)\s|\n\n|\Z)',
+                corpo, re.DOTALL
+            )
+            for item in itens[:8]:
+                parte = re.split(r'[—:]', item.strip(), maxsplit=1)[0].strip()
+                parte = re.sub(r'\s+', ' ', parte)
+                if parte.lower() not in todos_titulos and len(parte) >= 6:
+                    causas.append(_truncar_causa(parte))
+                    if len(causas) >= 6:
+                        break
+
+    # 3. Fallback final: primeiras frases do corpo (nunca títulos)
+    if not causas:
+        m_corpo = re.search(
+            r'\[TEXTO DO POST[^\]]*\]\s*\n+[-─]+\s*\n+(.*)', texto, re.DOTALL
+        )
+        if m_corpo:
+            corpo = re.sub(r'\*\*(.+?)\*\*', r'\1', m_corpo.group(1))
+            frases = [s.strip() for s in re.split(r'(?<=[.!?])\s+', corpo)
+                      if len(s.strip()) > 20 and not s.strip().startswith('#')]
+            for frase in frases[:4]:
+                if frase.lower() not in todos_titulos:
+                    causas.append(_truncar_causa(frase))
+
+    print(f"CAUSAS EXTRAIDAS: {causas}")
+    return causas
+
+
 def parse_post(md_path):
     with open(md_path, encoding="utf-8") as f:
         texto = f.read()
@@ -243,17 +332,7 @@ def parse_post(md_path):
               "sungrow", "weg", "hoymiles", "drive"]
     marca = next((mk for mk in marcas if mk in titulo_seo.lower()), None)
 
-    m_causa = re.search(
-        r'## [^\n]*[Cc]aus[^\n]*\n(.*?)(?=\n## |\Z)', texto, re.DOTALL
-    )
-    causas = []
-    if m_causa:
-        itens = re.findall(
-            r'(?m)^\d+\. +(.+?)(?=\n\d+\.|\n\n|\Z)', m_causa.group(1), re.DOTALL
-        )
-        for item in itens[:3]:
-            parte = item.split("—", 1)[0].strip()
-            causas.append(re.sub(r'\s+', ' ', parte)[:75])
+    causas = _extrair_causas(texto)
     while len(causas) < 3:
         causas.append("")
 
@@ -262,47 +341,24 @@ def parse_post(md_path):
     )
     passos = []
     if m_diag:
-        itens = re.findall(
-            r'(?m)^\d+\. +(.+?)(?=\n\d+\.|\n\n|\Z)', m_diag.group(1), re.DOTALL
+        secao_diag = re.sub(r'\*\*(.+?)\*\*', r'\1', m_diag.group(1))
+        itens_diag = re.findall(
+            r'(?m)^(?:[-*]|\d+\.)\s+(.+?)(?=\n(?:[-*]|\d+\.)\s|\n\n|\Z)',
+            secao_diag, re.DOTALL
         )
-        for item in itens[:2]:
+        for item in itens_diag[:2]:
             passos.append(re.sub(r'\s+', ' ', item.strip())[:100])
+    if not passos:
+        m_diag2 = re.search(
+            r'\[TEXTO DO POST[^\]]*\]\s*\n+[-─]+\s*\n+(.*)', texto, re.DOTALL
+        )
+        if m_diag2:
+            corpo_d = re.sub(r'\*\*(.+?)\*\*', r'\1', m_diag2.group(1))
+            sents_d = [s.strip() for s in re.split(r'(?<=[.!?])\s+', corpo_d)
+                       if len(s.strip()) > 20 and not s.strip().startswith('#')]
+            passos = [s[:100] for s in sents_d[2:4]]
     while len(passos) < 2:
         passos.append("")
-
-    # ── Coletar H2/H3 do corpo para fallback de posts educacionais ──
-    h2_h3_all = [h.strip() for h in re.findall(r'^#{2,3}\s+(.+)', texto, re.MULTILINE)
-                 if not h.strip().startswith('[')]
-
-    # Fallback causas: primeiros 3 H2/H3, depois frases do corpo
-    if all(c == "" for c in causas):
-        fallback_c = h2_h3_all[:3]
-        if not fallback_c:
-            m_c = re.search(
-                r'\[TEXTO DO POST[^\]]*\]\s*\n+[-─]+\s*\n+(.*)', texto, re.DOTALL
-            )
-            if m_c:
-                corpo = re.sub(r'\*\*(.+?)\*\*', r'\1', m_c.group(1))
-                sents = [s.strip() for s in re.split(r'(?<=[.!?])\s+', corpo)
-                         if len(s.strip()) > 20 and not s.strip().startswith('#')]
-                fallback_c = [s[:75] for s in sents[:3]]
-        causas = (fallback_c + ["", "", ""])[:3]
-
-    # Fallback passos: próximos 2 H2/H3 (diferentes dos usados em causas)
-    if all(p == "" for p in passos):
-        fallback_p = h2_h3_all[3:5]
-        if not fallback_p:
-            fallback_p = h2_h3_all[:2]
-        if not fallback_p:
-            m_p = re.search(
-                r'\[TEXTO DO POST[^\]]*\]\s*\n+[-─]+\s*\n+(.*)', texto, re.DOTALL
-            )
-            if m_p:
-                corpo = re.sub(r'\*\*(.+?)\*\*', r'\1', m_p.group(1))
-                sents = [s.strip() for s in re.split(r'(?<=[.!?])\s+', corpo)
-                         if len(s.strip()) > 20 and not s.strip().startswith('#')]
-                fallback_p = [s[:100] for s in sents[3:5]]
-        passos = (fallback_p + ["", ""])[:2]
 
     # Extrair problema dos 2 primeiros parágrafos do corpo
     m_intro = re.search(
@@ -737,17 +793,18 @@ def transicao_lateral(clip1, clip2, duracao=0.4):
 # ════════════════════════════════════════════════════════════
 
 def frame_s1(t, dados):
+    dur_s1 = dados.get("dur_s1", DUR_S1)
     pf  = eio(prog(t, 0.0, 0.30))
     pc  = eio(prog(t, 0.3, 0.80))
     pe  = eio(prog(t, 0.8, 1.50))
-    pt  = eio(prog(t, 1.5, 2.50))   # zoom + 3D do título
-    pfo = 1.0 - eio(prog(t, 7.5, 8.00))
-    pp  = pause_progress(t, 4.5, DUR_S1)
+    pt  = eio(prog(t, 1.5, 2.50))
+    pfo = 1.0 - eio(prog(t, dur_s1 - 0.5, dur_s1))
+    pp  = pause_progress(t, dur_s1 - PAUSE_DUR - FADE_DUR, dur_s1)
     # Glow pulsa continuamente; arcos flickeiam
     pgl   = 0.5 + 0.5 * math.sin(t * 3.0)
     arc_a = int((35 + 45 * pgl) * pt)
 
-    canvas = montar_base(dados["img_capa"], pf, int(t * 8), pc, t=t, dur=DUR_S1)
+    canvas = montar_base(dados["img_capa"], pf, int(t * 8), pc, t=t, dur=dur_s1)
 
     # ── Raios elétricos nos cantos ──────────────────────────
     arc_layer = Image.new("RGBA", (W, H), (0, 0, 0, 0))
@@ -881,14 +938,15 @@ def frame_s1(t, dados):
 # ════════════════════════════════════════════════════════════
 
 def frame_s2(t, dados):
+    dur_s2 = dados.get("dur_s2", DUR_S2)
     pf  = eio(prog(t, 0.0, 0.30))
     pc  = eio(prog(t, 0.3, 0.80))
     pe  = eio(prog(t, 0.8, 1.50))
     pt  = eio(prog(t, 1.5, 2.50))
-    pfo = 1.0 - eio(prog(t, 9.5, 10.00))
-    pp  = pause_progress(t, 6.5, DUR_S2)
+    pfo = 1.0 - eio(prog(t, dur_s2 - 0.5, dur_s2))
+    pp  = pause_progress(t, dur_s2 - PAUSE_DUR - FADE_DUR, dur_s2)
 
-    canvas = montar_base(dados["img_causa"], pf, int(t * 8) + 100, pc, t=t, dur=DUR_S2)
+    canvas = montar_base(dados["img_causa"], pf, int(t * 8) + 100, pc, t=t, dur=dur_s2)
     layer  = Image.new("RGBA", (W, H), (0, 0, 0, 0))
     draw   = ImageDraw.Draw(layer)
 
@@ -941,14 +999,15 @@ def frame_s2(t, dados):
 # ════════════════════════════════════════════════════════════
 
 def frame_s3(t, dados):
+    dur_s3 = dados.get("dur_s3", DUR_S3)
     pf  = eio(prog(t, 0.0, 0.30))
     pc  = eio(prog(t, 0.3, 0.80))
     pe  = eio(prog(t, 0.8, 1.50))
     pt  = eio(prog(t, 1.5, 2.50))
-    pfo = 1.0 - eio(prog(t, 9.5, 10.00))
-    pp  = pause_progress(t, 6.5, DUR_S3)
+    pfo = 1.0 - eio(prog(t, dur_s3 - 0.5, dur_s3))
+    pp  = pause_progress(t, dur_s3 - PAUSE_DUR - FADE_DUR, dur_s3)
 
-    canvas = montar_base(dados["img_diag"], pf, int(t * 8) + 200, pc, t=t, dur=DUR_S3)
+    canvas = montar_base(dados["img_diag"], pf, int(t * 8) + 200, pc, t=t, dur=dur_s3)
     layer  = Image.new("RGBA", (W, H), (0, 0, 0, 0))
     draw   = ImageDraw.Draw(layer)
 
@@ -1134,31 +1193,40 @@ def gerar_video(numero_post, md_path):
     print(f"Script voz ({len(script_voz.split())} palavras):\n{script_voz[:120]}...")
     audio_path = gerar_voiceover(script_voz, api_key)
 
-    audio_clip      = None
-    slide4_duration = DUR_S4
+    audio_clip = None
+    dur_s1 = DUR_S1
+    dur_s2 = DUR_S2
+    dur_s3 = DUR_S3
+    dur_s4 = DUR_S4
 
     if audio_path:
         try:
             audio_clip = AudioFileClip(audio_path).volumex(7.5)
-            total_base = DUR_S1 + DUR_S2 + DUR_S3   # 28s
-            if audio_clip.duration > total_base + DUR_S4:
-                slide4_duration = audio_clip.duration - total_base
-                print(f"⏱  Slide 4 estendido para {slide4_duration:.1f}s")
-            elif audio_clip.duration < total_base:
-                slide4_duration = DUR_S4
-            else:
-                slide4_duration = max(DUR_S4, audio_clip.duration - total_base)
+            duracao_vo = audio_clip.duration
+            print(f"⏱  Duração real do voiceover: {duracao_vo:.2f}s")
+
+            # Distribuição proporcional: S1=25%, S2=30%, S3=30%, S4=15%
+            # Cada slide recebe NO MÍNIMO sua porção do voiceover + 1.5s
+            dur_s1 = max(DUR_S1, duracao_vo * 0.25 + 1.5)
+            dur_s2 = max(DUR_S2, duracao_vo * 0.30 + 1.5)
+            dur_s3 = max(DUR_S3, duracao_vo * 0.30 + 1.5)
+            dur_s4 = max(DUR_S4, duracao_vo * 0.15 + 1.5)
+            print(f"⏱  Durações: S1={dur_s1:.1f}s S2={dur_s2:.1f}s "
+                  f"S3={dur_s3:.1f}s S4={dur_s4:.1f}s")
         except Exception as exc:
             print(f"⚠️  Erro ao carregar áudio: {exc}")
             audio_clip = None
 
-    dados["dur_s4"] = slide4_duration
+    dados["dur_s1"] = dur_s1
+    dados["dur_s2"] = dur_s2
+    dados["dur_s3"] = dur_s3
+    dados["dur_s4"] = dur_s4
 
     # ── Clips ────────────────────────────────────────────────
-    c1 = VideoClip(lambda t, d=dados: frame_s1(t, d), duration=DUR_S1)
-    c2 = VideoClip(lambda t, d=dados: frame_s2(t, d), duration=DUR_S2)
-    c3 = VideoClip(lambda t, d=dados: frame_s3(t, d), duration=DUR_S3)
-    c4 = VideoClip(lambda t, d=dados: frame_s4(t, d), duration=slide4_duration)
+    c1 = VideoClip(lambda t, d=dados: frame_s1(t, d), duration=dados["dur_s1"])
+    c2 = VideoClip(lambda t, d=dados: frame_s2(t, d), duration=dados["dur_s2"])
+    c3 = VideoClip(lambda t, d=dados: frame_s3(t, d), duration=dados["dur_s3"])
+    c4 = VideoClip(lambda t, d=dados: frame_s4(t, d), duration=dados["dur_s4"])
     # Transições laterais entre slides (direita → esquerda, 0.4s)
     video = concatenate_videoclips([
         c1,
