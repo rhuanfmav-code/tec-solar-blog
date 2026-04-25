@@ -56,14 +56,10 @@ H2: Conclusão
 - Use OBRIGATORIAMENTE o bloco de CTA abaixo, sem alterações:
 
 Condenaram seu inversor por causa desse erro?
-
 Antes de comprar equipamento novo, envie para a nossa bancada. A TEC Solar realiza diagnóstico eletrônico completo em nível de componente — abrimos o inversor, medimos a placa, identificamos a causa raiz e entregamos um laudo técnico detalhado.
-
 Se o reparo for viável, você recebe o equipamento funcionando por uma fração do custo de substituição. Se não for, o laudo serve de base para qualquer decisão.
-
 Atendemos todo o Brasil via logística reversa.
-
-👉 [Envie seu inversor agora](https://wa.me/5538998891587) | [Falar no WhatsApp](https://wa.me/5538998891587)
+👉 Envie seu inversor agora | Falar no WhatsApp
 PARÂMETROS DO RASCUNHO:
 - 900 a 1200 palavras
 - Parágrafos curtos: máximo 3 a 4 linhas
