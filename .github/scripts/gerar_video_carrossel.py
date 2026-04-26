@@ -202,15 +202,15 @@ def get_font(size, bold=False):
 # PARSE DO POST MARKDOWN
 # ════════════════════════════════════════════════════════════
 
-def _truncar_causa(texto, max_chars=55):
-    """Trunca à última palavra completa antes de max_chars e adiciona '...'."""
-    texto = re.sub(r'\*+', '', texto)
-    texto = re.sub(r'\s+', ' ', texto).strip()
-    if len(texto) <= max_chars:
-        return texto
-    partes = texto[:max_chars].rsplit(' ', 1)
-    base = partes[0] if len(partes) > 1 else texto[:max_chars]
-    return base.rstrip('.,;:') + '...'
+def _parte_antes_traco(texto):
+    """Retorna o texto antes de ' — ' (ou ' - '), ou o texto completo se não houver traço."""
+    txt = re.sub(r'\*+', '', texto)
+    txt = re.sub(r'\s+', ' ', txt).strip()
+    if ' — ' in txt:
+        return txt.split(' — ', 1)[0].strip()
+    if ' - ' in txt:
+        return txt.split(' - ', 1)[0].strip()
+    return txt
 
 
 def _extrair_causas(texto):
@@ -221,15 +221,6 @@ def _extrair_causas(texto):
     }
 
     causas_lista = []
-
-    def _parte_antes_traco(item_txt):
-        """Retorna o texto antes de ' — ' (traço duplo com espaços), ou o item inteiro."""
-        txt = re.sub(r'\s+', ' ', item_txt.strip())
-        if ' — ' in txt:
-            return txt.split(' — ', 1)[0].strip()
-        if ' - ' in txt:
-            return txt.split(' - ', 1)[0].strip()
-        return txt
 
     # 1. Localizar seção com palavras-chave de causa
     m = re.search(
@@ -249,7 +240,7 @@ def _extrair_causas(texto):
             parte = _parte_antes_traco(item)
             parte = re.sub(r'\s+', ' ', parte).strip()
             if parte.lower() not in todos_titulos and len(parte) >= 6:
-                causas_lista.append(_truncar_causa(parte))
+                causas_lista.append(parte)
 
         # Prioridade 2: itens com bullet (se não encontrou numerados)
         if not causas_lista:
@@ -261,16 +252,16 @@ def _extrair_causas(texto):
                 parte = _parte_antes_traco(item)
                 parte = re.sub(r'\s+', ' ', parte).strip()
                 if parte.lower() not in todos_titulos and len(parte) >= 6:
-                    causas_lista.append(_truncar_causa(parte))
+                    causas_lista.append(parte)
 
         # Prioridade 3: frases do parágrafo (se ainda não encontrou)
         if not causas_lista:
             frases = [s.strip() for s in re.split(r'(?<=[.!?])\s+', secao)
                       if len(s.strip()) > 20 and not s.strip().startswith('#')]
             for frase in frases[:4]:
-                parte = re.sub(r'\s+', ' ', frase)
+                parte = _parte_antes_traco(re.sub(r'\s+', ' ', frase))
                 if parte.lower() not in todos_titulos:
-                    causas_lista.append(_truncar_causa(parte))
+                    causas_lista.append(parte)
 
     # 2. Fallback: listas numeradas no corpo do post
     if not causas_lista:
@@ -288,7 +279,7 @@ def _extrair_causas(texto):
                 parte = _parte_antes_traco(item)
                 parte = re.sub(r'\s+', ' ', parte).strip()
                 if parte.lower() not in todos_titulos and len(parte) >= 6:
-                    causas_lista.append(_truncar_causa(parte))
+                    causas_lista.append(parte)
                     if len(causas_lista) >= 3:
                         break
 
@@ -308,7 +299,7 @@ def _extrair_causas(texto):
                 parte = _parte_antes_traco(item)
                 parte = re.sub(r'\s+', ' ', parte).strip()
                 if parte.lower() not in todos_titulos and len(parte) >= 6:
-                    causas_lista.append(_truncar_causa(parte))
+                    causas_lista.append(parte)
                     if len(causas_lista) >= 3:
                         break
 
@@ -322,8 +313,9 @@ def _extrair_causas(texto):
             frases = [s.strip() for s in re.split(r'(?<=[.!?])\s+', corpo)
                       if len(s.strip()) > 20 and not s.strip().startswith('#')]
             for frase in frases[:4]:
-                if frase.lower() not in todos_titulos:
-                    causas_lista.append(_truncar_causa(frase))
+                parte = _parte_antes_traco(re.sub(r'\s+', ' ', frase))
+                if parte.lower() not in todos_titulos:
+                    causas_lista.append(parte)
 
     # Máximo 3 causas
     causas_lista = causas_lista[:3]
@@ -387,7 +379,7 @@ def parse_post(md_path):
             secao_diag, re.DOTALL
         )
         for item in itens_diag[:2]:
-            passos.append(re.sub(r'\s+', ' ', item.strip())[:100])
+            passos.append(_parte_antes_traco(re.sub(r'\s+', ' ', item.strip())))
     if not passos:
         m_diag2 = re.search(
             r'\[TEXTO DO POST[^\]]*\]\s*\n+[-─]+\s*\n+(.*)', texto, re.DOTALL
@@ -396,7 +388,7 @@ def parse_post(md_path):
             corpo_d = re.sub(r'\*\*(.+?)\*\*', r'\1', m_diag2.group(1))
             sents_d = [s.strip() for s in re.split(r'(?<=[.!?])\s+', corpo_d)
                        if len(s.strip()) > 20 and not s.strip().startswith('#')]
-            passos = [s[:100] for s in sents_d[2:4]]
+            passos = [_parte_antes_traco(re.sub(r'\s+', ' ', s)) for s in sents_d[2:4]]
     while len(passos) < 2:
         passos.append("")
 
@@ -1017,7 +1009,7 @@ def frame_s2(t, dados):
     # Cada bloco aparece progressivamente com 1.5s de intervalo entre eles
     # Duração mínima do slide: 3 causas × 1.5s + 3s leitura = 7.5s de conteúdo
     font_label = get_font(28, bold=True)
-    font_causa = get_font(36)
+    font_causa = get_font(34)
     INTERVAL   = 1.5   # segundos entre o início de cada bloco
     T_START    = 2.5   # quando o primeiro bloco começa a aparecer
     FADE_BLOCK = 0.3   # duração do fade-in de cada bloco
@@ -1037,9 +1029,9 @@ def frame_s2(t, dados):
                   fill=(*CIANO, alpha_bloco))
         label_h = bb_label[3] - bb_label[1]
 
-        # Texto da causa — branco #FFFFFF, 36pt, abaixo do label
+        # Texto da causa — branco #FFFFFF, 34pt, abaixo do label
         causa_y  = y_bloco + label_h + 8
-        linhas_c = wrap_text(draw, causa, font_causa, W - 120)
+        linhas_c = quebrar_titulo(causa, font_causa, W - 80, draw)
         bb_text  = draw.textbbox((0, 0), linhas_c[0], font=font_causa)
         line_h   = bb_text[3] - bb_text[1]
         for j, linha in enumerate(linhas_c):
@@ -1110,7 +1102,7 @@ def frame_s3(t, dados):
 
     # Passos palavra por palavra
     font_l = get_font(26, bold=True)
-    font_p = get_font(30)
+    font_p = get_font(34)
     t_now  = 2.5
     for i, passo in enumerate(dados["passos"]):
         py  = 490 + i * 300
