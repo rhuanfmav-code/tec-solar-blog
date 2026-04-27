@@ -84,6 +84,20 @@ Atendemos todo o Brasil via logística reversa.
 
 ---
 
+## Estrutura de Posts de Cluster
+
+Quando o tópico do post NÃO tiver marca e código de erro específicos (posts de cluster), usar esta estrutura alternativa de H2s:
+
+1. **H2: O que causa esse problema** — explicação técnica do fenômeno geral
+2. **H2: Como identificar** — checklist de sintomas e verificações práticas
+3. **H2: Quando é falha eletrônica interna** — diferenciação entre causas externas e internas
+4. **H2: Vale a pena consertar?** — análise técnica e financeira objetiva
+5. **CTA padrão com botões** — mesmo bloco HTML fixo de todos os posts
+
+Manter o mesmo processo de humanização (Etapas 1, 2, 3) e os mesmos parâmetros de tamanho (900-1200 palavras).
+
+---
+
 ## Regra obrigatória de título dos posts
 
 O título enviado ao WordPress NUNCA deve incluir o prefixo "Post XX —", "Post XX -" ou "Post XX:".

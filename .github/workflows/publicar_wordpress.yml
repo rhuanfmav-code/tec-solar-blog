@@ -7,15 +7,15 @@ on:
         description: 'Número do post (ex: 07)'
         required: true
         default: '07'
-  push:
-    paths:
-      - 'posts/post-**.md'
+  schedule:
+    - cron: '0 10 * * *'   # 07:00 BRT (UTC-3)
+    - cron: '0 22 * * *'   # 19:00 BRT (UTC-3)
 
 jobs:
   publicar:
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write
 
     steps:
       - name: Checkout repositório
@@ -37,21 +37,24 @@ jobs:
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             NUMERO="${{ github.event.inputs.numero_post }}"
             ARQUIVO="posts/post-$(printf '%02d' $NUMERO).md"
-          else
-            CHANGED=$(git diff --name-only HEAD~1 HEAD 2>/dev/null | grep 'posts/post-' | head -1)
-            if [ -z "$CHANGED" ]; then
-              CHANGED=$(git show --name-only --pretty=format: HEAD 2>/dev/null | grep 'posts/post-' | head -1)
+            echo "ARQUIVO_POST=$ARQUIVO" >> $GITHUB_ENV
+
+          elif [ "${{ github.event_name }}" = "schedule" ]; then
+            ULTIMO=$(grep -oP '(?<=Último post publicado: Post )\d+' publicados.md 2>/dev/null || echo "0")
+            PROXIMO=$((ULTIMO + 1))
+            ARQUIVO="posts/post-$(printf '%02d' $PROXIMO).md"
+            if [ ! -f "$ARQUIVO" ]; then
+              echo "Post $PROXIMO ainda não gerado. Pulando esta execução."
+              echo "SKIP_PUBLISH=true" >> $GITHUB_ENV
+              exit 0
             fi
-            if [ -z "$CHANGED" ]; then
-              echo "Nenhum arquivo de post encontrado no commit atual. Abortando."
-              exit 1
-            fi
-            ARQUIVO="$CHANGED"
+            echo "ARQUIVO_POST=$ARQUIVO" >> $GITHUB_ENV
+            echo "PROXIMO_NUM=$PROXIMO" >> $GITHUB_ENV
+            echo "Publicando: $ARQUIVO"
           fi
-          echo "ARQUIVO_POST=$ARQUIVO" >> $GITHUB_ENV
-          echo "Arquivo detectado: $ARQUIVO"
 
       - name: Publicar no WordPress
+        if: env.SKIP_PUBLISH != 'true'
         env:
           WP_URL:          ${{ secrets.WP_URL }}
           WP_USER:         ${{ secrets.WP_USER }}
@@ -59,3 +62,17 @@ jobs:
           UNSPLASH_ACCESS_KEY: ${{ secrets.UNSPLASH_ACCESS_KEY }}
         run: |
           python3 .github/scripts/publicar_wordpress.py "$ARQUIVO_POST"
+
+      - name: Atualizar publicados.md
+        if: github.event_name == 'schedule' && env.SKIP_PUBLISH != 'true'
+        run: |
+          PROXIMO="${PROXIMO_NUM}"
+          SEGUINTE=$((PROXIMO + 1))
+          printf '# Controle de Posts Publicados\n\nÚltimo post publicado: Post %s\nPróximo post a publicar: Post %s\n' \
+            "$PROXIMO" "$SEGUINTE" > publicados.md
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add publicados.md
+          git commit -m "Publicado: Post $(printf '%02d' $PROXIMO)"
+          git pull --rebase origin main
+          git push origin main

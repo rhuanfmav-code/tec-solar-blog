@@ -300,7 +300,7 @@ IDENTIDADE DA TEC SOLAR
 PÚBLICO-ALVO PRIMÁRIO: integradores solares, técnicos, empresas de energia
 PÚBLICO-ALVO SECUNDÁRIO: donos de sistemas com equipamento parado
 ════════════════════════════════════
-PARTE 2 — CALENDÁRIO EDITORIAL (83 posts)
+PARTE 2 — CALENDÁRIO EDITORIAL (91 posts)
 ════════════════════════════════════
 RODADA 1
 Post 01 — Growatt Erro 102: Falha de Isolamento (String Leakage) — causa raiz e como diagnosticar na bancada
@@ -336,65 +336,73 @@ Post 28 — WEG E006: Tensão de Rede Fora do Padrão — instabilidade da conce
 Post 29 — Canadian Solar Falha 205: Tensão de Rede Fora do Limite — diagnóstico completo
 Post 30 — Hoymiles F07: Temperatura Alta — microinversor sem ventilação adequada
 Post 31 — ABB F018: Temperatura Alta — ventilador ou dissipador com defeito
-Post 32 — Capacitores eletrolíticos em inversores: vida útil, degradação e quando trocar
-Post 33 — Drive solar para bombeamento: os 5 defeitos mais comuns e como diagnosticar
+Post 32 — [CLUSTER] Por que inversores solares falham mais no verão — calor, poeira e ciclos térmicos
+Post 33 — Capacitores eletrolíticos em inversores: vida útil, degradação e quando trocar
+Post 34 — Drive solar para bombeamento: os 5 defeitos mais comuns e como diagnosticar
 RODADA 4
-Post 34 — Growatt Erro 117: Tensão CC Alta Demais — string mal configurada ou falha no circuito de medição?
-Post 35 — Fronius State 307: Falha no Ventilador Interno — substituição simples ou sintoma de problema maior?
-Post 36 — Deye F17: Sobretensão do Barramento DC — falha no circuito de pré-carga explicada
-Post 37 — SMA 6120: Falha de Hardware Interno — placa principal danificada, o que é recuperável
-Post 38 — Sungrow Err 026: Corrente de Fuga CC — cabeamento CC com defeito
-Post 39 — WEG E012: Temperatura Elevada — ventilador com defeito no inversor WEG
-Post 40 — Canadian Solar Falha 301: Temperatura Interna Alta — sistema de refrigeração
-Post 41 — Hoymiles F09: Falha de Comunicação DTU — módulo com problema
-Post 42 — ABB F029: Falha de Hardware — dano na placa de potência
-Post 43 — Placa de controle vs. placa de potência: como diferenciar onde está o defeito
-Post 44 — Inversor fora de garantia: trocar ou reparar? A análise técnica e financeira
+Post 35 — [CLUSTER] Quais marcas de inversores chegam mais na bancada — e por quê
+Post 36 — Growatt Erro 117: Tensão CC Alta Demais — string mal configurada ou falha no circuito de medição?
+Post 37 — Fronius State 307: Falha no Ventilador Interno — substituição simples ou sintoma de problema maior?
+Post 38 — [CLUSTER] Inversor dentro da garantia: o fabricante pode negar o reparo? O que diz a lei
+Post 39 — Deye F17: Sobretensão do Barramento DC — falha no circuito de pré-carga explicada
+Post 40 — SMA 6120: Falha de Hardware Interno — placa principal danificada, o que é recuperável
+Post 41 — [CLUSTER] Como funciona a logística reversa de equipamento eletrônico no Brasil
+Post 42 — Sungrow Err 026: Corrente de Fuga CC — cabeamento CC com defeito
+Post 43 — WEG E012: Temperatura Elevada — ventilador com defeito no inversor WEG
+Post 44 — [CLUSTER] Quanto custa reparar um inversor vs. comprar um novo — a conta real
+Post 45 — Canadian Solar Falha 301: Temperatura Interna Alta — sistema de refrigeração
+Post 46 — Hoymiles F09: Falha de Comunicação DTU — módulo com problema
+Post 47 — [CLUSTER] Reparo de inversor solar: o que o técnico precisa saber antes de enviar para bancada
+Post 48 — ABB F029: Falha de Hardware — dano na placa de potência
+Post 49 — Placa de controle vs. placa de potência: como diferenciar onde está o defeito
+Post 50 — [CLUSTER] Erros mais comuns de instalação que causam falha prematura no inversor
+Post 51 — Inversor fora de garantia: trocar ou reparar? A análise técnica e financeira
+Post 52 — Growatt Erro 124: Temperatura Interna Elevada — ventilador, dissipador ou sensor com defeito?
+Post 53 — [CLUSTER] Por que o laudo técnico é essencial antes de acionar seguro ou garantia
 RODADA 5
-Post 45 — Growatt Erro 124: Temperatura Interna Elevada — ventilador, dissipador ou sensor com defeito?
-Post 46 — Fronius State 408: Falha de Hardware na Placa de Potência — diagnóstico em nível de componente
-Post 47 — Deye F18: Corrente de Fuga CA Alta — isolamento comprometido, como localizar o ponto
-Post 48 — SMA 7702: Temperatura Crítica do Dissipador — ventilador ou ambiente como causa
-Post 49 — Sungrow Err 043: Temperatura Interna Alta — ventilador ou sobrecarga?
-Post 50 — WEG E018: Corrente de Fuga — isolamento comprometido, rastreamento do ponto
-Post 51 — Canadian Solar Falha 401: Falha de Hardware — dano eletrônico interno
-Post 52 — Hoymiles F12: Falha de Hardware — dano eletrônico interno em microinversor
-Post 53 — ABB F037: Falha de Rede CA — oscilação ou desconexão da rede elétrica
-Post 54 — Relés de bypass em inversores solares: falha silenciosa que para o sistema
-Post 55 — Superaquecimento de inversor solar: causas, consequências e como evitar
+Post 54 — Fronius State 408: Falha de Hardware na Placa de Potência — diagnóstico em nível de componente
+Post 55 — Deye F18: Corrente de Fuga CA Alta — isolamento comprometido, como localizar o ponto
+Post 56 — SMA 7702: Temperatura Crítica do Dissipador — ventilador ou ambiente como causa
+Post 57 — Sungrow Err 043: Temperatura Interna Alta — ventilador ou sobrecarga?
+Post 58 — WEG E018: Corrente de Fuga — isolamento comprometido, rastreamento do ponto
+Post 59 — Canadian Solar Falha 401: Falha de Hardware — dano eletrônico interno
+Post 60 — Hoymiles F12: Falha de Hardware — dano eletrônico interno em microinversor
+Post 61 — ABB F037: Falha de Rede CA — oscilação ou desconexão da rede elétrica
+Post 62 — Relés de bypass em inversores solares: falha silenciosa que para o sistema
+Post 63 — Superaquecimento de inversor solar: causas, consequências e como evitar
 RODADA 6
-Post 56 — Growatt Erro 200: Falha na Placa de Controle — o que verificar antes de condenar o inversor
-Post 57 — Fronius State 509: Falha na Atualização de Firmware — como recuperar sem danificar o inversor
-Post 58 — Deye F23: Falha no Relé de Saída — relé de bypass com defeito, reparo possível?
-Post 59 — SMA 9416: Falha no Relé de Rede — diagnóstico e viabilidade de reparo
-Post 60 — Sungrow Err 059: Sobretensão do Barramento DC — falha no circuito de descarga
-Post 61 — WEG E024: Falha de IGBT — curto no estágio de potência
-Post 62 — Canadian Solar Falha 502: Falha de Comunicação — módulo de interface com defeito
-Post 63 — Sensores de temperatura em inversores: como identificar leitura falsa
-Post 64 — Falha de isolamento em sistemas fotovoltaicos: onde começa e como rastrear
+Post 64 — Growatt Erro 200: Falha na Placa de Controle — o que verificar antes de condenar o inversor
+Post 65 — Fronius State 509: Falha na Atualização de Firmware — como recuperar sem danificar o inversor
+Post 66 — Deye F23: Falha no Relé de Saída — relé de bypass com defeito, reparo possível?
+Post 67 — SMA 9416: Falha no Relé de Rede — diagnóstico e viabilidade de reparo
+Post 68 — Sungrow Err 059: Sobretensão do Barramento DC — falha no circuito de descarga
+Post 69 — WEG E024: Falha de IGBT — curto no estágio de potência
+Post 70 — Canadian Solar Falha 502: Falha de Comunicação — módulo de interface com defeito
+Post 71 — Sensores de temperatura em inversores: como identificar leitura falsa
+Post 72 — Falha de isolamento em sistemas fotovoltaicos: onde começa e como rastrear
 RODADA 7
-Post 65 — Growatt Erro 302: Falta de Rede CA — diagnóstico completo do estágio de saída
-Post 66 — Fronius State 516: Falha de Placa de Comunicação — diagnóstico e alternativas de reparo
-Post 67 — Deye F29: Falha de IGBT — curto ou sobrecarga no estágio de potência
-Post 68 — Sungrow Err 063: Falha na Placa de Potência — IGBT ou driver danificado
-Post 69 — WEG E031: Falha de Comunicação RS485 — placa de interface com defeito
-Post 70 — Transformadores de corrente (CT) em inversores: defeitos e diagnóstico
-Post 71 — O que é diagnóstico em nível de placa e por que ele muda tudo no reparo
+Post 73 — Growatt Erro 302: Falta de Rede CA — diagnóstico completo do estágio de saída
+Post 74 — Fronius State 516: Falha de Placa de Comunicação — diagnóstico e alternativas de reparo
+Post 75 — Deye F29: Falha de IGBT — curto ou sobrecarga no estágio de potência
+Post 76 — Sungrow Err 063: Falha na Placa de Potência — IGBT ou driver danificado
+Post 77 — WEG E031: Falha de Comunicação RS485 — placa de interface com defeito
+Post 78 — Transformadores de corrente (CT) em inversores: defeitos e diagnóstico
+Post 79 — O que é diagnóstico em nível de placa e por que ele muda tudo no reparo
 RODADA 8
-Post 72 — Growatt Erro 403: Falha de Corrente de Fuga — capacitor de filtro ou isolamento comprometido?
-Post 73 — Fronius State 701: Falha de Isolamento CA — cabeamento de saída ou problema interno?
-Post 74 — Deye F32: Temperatura do Dissipador Alta — sistema de refrigeração ou pasta térmica?
-Post 75 — Ventiladores em inversores solares: quando a falha mecânica vira problema eletrônico
-Post 76 — Logística reversa para reparo de inversores: como funciona e o que você precisa saber
+Post 80 — Growatt Erro 403: Falha de Corrente de Fuga — capacitor de filtro ou isolamento comprometido?
+Post 81 — Fronius State 701: Falha de Isolamento CA — cabeamento de saída ou problema interno?
+Post 82 — Deye F32: Temperatura do Dissipador Alta — sistema de refrigeração ou pasta térmica?
+Post 83 — Ventiladores em inversores solares: quando a falha mecânica vira problema eletrônico
+Post 84 — Logística reversa para reparo de inversores: como funciona e o que você precisa saber
 RODADA 9
-Post 77 — Growatt Erro 501: Superaquecimento do IGBT — a falha mais cara e como evitá-la
-Post 78 — Deye F45: Falha de Bateria em Inversor Híbrido — BMS ou bateria deteriorada?
-Post 79 — Pasta térmica em inversores: impacto real na vida útil do IGBT
-Post 80 — Por que a maioria dos inversores condenados pelo mercado ainda tem conserto
+Post 85 — Growatt Erro 501: Superaquecimento do IGBT — a falha mais cara e como evitá-la
+Post 86 — Deye F45: Falha de Bateria em Inversor Híbrido — BMS ou bateria deteriorada?
+Post 87 — Pasta térmica em inversores: impacto real na vida útil do IGBT
+Post 88 — Por que a maioria dos inversores condenados pelo mercado ainda tem conserto
 RODADA 10
-Post 81 — Growatt Erro 603: Falha de Comunicação RS485 — placa de comunicação ou configuração?
-Post 82 — Deye Híbrido: Os erros mais comuns em inversores híbridos e o que realmente os causa
-Post 83 — Circuito de pré-carga em inversores: o que é, como falha e como diagnosticar
+Post 89 — Growatt Erro 603: Falha de Comunicação RS485 — placa de comunicação ou configuração?
+Post 90 — Deye Híbrido: Os erros mais comuns em inversores híbridos e o que realmente os causa
+Post 91 — Circuito de pré-carga em inversores: o que é, como falha e como diagnosticar
 ════════════════════════════════════
 PARTE 3 — CHECKLIST DE PUBLICAÇÃO NO WORDPRESS
 ════════════════════════════════════
@@ -432,5 +440,5 @@ Você acorda com tudo pronto:
 - Post completo para publicação automática no WordPress
 - Vídeo MP4 gerado automaticamente pelo GitHub Actions em carrossel/post-[XX]/video-carrossel.mp4
 TEC Solar — Onde a energia solar volta a funcionar.
-83 posts | publicação automática | vídeo carrossel gerado via GitHub Actions
-Versão 8 — fluxo completo: pesquisa → rascunho → humanizer → output → vídeo MP4 automático
+91 posts | publicação automática | vídeo carrossel gerado via GitHub Actions
+Versão 9 — fluxo completo: pesquisa → rascunho → humanizer → output → vídeo MP4 automático
