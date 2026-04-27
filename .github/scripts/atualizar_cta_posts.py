@@ -21,8 +21,8 @@ API_BASE    = f"{WP_URL}/wp-json/wp/v2"
 
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 
-NEW_CTA_SENTINEL = "wa.me/5538998891587"
-OLD_CTA_SENTINEL = "Condenaram seu inversor"
+NEW_CTA_SENTINEL = "background:#25D366"  # exclusivo dos botões novos
+OLD_CTA_MARKERS  = ["Condenaram seu inversor", "Antes de comprar equipamento novo"]
 
 CTA_HTML = (
     "<hr>\n"
@@ -84,18 +84,25 @@ def buscar_post_por_slug(slug: str):
 def substituir_cta(html: str):
     """
     Retorna novo HTML com CTA atualizado, ou None se já estiver correto.
-    Prioridade:
-      1. Novo CTA já presente → não faz nada
-      2. Antigo CTA presente  → substitui
-      3. Nenhum CTA           → acrescenta ao final
+    - Se background:#25D366 estiver presente → botões novos já existem, pular
+    - Caso contrário → remover CTA antigo (qualquer variante) e injetar novo
     """
     if NEW_CTA_SENTINEL in html:
         return None
-    if OLD_CTA_SENTINEL in html:
-        idx     = html.find(OLD_CTA_SENTINEL)
-        idx_hr  = html.rfind("<hr>", 0, idx)
-        corte   = idx_hr if idx_hr != -1 else idx
-        html    = html[:corte].rstrip()
+
+    # Localiza início do CTA antigo pelo primeiro marcador encontrado
+    idx_old = -1
+    for marker in OLD_CTA_MARKERS:
+        pos = html.find(marker)
+        if pos != -1:
+            idx_old = pos
+            break
+
+    if idx_old != -1:
+        idx_hr = html.rfind("<hr>", 0, idx_old)
+        corte  = idx_hr if idx_hr != -1 else idx_old
+        html   = html[:corte].rstrip()
+
     return html + "\n" + CTA_HTML
 
 

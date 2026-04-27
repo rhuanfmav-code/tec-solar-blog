@@ -21,8 +21,8 @@ AUTH     = (WP_USER, WP_PASSWORD)
 # CTA HTML — bloco fixo injetado ao final de todo post
 # ============================================================
 
-NEW_CTA_SENTINEL = "wa.me/5538998891587"
-OLD_CTA_SENTINEL = "Condenaram seu inversor"
+NEW_CTA_SENTINEL = "background:#25D366"  # exclusivo dos botões novos
+OLD_CTA_MARKERS  = ["Condenaram seu inversor", "Antes de comprar equipamento novo"]
 
 CTA_HTML = (
     "<hr>\n"
@@ -53,13 +53,23 @@ CTA_HTML = (
 
 
 def injetar_cta(html):
-    """Remove o CTA antigo (se presente) e insere o novo CTA ao final."""
+    """Remove CTA antigo (qualquer variante) e insere o novo ao final.
+    Detecta novo CTA pela presença exclusiva de background:#25D366.
+    """
     if NEW_CTA_SENTINEL in html:
-        return html  # já tem o novo CTA
-    if OLD_CTA_SENTINEL in html:
-        idx = html.find(OLD_CTA_SENTINEL)
-        idx_hr = html.rfind("<hr>", 0, idx)
-        html = html[: idx_hr if idx_hr != -1 else idx].rstrip()
+        return html
+
+    idx_old = -1
+    for marker in OLD_CTA_MARKERS:
+        pos = html.find(marker)
+        if pos != -1:
+            idx_old = pos
+            break
+
+    if idx_old != -1:
+        idx_hr = html.rfind("<hr>", 0, idx_old)
+        html   = html[: idx_hr if idx_hr != -1 else idx_old].rstrip()
+
     return html + "\n" + CTA_HTML
 
 # Pasta de imagens: três níveis acima do script (.github/scripts/ → raiz)
