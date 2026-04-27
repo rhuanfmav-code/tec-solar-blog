@@ -55,11 +55,29 @@ H2: Conclusão
 - Mensagem central: "Antes de condenar, diagnostique"
 - Use OBRIGATORIAMENTE o bloco de CTA abaixo, sem alterações:
 
-Condenaram seu inversor por causa desse erro?
+## Envie seu inversor para diagnóstico
+
 Antes de comprar equipamento novo, envie para a nossa bancada. A TEC Solar realiza diagnóstico eletrônico completo em nível de componente — abrimos o inversor, medimos a placa, identificamos a causa raiz e entregamos um laudo técnico detalhado.
+
 Se o reparo for viável, você recebe o equipamento funcionando por uma fração do custo de substituição. Se não for, o laudo serve de base para qualquer decisão.
+
 Atendemos todo o Brasil via logística reversa.
-👉 Envie seu inversor agora | Falar no WhatsApp
+
+<div style="display:flex; flex-direction:column; gap:12px; margin-top:20px;">
+
+<a href="https://wa.me/5538998891587?text=Ol%C3%A1%2C%20vim%20pelo%20blog%20e%20quero%20enviar%20meu%20inversor%20para%20diagn%C3%B3stico" target="_blank" style="background:#25D366; color:white; padding:14px 24px; border-radius:8px; text-decoration:none; font-weight:bold; text-align:center;">
+👉 Falar no WhatsApp agora
+</a>
+
+<a href="https://www.instagram.com/tec_solar_moc?igsh=MWl2djYzeXk2Zm51dQ%3D%3D&utm_source=qr" target="_blank" style="background:#E1306C; color:white; padding:14px 24px; border-radius:8px; text-decoration:none; font-weight:bold; text-align:center;">
+📸 Seguir no Instagram
+</a>
+
+<a href="https://youtube.com/@tecsolar-reparodeinversores?si=kG3Njqipg8QRbZSD" target="_blank" style="background:#FF0000; color:white; padding:14px 24px; border-radius:8px; text-decoration:none; font-weight:bold; text-align:center;">
+▶️ Ver vídeos no YouTube
+</a>
+
+</div>
 PARÂMETROS DO RASCUNHO:
 - 900 a 1200 palavras
 - Parágrafos curtos: máximo 3 a 4 linhas

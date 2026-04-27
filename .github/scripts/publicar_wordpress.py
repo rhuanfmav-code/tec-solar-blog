@@ -17,6 +17,51 @@ WP_PASSWORD      = os.environ.get("WP_APP_PASSWORD", "")
 API_BASE = f"{WP_URL.rstrip('/')}/wp-json/wp/v2"
 AUTH     = (WP_USER, WP_PASSWORD)
 
+# ============================================================
+# CTA HTML — bloco fixo injetado ao final de todo post
+# ============================================================
+
+NEW_CTA_SENTINEL = "wa.me/5538998891587"
+OLD_CTA_SENTINEL = "Condenaram seu inversor"
+
+CTA_HTML = (
+    "<hr>\n"
+    "<h2>Envie seu inversor para diagnóstico</h2>\n"
+    "<p>Antes de comprar equipamento novo, envie para a nossa bancada. "
+    "A TEC Solar realiza diagnóstico eletrônico completo em nível de componente "
+    "— abrimos o inversor, medimos a placa, identificamos a causa raiz e "
+    "entregamos um laudo técnico detalhado.</p>\n"
+    "<p>Se o reparo for viável, você recebe o equipamento funcionando por uma "
+    "fração do custo de substituição. Se não for, o laudo serve de base para "
+    "qualquer decisão.</p>\n"
+    "<p>Atendemos todo o Brasil via logística reversa.</p>\n"
+    '<div style="display:flex; flex-direction:column; gap:12px; margin-top:20px;">\n'
+    "<a href=\"https://wa.me/5538998891587?text=Ol%C3%A1%2C%20vim%20pelo%20blog%20e%20quero%20enviar%20meu%20inversor%20para%20diagn%C3%B3stico\" "
+    'target="_blank" style="background:#25D366; color:white; padding:14px 24px; '
+    'border-radius:8px; text-decoration:none; font-weight:bold; text-align:center;">'
+    "👉 Falar no WhatsApp agora</a>\n"
+    "<a href=\"https://www.instagram.com/tec_solar_moc?igsh=MWl2djYzeXk2Zm51dQ%3D%3D&utm_source=qr\" "
+    'target="_blank" style="background:#E1306C; color:white; padding:14px 24px; '
+    'border-radius:8px; text-decoration:none; font-weight:bold; text-align:center;">'
+    "📸 Seguir no Instagram</a>\n"
+    "<a href=\"https://youtube.com/@tecsolar-reparodeinversores?si=kG3Njqipg8QRbZSD\" "
+    'target="_blank" style="background:#FF0000; color:white; padding:14px 24px; '
+    'border-radius:8px; text-decoration:none; font-weight:bold; text-align:center;">'
+    "▶️ Ver vídeos no YouTube</a>\n"
+    "</div>"
+)
+
+
+def injetar_cta(html):
+    """Remove o CTA antigo (se presente) e insere o novo CTA ao final."""
+    if NEW_CTA_SENTINEL in html:
+        return html  # já tem o novo CTA
+    if OLD_CTA_SENTINEL in html:
+        idx = html.find(OLD_CTA_SENTINEL)
+        idx_hr = html.rfind("<hr>", 0, idx)
+        html = html[: idx_hr if idx_hr != -1 else idx].rstrip()
+    return html + "\n" + CTA_HTML
+
 # Pasta de imagens: três níveis acima do script (.github/scripts/ → raiz)
 PASTA_IMAGENS = Path(__file__).resolve().parent.parent.parent / "imagens-padrao"
 
@@ -549,6 +594,7 @@ def publicar_post(caminho_arquivo):
     conteudo_html = converter_markdown_para_html(conteudo_md)
     conteudo_html = corrigir_numeracao_ol(conteudo_html)
     conteudo_html = processar_links(conteudo_html, dados["links_internos"], dados["links_externos"])
+    conteudo_html = injetar_cta(conteudo_html)
 
     if url_secundaria:
         conteudo_html = inserir_imagem_secundaria_no_html(
