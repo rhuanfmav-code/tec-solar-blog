@@ -54,6 +54,19 @@ DOURADO    = (245, 166,  35)
 BRANCO     = (255, 255, 255)
 CINZA_FOOT = (190, 190, 190)
 
+GANCHOS = [
+    "A maioria dos técnicos reseta e fecha o chamado. O erro volta. O equipamento volta com defeito.",
+    "Sabe o que acontece na maioria das vezes? O inversor é trocado sem diagnóstico. O problema continua.",
+    "Esse erro aparece, o técnico reinicia o sistema, o cliente fica satisfeito por dois dias. Depois volta tudo.",
+    "Quantos inversores foram substituídos por causa desse código sem nem abrir a tampa? A resposta vai te surpreender.",
+    "O integrador recebe a reclamação, vai até o local, reseta o inversor. Funciona por uma semana. Depois para de novo.",
+    "Esse é um dos erros que mais gera retrabalho no campo. Não porque é difícil — porque ninguém para para diagnosticar.",
+    "A maioria dos laudos técnicos para esse erro tem três palavras: inversor com defeito. Isso não é diagnóstico.",
+    "Antes de pedir orçamento de inversor novo, veja isso. Pode ser mais simples — e mais barato — do que parece.",
+    "Esse código assusta. Mas na bancada, a causa real quase nunca é o que parece na primeira leitura.",
+    "Se você já mandou um inversor para o fabricante por causa desse erro e ele voltou sem defeito identificado, esse vídeo é pra você.",
+]
+
 OVERLAY_ALPHA = int(255 * 0.82)   # rgba(5,13,26, 0.82)
 
 # ════════════════════════════════════════════════════════════
@@ -422,13 +435,14 @@ def parse_post(md_path):
 # ════════════════════════════════════════════════════════════
 
 def gerar_script_voz(dados):
-    nome_marca = NOMES_MARCA.get(dados["marca"], dados["titulo_seo"].split()[0])
-    codigo     = dados["codigo_erro"]
-    causa      = dados["causas"][0] if dados["causas"][0] else "a causa raiz está na placa"
+    nome_marca   = NOMES_MARCA.get(dados["marca"], dados["titulo_seo"].split()[0])
+    codigo       = dados["codigo_erro"]
+    causa        = dados["causas"][0] if dados["causas"][0] else "a causa raiz está na placa"
+    numero_post  = dados.get("numero_post", 0)
+    gancho       = GANCHOS[numero_post % len(GANCHOS)]
     return (
         f"Seu inversor {nome_marca}... exibindo {codigo}? "
-        f"A maioria dos técnicos reseta, e fecha o chamado. "
-        f"O erro volta. O equipamento continua com defeito. "
+        f"{gancho} "
         f"Na nossa bancada... a causa real quase nunca é o que parece. "
         f"{causa}. "
         f"Antes de condenar o equipamento... ou pedir um novo, "
@@ -1233,6 +1247,7 @@ def frame_s4(t, dados):
 
 def gerar_video(numero_post, md_path):
     dados = parse_post(md_path)
+    dados["numero_post"] = numero_post
     print(f"=== DEBUG TITULO ===")
     print(f"titulo_completo: '{dados.get('titulo', '')}'")
     print(f"marca: '{dados.get('marca', '')}'")

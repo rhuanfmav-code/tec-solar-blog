@@ -40,6 +40,17 @@ Trabalhe sempre na main diretamente.
 - Se o ambiente de sessão criar uma branch automática (ex: claude/alguma-branch), ignore-a completamente.
 - Nunca faça merge de branches — os arquivos já devem nascer na main.
 
+## Arquivos gerados por post — lista obrigatória e exclusiva
+
+Por post gerado, criar SOMENTE:
+1. `posts/post-XX.md` — o post completo
+2. Atualização de `progresso.md`
+
+NÃO gerar: `carrossel/post-XX-prompt.md` nem qualquer outro arquivo de prompt de carrossel.
+O vídeo MP4 é gerado automaticamente pelo GitHub Actions — nenhum arquivo de prompt adicional é necessário.
+
+---
+
 ## Regra obrigatória de título dos posts
 
 O título enviado ao WordPress NUNCA deve incluir o prefixo "Post XX —", "Post XX -" ou "Post XX:".
