@@ -67,6 +67,19 @@ GANCHOS = [
     "Se você já mandou um inversor para o fabricante por causa desse erro e ele voltou sem defeito identificado, esse vídeo é pra você.",
 ]
 
+CATEGORIAS_IMAGENS = {
+    "aterramento":      ["Bancada", "Placa"],
+    "tensao":           ["Bancada", "Inversor"],
+    "superaquecimento": ["Bancada", "Inversor"],
+    "bomba":            ["Drive", "Bancada"],
+    "diagnostico":      ["Bancada", "Placa"],
+    "queimado":         ["Placa", "Bancada"],
+    "garantia":         ["Bancada", "Inversor"],
+    "exporta":          ["Inversor", "Bancada"],
+    "desligando":       ["Inversor", "Placa"],
+    "nao liga":         ["Inversor", "Bancada"],
+}
+
 OVERLAY_ALPHA = int(255 * 0.82)   # rgba(5,13,26, 0.82)
 
 # ════════════════════════════════════════════════════════════
@@ -140,8 +153,8 @@ def sel(lista, num):
     return lista[num % len(lista)]
 
 
-def selecionar_imagens(marca, numero_post):
-    """Seleciona 4 imagens únicas por slide, priorizando por marca e tipo."""
+def selecionar_imagens(marca, numero_post, titulo_seo=""):
+    """Seleciona 4 imagens únicas por slide, priorizando por marca, categoria e tipo."""
     try:
         todos = sorted([f for f in os.listdir(IMG_DIR) if f.lower().endswith(".webp")])
     except FileNotFoundError:
@@ -149,6 +162,15 @@ def selecionar_imagens(marca, numero_post):
 
     marca_low = (marca or "").lower()
     usadas    = set()
+
+    # Para posts de cluster (sem marca), detectar categoria pelo título
+    cat_kws = None
+    if not marca_low and titulo_seo:
+        titulo_norm = titulo_seo.lower()
+        for palavra, kws in CATEGORIAS_IMAGENS.items():
+            if palavra in titulo_norm:
+                cat_kws = [k.lower() for k in kws]
+                break
 
     def candidatos(keywords):
         kw = [k.lower() for k in keywords]
@@ -164,24 +186,40 @@ def selecionar_imagens(marca, numero_post):
         usadas.add(escolha)
         return escolha
 
-    # Slide 1 (capa): brand-specific → fallback Inversor
-    capa_cands = candidatos([marca_low]) if marca_low else []
+    # Slide 1 (capa): brand-specific → cat kw[0] → Inversor
+    if marca_low:
+        capa_cands = candidatos([marca_low])
+    elif cat_kws:
+        capa_cands = candidatos([cat_kws[0]])
+    else:
+        capa_cands = []
     if not capa_cands:
         capa_cands = candidatos(["inversor"])
     img_capa = escolher(capa_cands or todos)
 
-    # Slide 4 (CTA): brand-specific (arquivo diferente da capa) → Multi-Inversores → Inversor
-    cta_cands = candidatos([marca_low]) if marca_low else []
+    # Slide 4 (CTA): brand-specific → cat kw[0] → Multi-Inversores → Inversor
+    if marca_low:
+        cta_cands = candidatos([marca_low])
+    elif cat_kws:
+        cta_cands = candidatos([cat_kws[0]])
+    else:
+        cta_cands = []
     if not cta_cands:
         cta_cands = candidatos(["multi-inversores", "inversor"])
     img_cta = escolher(cta_cands or todos)
 
-    # Slide 2 (causa): Placa ou Bancada
-    causa_cands = candidatos(["placa", "bancada"])
+    # Slide 2 (causa): cat kw[1] → Placa/Bancada
+    if cat_kws and len(cat_kws) > 1:
+        causa_cands = candidatos([cat_kws[1]])
+    else:
+        causa_cands = candidatos(["placa", "bancada"])
     img_causa = escolher(causa_cands or todos)
 
-    # Slide 3 (diag): Placa ou Bancada (diferente do slide 2)
-    diag_cands = candidatos(["placa", "bancada"])
+    # Slide 3 (diag): cat kw[1] → Placa/Bancada (diferente do slide 2)
+    if cat_kws and len(cat_kws) > 1:
+        diag_cands = candidatos([cat_kws[1]])
+    else:
+        diag_cands = candidatos(["placa", "bancada"])
     img_diag = escolher(diag_cands or todos)
 
     return img_capa, img_causa, img_diag, img_cta
@@ -382,7 +420,8 @@ def parse_post(md_path):
         causas.append("")
 
     m_diag = re.search(
-        r'## [^\n]*[Ii]dentificar[^\n]*\n(.*?)(?=\n## |\Z)', texto, re.DOTALL
+        r'## [^\n]*(?:[Ii]dentificar|[Vv]erificar|[Cc]hecklist)[^\n]*\n(.*?)(?=\n## |\Z)',
+        texto, re.DOTALL
     )
     passos = []
     if m_diag:
@@ -399,9 +438,17 @@ def parse_post(md_path):
         )
         if m_diag2:
             corpo_d = re.sub(r'\*\*(.+?)\*\*', r'\1', m_diag2.group(1))
-            sents_d = [s.strip() for s in re.split(r'(?<=[.!?])\s+', corpo_d)
-                       if len(s.strip()) > 20 and not s.strip().startswith('#')]
-            passos = [_parte_antes_traco(re.sub(r'\s+', ' ', s)) for s in sents_d[2:4]]
+            # Prioridade: primeiros itens de lista do corpo
+            itens_d = re.findall(
+                r'(?m)^(?:[-*]|\d+\.)\s+(.+?)(?=\n(?:[-*]|\d+\.)\s|\n\n|\Z)',
+                corpo_d, re.DOTALL
+            )
+            passos = [_parte_antes_traco(re.sub(r'\s+', ' ', item.strip()))
+                      for item in itens_d[:3] if item.strip()][:2]
+            if not passos:
+                sents_d = [s.strip() for s in re.split(r'(?<=[.!?])\s+', corpo_d)
+                           if len(s.strip()) > 20 and not s.strip().startswith('#')]
+                passos = [_parte_antes_traco(re.sub(r'\s+', ' ', s)) for s in sents_d[2:4]]
     while len(passos) < 2:
         passos.append("")
 
@@ -874,29 +921,42 @@ def frame_s1(t, dados):
 
     a_t    = int(255 * pt)
 
-    # ── Linha 1: "ANTES DE CONDENAR," (ciano, 36px) ───────
-    font_l1 = get_font(36)
-    txt_l1  = "ANTES DE CONDENAR,"
-    bb_l1   = draw.textbbox((0, 0), txt_l1, font=font_l1)
-    draw.text(((W - bb_l1[2]) // 2, 115), txt_l1, font=font_l1,
-              fill=(*CIANO, int(255 * pe)))
-
-    # ── MODO CAPA: falha/erro vs educacional ──────────────
+    # ── MODO CAPA: computar antes de desenhar ─────────────
     modo_falha = bool(dados.get("marca")) and bool(dados.get("codigo_erro"))
+    label_capa = None  # label ciano extra para posts de cluster com "Inversor"
+
     if modo_falha:
         linha2 = f"INVERSOR {NOMES_MARCA.get(dados['marca'], (dados['marca'] or '').upper()).upper()}".strip()
         linha3 = dados["codigo_erro"].upper()
     else:
-        titulo = dados["titulo_seo"]
-        sep_match = re.search(r'[:—]', titulo)
-        if sep_match:
-            linha2 = titulo[:sep_match.start()].strip()
-            linha3 = dados["subtitulo"]   # subtitulo já é a parte após ":" — não re-extrair
+        titulo_proc = dados["titulo_seo"]
+
+        # Strip "Inversor Solar" ou "Inversor" do início → exibir como label ciano
+        m_inv = re.match(r'^inversor\s+solar\b\s*', titulo_proc, re.IGNORECASE)
+        if m_inv:
+            label_capa  = "INVERSOR SOLAR"
+            titulo_proc = titulo_proc[m_inv.end():].strip()
+        elif re.match(r'^inversor\b\s*', titulo_proc, re.IGNORECASE):
+            label_capa  = "INVERSOR SOLAR"
+            titulo_proc = re.sub(r'^inversor\b\s*', '', titulo_proc, flags=re.IGNORECASE).strip()
+
+        # Dividir no primeiro ":" ou " — "
+        m_sep = re.search(r'(?::| — )', titulo_proc)
+        if m_sep:
+            linha2 = titulo_proc[:m_sep.start()].strip().upper()
+            linha3 = titulo_proc[m_sep.end():].strip()
         else:
-            linha2 = titulo
+            linha2 = titulo_proc.upper()
             linha3 = ""
 
-    print(f"MODO CAPA: {'falha' if modo_falha else 'educacional'} | linha2='{linha2}' | linha3='{linha3}'")
+    print(f"MODO CAPA: {'falha' if modo_falha else 'educacional'} | label='{label_capa}' | linha2='{linha2}' | linha3='{linha3}'")
+
+    # ── Linha 1: "ANTES DE CONDENAR," ou label "INVERSOR SOLAR" ──
+    font_l1 = get_font(36)
+    txt_l1  = label_capa if label_capa else "ANTES DE CONDENAR,"
+    bb_l1   = draw.textbbox((0, 0), txt_l1, font=font_l1)
+    draw.text(((W - bb_l1[2]) // 2, 115), txt_l1, font=font_l1,
+              fill=(*CIANO, int(255 * pe)))
 
     y_cur = 168
 
@@ -1257,8 +1317,8 @@ def gerar_video(numero_post, md_path):
     print(f"Post {numero_post:02d} — {dados['titulo_seo']}")
     print(f"Marca: {dados['marca']} | Código: {dados['codigo_erro']}")
 
-    # Selecionar imagens por slide (brand-aware, sem duplicatas)
-    img_capa, img_causa, img_diag, img_cta = selecionar_imagens(dados["marca"], numero_post)
+    # Selecionar imagens por slide (brand-aware + category-aware, sem duplicatas)
+    img_capa, img_causa, img_diag, img_cta = selecionar_imagens(dados["marca"], numero_post, dados["titulo_seo"])
     dados["img_capa"]  = img_capa
     dados["img_causa"] = img_causa
     dados["img_diag"]  = img_diag
