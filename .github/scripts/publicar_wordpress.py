@@ -565,6 +565,15 @@ def configurar_yoast(post_id, palavra_chave, titulo_seo, meta_description):
 # PUBLICAÇÃO PRINCIPAL
 # ============================================================
 
+MINIMO_PALAVRAS_CORPO = 800
+
+
+def contar_palavras_corpo(texto):
+    """Conta palavras do corpo removendo tags HTML e marcação Markdown."""
+    texto = re.sub(r'<[^>]+>', ' ', texto)
+    return len(re.findall(r'\b\w+\b', texto))
+
+
 def publicar_post(caminho_arquivo):
     print(f"\n Publicando: {caminho_arquivo}")
     dados        = parsear_post(caminho_arquivo)
@@ -575,6 +584,16 @@ def publicar_post(caminho_arquivo):
     print(f"   Título : {titulo}")
     print(f"   Slug   : {slug}")
     print(f"   Post # : {numero_post}")
+
+    # ── Validação de tamanho mínimo do corpo ──────────────────
+    n_palavras = contar_palavras_corpo(dados["conteudo"])
+    print(f"   Palavras no corpo: {n_palavras}")
+    if n_palavras < MINIMO_PALAVRAS_CORPO:
+        print(
+            f"\n ERRO: corpo com {n_palavras} palavras — mínimo exigido: "
+            f"{MINIMO_PALAVRAS_CORPO}. Post não publicado."
+        )
+        sys.exit(1)
 
     # ── Imagem principal ──────────────────────────────────────
     print("\n Imagem principal...")

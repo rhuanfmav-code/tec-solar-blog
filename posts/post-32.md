@@ -2,37 +2,43 @@
 
 ---
 
-[PALAVRA-CHAVE FOCO]
+## [PALAVRA-CHAVE FOCO]
+
 inversores solares falham no verão
 
 ---
 
-[TÍTULO SEO — Title Tag]
+## [TÍTULO SEO — Title Tag]
+
 Por que inversores solares falham mais no verão
 
 ---
 
-[SLUG — URL do Post]
+## [SLUG — URL do Post]
+
 por-que-inversores-solares-falham-mais-no-verao
 
 ---
 
-[META DESCRIPTION]
+## [META DESCRIPTION]
+
 Calor, poeira e ciclos térmicos destroem inversores no verão. Veja as causas reais e como saber se o problema é externo ou interno.
 
 ---
 
-[CATEGORIA]
+## [CATEGORIA]
+
 Manutenção e Diagnóstico
 
 ---
 
-[TAGS]
+## [TAGS]
+
 superaquecimento inversor solar, ciclos térmicos inversor, falha inversor no verão, degradação capacitor inversor, IGBT superaquecimento
 
 ---
 
-[TEXTO DO POST — VERSÃO HUMANIZADA FINAL]
+## [TEXTO DO POST — VERSÃO HUMANIZADA FINAL]
 
 **Inversores solares falham mais no verão**, e isso não é coincidência. É física. A combinação de temperatura ambiente elevada, irradiância máxima, poeira acumulada e ciclos térmicos diários cria um estresse mecânico e eletrônico que os componentes internos não suportam indefinidamente — e o verão é quando essa conta chega.
 
@@ -120,7 +126,7 @@ Atendemos todo o Brasil via logística reversa.
 
 ---
 
-[LINKS INTERNOS SUGERIDOS]
+## [LINKS INTERNOS SUGERIDOS]
 
 - Âncora: "por que os IGBTs queimam" → Link para: Por que os IGBTs queimam em inversores solares: as 6 causas reais (Post 10)
 - Âncora: "checklist antes de chamar o técnico" → Link para: Inversor solar parou de funcionar: o checklist completo antes de chamar o técnico (Post 11)
@@ -128,14 +134,14 @@ Atendemos todo o Brasil via logística reversa.
 
 ---
 
-[LINKS EXTERNOS SUGERIDOS]
+## [LINKS EXTERNOS SUGERIDOS]
 
 - Texto âncora: "lei de Arrhenius aplicada na prática" → Fonte: Infineon Technologies — IGBT Application Note AN2013-05 (infineon.com)
 - Texto âncora: "ESR do capacitor" → Fonte: Nichicon — General Description of Aluminum Electrolytic Capacitors (nichicon.com)
 
 ---
 
-[IMAGEM PRINCIPAL — USE ESTA]
+## [IMAGEM PRINCIPAL — USE ESTA]
 
 IMAGEM PRINCIPAL:
 → URL para download: https://images.unsplash.com/photo-1509391366360-2e959784a276?w=1200
@@ -147,7 +153,7 @@ IMAGEM PRINCIPAL:
 
 ---
 
-[IMAGEM SECUNDÁRIA — USE NO MEIO DO POST]
+## [IMAGEM SECUNDÁRIA — USE NO MEIO DO POST]
 
 IMAGEM SECUNDÁRIA:
 → URL para download: https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=1200
