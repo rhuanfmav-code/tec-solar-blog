@@ -24,32 +24,19 @@ REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 NEW_CTA_SENTINEL = "background:#25D366"  # exclusivo dos botões novos
 OLD_CTA_MARKERS  = ["Condenaram seu inversor", "Antes de comprar equipamento novo"]
 
-CTA_HTML = (
-    "<hr>\n"
-    "<h2>Envie seu inversor para diagnóstico</h2>\n"
-    "<p>Antes de comprar equipamento novo, envie para a nossa bancada. "
-    "A TEC Solar realiza diagnóstico eletrônico completo em nível de componente "
-    "— abrimos o inversor, medimos a placa, identificamos a causa raiz e "
-    "entregamos um laudo técnico detalhado.</p>\n"
-    "<p>Se o reparo for viável, você recebe o equipamento funcionando por uma "
-    "fração do custo de substituição. Se não for, o laudo serve de base para "
-    "qualquer decisão.</p>\n"
-    "<p>Atendemos todo o Brasil via logística reversa.</p>\n"
-    '<div style="display:flex; flex-direction:column; gap:12px; margin-top:20px;">\n'
-    "<a href=\"https://wa.me/5538998891587?text=Ol%C3%A1%2C%20vim%20pelo%20blog%20e%20quero%20enviar%20meu%20inversor%20para%20diagn%C3%B3stico\" "
-    'target="_blank" style="background:#25D366; color:white; padding:14px 24px; '
-    'border-radius:8px; text-decoration:none; font-weight:bold; text-align:center;">'
-    "👉 Falar no WhatsApp agora</a>\n"
-    "<a href=\"https://www.instagram.com/tec_solar_moc?igsh=MWl2djYzeXk2Zm51dQ%3D%3D&utm_source=qr\" "
-    'target="_blank" style="background:#E1306C; color:white; padding:14px 24px; '
-    'border-radius:8px; text-decoration:none; font-weight:bold; text-align:center;">'
-    "📸 Seguir no Instagram</a>\n"
-    "<a href=\"https://youtube.com/@tecsolar-reparodeinversores?si=kG3Njqipg8QRbZSD\" "
-    'target="_blank" style="background:#FF0000; color:white; padding:14px 24px; '
-    'border-radius:8px; text-decoration:none; font-weight:bold; text-align:center;">'
-    "▶️ Ver vídeos no YouTube</a>\n"
-    "</div>"
-)
+CTA_HTML = """
+<div style="margin-top:32px;">
+<h2 style="font-size:22px; font-weight:700; margin-bottom:12px;">Envie seu inversor para diagnóstico</h2>
+<p>Antes de comprar equipamento novo, envie para a nossa bancada. A TEC Solar realiza diagnóstico eletrônico completo em nível de componente — abrimos o inversor, medimos a placa, identificamos a causa raiz e entregamos um laudo técnico detalhado.</p>
+<p>Se o reparo for viável, você recebe o equipamento funcionando por uma fração do custo de substituição. Se não for, o laudo serve de base para qualquer decisão.</p>
+<p>Atendemos todo o Brasil via logística reversa.</p>
+<div style="display:flex; flex-direction:column; gap:12px; margin-top:20px;">
+<a href="https://wa.me/5538998891587?text=Ol%C3%A1%2C%20vim%20pelo%20blog%20e%20quero%20enviar%20meu%20inversor%20para%20diagn%C3%B3stico" target="_blank" style="background:#25D366; color:#ffffff; padding:14px 24px; border-radius:8px; text-decoration:none; font-weight:bold; text-align:center; display:block;">👉 Falar no WhatsApp agora</a>
+<a href="https://www.instagram.com/tec_solar_moc" target="_blank" style="background:#E1306C; color:#ffffff; padding:14px 24px; border-radius:8px; text-decoration:none; font-weight:bold; text-align:center; display:block;">📸 Seguir no Instagram</a>
+<a href="https://youtube.com/@tecsolar-reparodeinversores" target="_blank" style="background:#FF0000; color:#ffffff; padding:14px 24px; border-radius:8px; text-decoration:none; font-weight:bold; text-align:center; display:block;">▶️ Ver vídeos no YouTube</a>
+</div>
+</div>
+"""
 
 
 def extrair_slug(caminho_md: Path) -> str:
