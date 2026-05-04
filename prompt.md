@@ -273,18 +273,35 @@ REGRA OBRIGATÓRIA DE TAGS:
 ─────────────────────────────────────
 [LINKS INTERNOS SUGERIDOS]
 ─────────────────────────────────────
-Formato:
-- Âncora: "[frase do texto]" → Link para: post sobre [tema] (Post XX)
-REGRA OBRIGATÓRIA DE LINKS INTERNOS:
-- Se o post de destino ainda NÃO existe, NÃO inserir link nenhum no texto
-- O texto corre normalmente, sem âncora, sem href, sem placeholder visível
-- PROIBIDO: href="#", href vazio, title="Link interno pendente" ou qualquer marcação de link com destino fictício
-- Inserir o link real somente quando o post de destino já estiver publicado
+Formato obrigatório — 3 a 5 links por post:
+- Âncora: 'texto âncora exato que aparece no post' → URL: /slug-do-post-relacionado → Contexto: onde no texto inserir
+
+Exemplos de referências cruzadas entre posts do calendário:
+- Post sobre Growatt Erro 110 → link para 'inversor solar desligando sozinho' (Post 41)
+- Post sobre capacitor → link para 'inversor solar queimado vale a pena consertar' (Post 49)
+- Post sobre diagnóstico → link para 'como funciona o diagnóstico eletrônico' (Post 80)
+- Post sobre IGBT → link para 'por que os IGBTs queimam' (Post 10)
+- Post sobre garantia → link para 'inversor fora de garantia' (Post 54)
+
+REGRAS OBRIGATÓRIAS:
+- Sugerir apenas posts com número MENOR que o post atual — já gerados na sequência
+- A âncora deve ser um trecho EXATO que aparece no texto do post (o script busca esse texto no HTML)
+- PROIBIDO: sugerir URL de post com número maior no calendário (ainda não existe)
+- PROIBIDO: href="#", href vazio ou qualquer placeholder visível no texto
+- O script publicar_wordpress.py insere os links automaticamente: não inserir <a href> no texto do post
 ─────────────────────────────────────
 [LINKS EXTERNOS SUGERIDOS]
 ─────────────────────────────────────
-Formato:
-- Texto âncora: "[termo]" → Fonte: [nome + URL se disponível]
+Formato obrigatório — 1 a 2 links por post:
+- Texto âncora: "[termo exato no post]" → URL: [link completo] → Fonte: [nome da fonte]
+
+Fontes prioritárias (nesta ordem de preferência):
+1. ABNT — normas técnicas (abnt.org.br)
+2. INMETRO — certificações e portarias (inmetro.gov.br)
+3. ANEEL — resoluções e regulações de energia (aneel.gov.br)
+4. Datasheet oficial do fabricante quando o post citar especificação técnica do modelo
+
+O script publicar_wordpress.py aplica target="_blank" rel="noopener noreferrer" automaticamente em todos os links externos.
 ════════════════════════════════════
 BLOCO DE IMAGENS — BLOG WORDPRESS
 ════════════════════════════════════

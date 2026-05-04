@@ -295,6 +295,24 @@ def inserir_imagem_secundaria_no_html(html, src_url, alt_text, legenda):
         partes[1] = figura + partes[1]   # após o 1º H2 se só houver um
     return "</h2>".join(partes)
 
+
+def _substituir_ancora_em_paragrafo(html, ancora, link_html):
+    """Substitui a PRIMEIRA ocorrência de 'ancora' apenas fora de headings H1-H3."""
+    # re.split com grupo capturador produz: [não-heading, heading, não-heading, ...]
+    # índices pares = conteúdo fora de headings; índices ímpares = tags de heading
+    partes = re.split(r'(<h[1-3][^>]*>.*?</h[1-3]>)', html, flags=re.DOTALL)
+    substituido = False
+    resultado = []
+    for i, parte in enumerate(partes):
+        if substituido or (i % 2 == 1):   # preserva headings e segmentos pós-substituição
+            resultado.append(parte)
+        elif ancora in parte:
+            resultado.append(parte.replace(ancora, link_html, 1))
+            substituido = True
+        else:
+            resultado.append(parte)
+    return ''.join(resultado)
+
 # ============================================================
 # PARSER
 # ============================================================
@@ -332,8 +350,28 @@ def parsear_post(caminho_arquivo):
 # ============================================================
 
 def processar_links(conteudo, links_internos_str, links_externos_str):
+    # ── Links internos ────────────────────────────────────────
+    # Formato esperado: Âncora: 'texto' → URL: /slug → Contexto: ...
+    for linha in links_internos_str.split("\n"):
+        match = re.search(
+            r"ncora:\s*['\"](.+?)['\"].*?URL:\s*(/[^\s→\n]+)",
+            linha,
+        )
+        if not match:
+            continue
+        ancora = match.group(1).strip()
+        url    = match.group(2).rstrip("→ ").strip()
+        full_url  = f"https://blogtecsolar.com.br{url}"
+        link_html = f'<a href="{full_url}" title="{ancora}">{ancora}</a>'
+        conteudo = _substituir_ancora_em_paragrafo(conteudo, ancora, link_html)
+
+    # ── Links externos ────────────────────────────────────────
+    # Formato esperado: Texto âncora: "termo" → URL: https://... → Fonte: ...
     for linha in links_externos_str.split("\n"):
-        match = re.search(r'[Tt]exto\s+â[n]?cora:\s*["\'](.+?)["\'].*?(https?://\S+)', linha)
+        match = re.search(
+            r'[Tt]exto\s+â[n]?cora:\s*["\'](.+?)["\'].*?(https?://\S+)',
+            linha,
+        )
         if match:
             ancora, url = match.group(1), match.group(2).rstrip(")")
             conteudo = conteudo.replace(
@@ -341,8 +379,6 @@ def processar_links(conteudo, links_internos_str, links_externos_str):
                 f'<a href="{url}" target="_blank" rel="noopener noreferrer">{ancora}</a>',
                 1,
             )
-    # Links internos: NÃO inserir href se o post de destino ainda não existe
-    # O texto corre normalmente sem âncora
     return conteudo
 
 def renumerar_listas_ordenadas(texto):
