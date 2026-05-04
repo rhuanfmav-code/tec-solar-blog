@@ -9,7 +9,6 @@ on:
         default: '07'
   schedule:
     - cron: '0 10 * * *'   # 07:00 BRT (UTC-3)
-    - cron: '0 22 * * *'   # 19:00 BRT (UTC-3)
 
 jobs:
   publicar:
