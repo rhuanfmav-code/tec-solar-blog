@@ -30,13 +30,32 @@ jobs:
       - name: Instalar dependências
         run: pip install pillow requests
 
+      - name: Verificar posts pendentes
+        run: |
+          ULTIMO_GERADO=$(grep -oP '(?<=Último post gerado: Post )\d+' progresso.md 2>/dev/null || echo "0")
+          ULTIMO_PUBLICADO=$(grep -oP '(?<=Último post publicado: Post )\d+' publicados.md 2>/dev/null || echo "0")
+          PENDENTES=$((ULTIMO_GERADO - ULTIMO_PUBLICADO))
+          echo "Último gerado   : Post $ULTIMO_GERADO"
+          echo "Último publicado: Post $ULTIMO_PUBLICADO"
+          echo "Posts pendentes : $PENDENTES"
+          if [ "$PENDENTES" -gt 0 ]; then
+            LISTA=$(seq $((ULTIMO_PUBLICADO + 1)) $ULTIMO_GERADO | tr '\n' ' ')
+            echo "Aguardando publicação: Posts $LISTA"
+          fi
+
       - name: Detectar arquivo do post
         id: detect_post
         run: |
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             NUMERO="${{ github.event.inputs.numero_post }}"
             ARQUIVO="posts/post-$(printf '%02d' $NUMERO).md"
+            if [ ! -f "$ARQUIVO" ]; then
+              echo "Post $NUMERO não encontrado: $ARQUIVO"
+              echo "SKIP_PUBLISH=true" >> $GITHUB_ENV
+              exit 0
+            fi
             echo "ARQUIVO_POST=$ARQUIVO" >> $GITHUB_ENV
+            echo "PROXIMO_NUM=$NUMERO" >> $GITHUB_ENV
 
           elif [ "${{ github.event_name }}" = "schedule" ]; then
             ULTIMO=$(grep -oP '(?<=Último post publicado: Post )\d+' publicados.md 2>/dev/null || echo "0")
@@ -63,7 +82,7 @@ jobs:
           python3 .github/scripts/publicar_wordpress.py "$ARQUIVO_POST"
 
       - name: Atualizar publicados.md
-        if: github.event_name == 'schedule' && env.SKIP_PUBLISH != 'true'
+        if: env.SKIP_PUBLISH != 'true'
         run: |
           PROXIMO="${PROXIMO_NUM}"
           SEGUINTE=$((PROXIMO + 1))

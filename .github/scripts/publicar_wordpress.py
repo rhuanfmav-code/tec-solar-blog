@@ -597,6 +597,18 @@ def contar_palavras_corpo(texto):
     return len(re.findall(r'\b\w+\b', texto))
 
 
+def post_ja_existe(slug, api_base, auth):
+    resp = requests.get(
+        f"{api_base}/posts",
+        params={"slug": slug, "status": "any"},
+        auth=auth,
+        timeout=30,
+    )
+    if resp.status_code == 200 and len(resp.json()) > 0:
+        return True
+    return False
+
+
 def publicar_post(caminho_arquivo):
     print(f"\n Publicando: {caminho_arquivo}")
     dados        = parsear_post(caminho_arquivo)
@@ -658,6 +670,11 @@ def publicar_post(caminho_arquivo):
     categoria_id = obter_categoria()
     tag_ids      = obter_ou_criar_tags(dados["tags"]) if dados["tags"] else []
     print(f"   Categoria ID: {categoria_id} | Tags: {tag_ids}")
+
+    # ── Verificar duplicata por slug ──────────────────────────
+    if post_ja_existe(slug, API_BASE, AUTH):
+        print(f"\n SKIP: post com slug '{slug}' já existe no WordPress. Publicação ignorada.")
+        return None
 
     # ── Criar post ────────────────────────────────────────────
     print("\n Criando post no WordPress...")

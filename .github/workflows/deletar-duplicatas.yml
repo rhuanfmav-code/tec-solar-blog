@@ -1,0 +1,43 @@
+name: Deletar Posts Duplicados WordPress
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Simulação apenas (não deleta nada)'
+        required: false
+        default: 'true'
+        type: choice
+        options:
+          - 'true'
+          - 'false'
+
+jobs:
+  deletar-duplicatas:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repositório
+        uses: actions/checkout@v4
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Instalar dependências
+        run: pip install requests
+
+      - name: Deletar duplicatas
+        env:
+          WP_URL:          ${{ secrets.WP_URL }}
+          WP_USER:         ${{ secrets.WP_USER }}
+          WP_APP_PASSWORD: ${{ secrets.WP_APP_PASSWORD }}
+        run: |
+          if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
+            echo "Modo: DRY RUN (apenas listagem)"
+            python3 .github/scripts/deletar_duplicatas.py --dry-run
+          else
+            echo "Modo: EXCLUSÃO REAL"
+            python3 .github/scripts/deletar_duplicatas.py
+          fi
