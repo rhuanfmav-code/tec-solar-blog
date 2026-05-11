@@ -1,0 +1,126 @@
+name: Publicar Posts Pendentes (Lote)
+
+on:
+  workflow_dispatch:
+    inputs:
+      post_inicio:
+        description: 'Primeiro post a publicar (deixe em branco para usar publicados.md)'
+        required: false
+        default: ''
+      post_fim:
+        description: 'Último post a publicar (deixe em branco para usar progresso.md)'
+        required: false
+        default: ''
+
+jobs:
+  publicar-lote:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repositório
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Instalar dependências
+        run: pip install pillow requests
+
+      - name: Detectar range de posts pendentes
+        id: range
+        run: |
+          if [ -n "${{ github.event.inputs.post_inicio }}" ]; then
+            INICIO="${{ github.event.inputs.post_inicio }}"
+          else
+            INICIO=$(grep -oP '(?<=Próximo post a publicar: Post )\d+' publicados.md 2>/dev/null || echo "")
+            if [ -z "$INICIO" ]; then
+              PUBLICADO=$(grep -oP '(?<=Último post publicado: Post )\d+' publicados.md 2>/dev/null || echo "0")
+              INICIO=$((PUBLICADO + 1))
+            fi
+          fi
+
+          if [ -n "${{ github.event.inputs.post_fim }}" ]; then
+            FIM="${{ github.event.inputs.post_fim }}"
+          else
+            FIM=$(grep -oP '(?<=Último post gerado: Post )\d+' progresso.md 2>/dev/null || echo "0")
+          fi
+
+          echo "INICIO=$INICIO" >> $GITHUB_ENV
+          echo "FIM=$FIM" >> $GITHUB_ENV
+          echo "Publicando posts $INICIO até $FIM"
+
+          if [ "$FIM" -lt "$INICIO" ]; then
+            echo "Nenhum post pendente para publicar."
+            echo "SKIP_ALL=true" >> $GITHUB_ENV
+          fi
+
+      - name: Publicar posts em sequência
+        if: env.SKIP_ALL != 'true'
+        env:
+          WP_URL:          ${{ secrets.WP_URL }}
+          WP_USER:         ${{ secrets.WP_USER }}
+          WP_APP_PASSWORD: ${{ secrets.WP_APP_PASSWORD }}
+        run: |
+          PUBLICADOS=0
+          PULADOS=0
+          ERROS=0
+          ULTIMO_OK=0
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          for NUM in $(seq $INICIO $FIM); do
+            ARQUIVO="posts/post-$(printf '%02d' $NUM).md"
+            if [ ! -f "$ARQUIVO" ]; then
+              echo ""
+              echo "⚠  Post $NUM não encontrado: $ARQUIVO — pulando"
+              PULADOS=$((PULADOS + 1))
+              continue
+            fi
+
+            echo ""
+            echo "════════════════════════════════════════"
+            echo "Publicando Post $NUM — $ARQUIVO"
+            echo "════════════════════════════════════════"
+
+            if python3 .github/scripts/publicar_wordpress.py "$ARQUIVO"; then
+              PUBLICADOS=$((PUBLICADOS + 1))
+              ULTIMO_OK=$NUM
+              SEGUINTE=$((NUM + 1))
+              printf '# Controle de Posts Publicados\n\nÚltimo post publicado: Post %s\nPróximo post a publicar: Post %s\n' \
+                "$NUM" "$SEGUINTE" > publicados.md
+              echo "✓ publicados.md → Post $NUM"
+
+              # Commit incremental para preservar progresso em caso de falha posterior
+              git add publicados.md
+              git commit -m "Publicado: Post $(printf '%02d' $NUM)"
+            else
+              echo "✗ ERRO ao publicar Post $NUM"
+              ERROS=$((ERROS + 1))
+            fi
+          done
+
+          echo ""
+          echo "════════════════════════════════════════"
+          echo "RESUMO FINAL"
+          echo "════════════════════════════════════════"
+          echo "Posts publicados : $PUBLICADOS"
+          echo "Posts pulados    : $PULADOS"
+          echo "Erros            : $ERROS"
+
+          # Push de todos os commits acumulados
+          git pull --rebase origin main
+          git push origin main
+
+          # Sai com erro se qualquer post falhou
+          if [ "$ERROS" -gt 0 ]; then
+            echo ""
+            echo "ATENÇÃO: $ERROS post(s) falharam. Verifique os logs acima."
+            exit 1
+          fi
