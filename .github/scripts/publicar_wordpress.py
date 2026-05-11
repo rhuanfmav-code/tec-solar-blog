@@ -318,10 +318,27 @@ def _substituir_ancora_em_paragrafo(html, ancora, link_html):
 # ============================================================
 
 def extrair_secao(conteudo, marcador):
-    # Usa "## [" como delimitador de fim para não cortar H2s internos do post
-    pattern = rf"##\s*\[{re.escape(marcador)}\]\s*\n(.*?)\n(?=##\s*\[|\Z)"
-    match = re.search(pattern, conteudo, re.DOTALL)
-    return match.group(1).strip() if match else ""
+    m_esc = re.escape(marcador)
+
+    if '─' in conteudo:
+        # Posts 35-38: separador Unicode ─────
+        # [SECTION]\n─────\ncontent\n─────
+        pat = rf"^\[{m_esc}\]\s*\n(?:[─]{{3,}}[─\s]*\n)?(.*?)(?=\n[─]{{3,}}|\Z)"
+        m = re.search(pat, conteudo, re.DOTALL | re.MULTILINE)
+
+    elif '## [' in conteudo:
+        # Post 45+ (e formatos futuros): ## [SECTION] com separadores --- opcionais
+        # Para cada campo, o conteúdo vai até \n---\n ou \n## [ ou fim do arquivo.
+        pat = rf"##\s*\[{m_esc}\]\s*\n\n?(.*?)(?=\n---\n|\n##\s*\[|\Z)"
+        m = re.search(pat, conteudo, re.DOTALL)
+
+    else:
+        # Posts 39-44: separador ASCII ---
+        # [SECTION]\ncontent\n---
+        pat = rf"^\[{m_esc}\]\s*\n(.*?)(?=\n---|\Z)"
+        m = re.search(pat, conteudo, re.DOTALL | re.MULTILINE)
+
+    return m.group(1).strip() if m else ""
 
 def parsear_post(caminho_arquivo):
     with open(caminho_arquivo, "r", encoding="utf-8") as f:
