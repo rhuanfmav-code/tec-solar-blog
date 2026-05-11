@@ -366,18 +366,25 @@ def processar_links(conteudo, links_internos_str, links_externos_str):
         conteudo = _substituir_ancora_em_paragrafo(conteudo, ancora, link_html)
 
     # ── Links externos ────────────────────────────────────────
-    # Formato esperado: Texto âncora: "termo" → URL: https://... → Fonte: ...
+    # Formato: Texto âncora: 'termo' → URL: https://... → Fonte: ...
+    # Formato legado: Texto âncora: "termo" → Fonte: nome https://...
     for linha in links_externos_str.split("\n"):
         match = re.search(
-            r'[Tt]exto\s+â[n]?cora:\s*["\'](.+?)["\'].*?(https?://\S+)',
+            r'[Tt]exto\s+â[n]?cora:\s*["\'](.+?)["\'].*?URL:\s*(https?://[^\s\n→]+)',
             linha,
         )
+        if not match:
+            match = re.search(
+                r'[Tt]exto\s+â[n]?cora:\s*["\'](.+?)["\'].*?(https?://[^\s\n→]+)',
+                linha,
+            )
         if match:
-            ancora, url = match.group(1), match.group(2).rstrip(")")
-            conteudo = conteudo.replace(
+            ancora = match.group(1).strip()
+            url    = match.group(2).rstrip(")→").strip()
+            conteudo = _substituir_ancora_em_paragrafo(
+                conteudo,
                 ancora,
                 f'<a href="{url}" target="_blank" rel="noopener noreferrer">{ancora}</a>',
-                1,
             )
     return conteudo
 
