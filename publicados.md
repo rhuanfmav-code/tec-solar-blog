@@ -1,4 +1,4 @@
 # Controle de Posts Publicados
 
-Último post publicado: Post 65
-Próximo post a publicar: Post 66
+Último post publicado: Post 66
+Próximo post a publicar: Post 67
