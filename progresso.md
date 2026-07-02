@@ -1,4 +1,4 @@
 # Controle de Posts Gerados
 
-Último post gerado: Post 90
-Próximo post a gerar: Post 91
+Último post gerado: Post 91
+Próximo post a gerar: Post 92
