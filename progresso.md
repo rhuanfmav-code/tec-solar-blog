@@ -1,5 +1,5 @@
 # Controle de Posts Gerados
 
-Último post gerado: Post 02
+Último post gerado: Post 03
 
-Todos os 91 posts do calendário editorial foram gerados (Posts 01 a 91).
+Posts gerados até agora: Posts 01 a 03
