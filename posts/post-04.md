@@ -58,7 +58,7 @@ As causas reais, em ordem de frequência:
 
 1. **Cabos CC com isolamento degradado** — UV, calor acumulado no eletroduto, roedores
 2. **Conectores MC4 mal crimpados ou com vedação comprometida** — água entra e cria caminho resistivo para o terra
-3. **Backsheet de painel delamimado** — umidade penetra pela parte traseira da célula e o encapsulante EVA degradado conduz para o frame
+3. **Backsheet de painel delaminado** — umidade penetra pela parte traseira da célula e o encapsulante EVA degradado conduz para o frame
 4. **Caixa de junção (junction box) com tampa solta** — condensação interna em ciclos de temperatura
 5. **Cabo de aterramento do frame do painel com resistência elevada** — paradoxalmente piora a leitura do circuito de medição
 6. **Falha no próprio circuito de medição do SMA** — resistores e capacitores do bloco de detecção com deriva por temperatura ou umidade
@@ -73,7 +73,7 @@ Não é exatamente o modo de falha descrito no manual. Mas é o que a gente vê 
 
 O diagnóstico do erro 3501 é feito com um megôhmímetro de 500V ou 1000V CC — não com multímetro. Resistências de isolamento na casa de centenas de kΩ ou poucos MΩ precisam de tensão de teste adequada para aparecer.
 
-**Procedimento de isolamento de string:**
+Procedimento de isolamento de string:
 
 1. Desligue o inversor pelo comando do display e aguarde a descarga do barramento CC (mínimo 5 minutos em inversores SMA sem transformador)
 2. Abra o string combiner ou cada string no quadro CC
@@ -85,10 +85,10 @@ O diagnóstico do erro 3501 é feito com um megôhmímetro de 500V ou 1000V CC �
 
 Depois de medir a string inteira, isole cada cabo individualmente — da caixa de junção do painel até o quadro CC. Retire e verifique todos os MC4 um a um. Pressione o conector contra uma toalha branca molhada e observe se há sujidade ou resíduo saindo da vedação.
 
-**Sinais físicos que apontam a origem:**
+Sinais físicos que apontam a origem:
 - Cabo com curvatura permanente e fissuras na camada externa (degradação UV no telhado)
 - MC4 com vedação de borracha endurecida, fragmentada ou com depósito branco (água evaporada)
-- Painel com bolhas ou descoloração no backsheet (delamimação)
+- Painel com bolhas ou descoloração no backsheet (delaminação)
 - Frame de painel com ponto de ferrugem na região do furo de aterramento
 
 Inversores SMA costeiros — especialmente em instalações no litoral do Rio de Janeiro, Espírito Santo e Bahia — chegam com o bloco de medição de isolamento corroído internamente. O erro 3501 aparece sem falha elétrica real na string. A placa diz que tem problema no gerador, mas o gerador está perfeito. Nesse caso, o defeito é no circuito de detecção do próprio inversor.
@@ -101,7 +101,7 @@ O erro mais frequente é fazer o teste de isolamento com os cabos CC ainda conec
 
 Quando os painéis estão expostos ao sol, a string está gerando tensão. Qualquer medição com megôhmímetro nessa condição é inválida e potencialmente perigosa. A tensão da string se soma à tensão de teste do instrumento, distorce o resultado e pode danificar o equipamento de medição.
 
-O segundo erro é testar apenas o cabo — e não testar os painéis. Um painel com backsheet delamimado tem resistência de isolamento que varia radicalmente com a umidade. Medir numa tarde seca de sol e obter 2 MΩ não descarta o painel. Medir de manhã cedo ou logo após chuva é que revela o problema. O SMA bloqueia nas condições de umidade elevada justamente porque é quando o isolamento cai.
+O segundo erro é testar apenas o cabo — e não testar os painéis. Um painel com backsheet delaminado tem resistência de isolamento que varia radicalmente com a umidade. Medir numa tarde seca de sol e obter 2 MΩ não descarta o painel. Medir de manhã cedo ou logo após chuva é que revela o problema. O SMA bloqueia nas condições de umidade elevada justamente porque é quando o isolamento cai.
 
 O técnico chega, não encontra defeito no cabo, declara "inversor com defeito" e pede orçamento de troca. O painel com backsheet comprometido continua no telhado. No próximo inverno chuvoso, o sistema novo vai apresentar o mesmo erro.
 
@@ -109,15 +109,15 @@ O técnico chega, não encontra defeito no cabo, declara "inversor com defeito" 
 
 ## Quando o reparo é viável
 
-A análise é direta se você fez o diagnóstico correto:
+A análise é direta se você fez o diagnóstico correto.
 
-**Substituição simples, sem reparo de inversor:**
-- Cabo CC danificado: substituição em campo, custo de material + mão de obra
+Substituição simples, sem reparo de inversor:
+- Cabo CC danificado: substituição em campo, custo de material e mão de obra
 - Conectores MC4 com vedação comprometida: substituição dos conectores por modelo certificado TÜV
-- Painel com backsheet delamimado: depende do grau de dano e cobertura de garantia
+- Painel com backsheet delaminado: depende do grau de dano e cobertura de garantia
 
-**Reparo no inversor necessário quando:**
-- String completamente saudável (isolamento > 2 MΩ em todas as medições), mas o SMA continua reportando erro 3501
+Reparo no inversor necessário quando:
+- String completamente saudável (isolamento acima de 2 MΩ em todas as medições), mas o SMA continua reportando erro 3501
 - Erro aparece mesmo com todos os cabos CC fisicamente desconectados do inversor
 - Medição de resistência no bloco interno de detecção mostra valores fora da especificação
 
@@ -131,26 +131,44 @@ Ainda depende do que você vai encontrar quando abrir o equipamento.
 
 O erro 3501 do SMA não é desordem eletrônica interna — é o inversor cumprindo a função que a IEC 62109-1 exige. O equipamento detectou uma condição de risco e bloqueou. A pergunta que o diagnóstico precisa responder é: o risco está no gerador, nos cabos, nos conectores — ou a leitura em si está errada?
 
-Envie seu inversor para a TEC Solar. Realizamos diagnóstico eletrônico completo em nível de placa e devolvemos um laudo técnico detalhado — mesmo que o reparo não seja viável. Atendemos todo o Brasil via logística reversa. [Falar com a TEC Solar no WhatsApp](https://wa.me/5538998891587) | [@tec_solar_moc](https://www.instagram.com/tec_solar_moc/)
-
 Antes de pedir orçamento de inversor novo, conecta o megôhmímetro na string com os painéis desconectados. Às vezes a resposta está num conector MC4 de R$ 12,00.
+
+## Envie seu inversor para diagnóstico
+
+Antes de comprar equipamento novo, envie para a nossa bancada. A TEC Solar realiza diagnóstico eletrônico completo em nível de componente — abrimos o inversor, medimos a placa, identificamos a causa raiz e entregamos um laudo técnico detalhado.
+
+Se o reparo for viável, você recebe o equipamento funcionando por uma fração do custo de substituição. Se não for, o laudo serve de base para qualquer decisão.
+
+Atendemos todo o Brasil via logística reversa.
+
+<div style="display:flex; flex-direction:column; gap:12px; margin-top:20px;">
+
+<a href="https://wa.me/5538998891587?text=Ol%C3%A1%2C%20vim%20pelo%20blog%20e%20quero%20enviar%20meu%20inversor%20para%20diagn%C3%B3stico" target="_blank" style="background:#25D366; color:white; padding:14px 24px; border-radius:8px; text-decoration:none; font-weight:bold; text-align:center;">
+👉 Falar no WhatsApp agora
+</a>
+
+<a href="https://www.instagram.com/tec_solar_moc?igsh=MWl2djYzeXk2Zm51dQ%3D%3D&utm_source=qr" target="_blank" style="background:#E1306C; color:white; padding:14px 24px; border-radius:8px; text-decoration:none; font-weight:bold; text-align:center;">
+📸 Seguir no Instagram
+</a>
+
+<a href="https://youtube.com/@tecsolar-reparodeinversores?si=kG3Njqipg8QRbZSD" target="_blank" style="background:#FF0000; color:white; padding:14px 24px; border-radius:8px; text-decoration:none; font-weight:bold; text-align:center;">
+▶️ Ver vídeos no YouTube
+</a>
+
+</div>
 
 ---
 
 ## [LINKS INTERNOS SUGERIDOS]
 
-- Âncora: "resistência de isolamento da string fotovoltaica" → Link para: post sobre Growatt Erro 102 – Falha de Isolamento (Post 01)
-- Âncora: "circuito de medição do próprio inversor" → Link para: post sobre placa de controle vs. placa de potência (Post 43)
-- Âncora: "sistema fotovoltaico com inversor parado" → Link para: post sobre inversor solar parado – checklist completo (Post 11)
-- Âncora: "falha de isolamento em sistemas fotovoltaicos" → Link para: post sobre onde começa a falha de isolamento (Post 64)
+- Âncora: 'resistência de isolamento da string fotovoltaica' → URL: /growatt-erro-102-falha-de-isolamento → Contexto: terceiro parágrafo da introdução, ao mencionar a queda da resistência de isolamento
 
 ---
 
 ## [LINKS EXTERNOS SUGERIDOS]
 
-- Texto âncora: "IEC 62109-1" → Fonte: IEC – Safety requirements for power conversion equipment for use in photovoltaic power systems (iec.ch)
-- Texto âncora: "ABNT NBR 16690" → Fonte: ABNT – Instalações elétricas de arranjos fotovoltaicos – Requisitos de projeto
-- Texto âncora: "conectores MC4 certificados TÜV" → Fonte: Multi-Contact (Stäubli) – Especificações técnicas MC4 para sistemas FV
+- Texto âncora: "IEC 62109-1" → URL: https://webstore.iec.ch/publication/6317 → Fonte: IEC — Safety requirements for power conversion equipment for use in photovoltaic power systems
+- Texto âncora: "ABNT NBR 16690" → URL: https://www.abnt.org.br → Fonte: ABNT — Instalações elétricas de arranjos fotovoltaicos — Requisitos de projeto
 
 ---
 
@@ -158,13 +176,11 @@ Antes de pedir orçamento de inversor novo, conecta o megôhmímetro na string c
 
 IMAGEM PRINCIPAL:
 → URL para download: https://images.unsplash.com/photo-1612198188060-c7c2a3b66eae?w=1200
-→ Página da imagem: https://unsplash.com/photos/solar-panels-rooftop-installation
 → Por que foi escolhida: Instalação fotovoltaica em telhado com cabeamento CC visível — contexto direto do diagnóstico de isolamento descrito no post
 → Nome do arquivo: sma-erro-3501-falha-isolamento-diagnostico.webp
 → Alt Text (máx. 125 caracteres): Técnico verificando cabeamento CC em sistema fotovoltaico com inversor SMA com falha de isolamento erro 3501
 → Legenda: Fig. 1 — Diagnóstico de falha de isolamento em string fotovoltaica conectada a inversor SMA
 → Onde inserir: Topo do post, antes da introdução
-→ Converter para WebP — máximo 150 KB
 
 ---
 
@@ -172,23 +188,8 @@ IMAGEM PRINCIPAL:
 
 IMAGEM SECUNDÁRIA:
 → URL para download: https://images.unsplash.com/photo-1581092580497-e0d23cbdf1dc?w=1200
-→ Página da imagem: https://unsplash.com/photos/electronics-testing-multimeter
 → Por que foi escolhida: Técnico usando instrumento de medição em equipamento eletrônico — representa o uso do megôhmímetro no procedimento de diagnóstico
 → Nome do arquivo: medicao-isolamento-string-fotovoltaica-2.webp
 → Alt Text (máx. 125 caracteres): Técnico medindo resistência de isolamento de string fotovoltaica com megôhmímetro para diagnóstico SMA 3501
 → Legenda: Fig. 2 — Medição de resistência de isolamento com megôhmímetro 1000V CC. Cada string deve ser testada individualmente com os painéis desconectados
 → Onde inserir: Após H2 "Como identificar na prática"
-→ Converter para WebP — máximo 150 KB
-
----
-
-## [IMAGEM ALTERNATIVA — BACKUP]
-
-IMAGEM ALTERNATIVA:
-→ URL para download: https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1200
-→ Página da imagem: https://unsplash.com/photos/solar-inverter-maintenance
-→ Nome do arquivo: placa-controle-sma-circuito-isolamento-alt.webp
-→ Alt Text (máx. 125 caracteres): Placa eletrônica de inversor SMA com circuito de medição de isolamento visível para diagnóstico de erro 3501
-→ Legenda: Bloco de medição de isolamento na placa de controle do inversor SMA — componentes de precisão críticos para leitura correta
-→ Onde inserir: Substituir qualquer uma das anteriores
-→ Converter para WebP — máximo 150 KB
