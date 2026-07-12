@@ -22,7 +22,7 @@ sungrow-grid-lost-perda-de-rede-diagnostico
 
 ## [META DESCRIPTION]
 
-Inversor Sungrow com Grid Lost? Veja como identificar se o problema é disjuntor, cabeamento AC ou circuito interno — diagnóstico em nível de placa.
+Inversor Sungrow com Grid Lost? Veja se o problema está no disjuntor, cabeamento ou relé interno — diagnóstico em nível de componente. TEC Solar.
 
 ---
 
@@ -34,38 +34,36 @@ Códigos de Erro e Falhas
 
 ## [TAGS]
 
-Sungrow, Grid Lost, perda de rede, erro inversor solar, diagnóstico AC
+Sungrow Grid Lost, perda de rede inversor solar, relé saída CA, diagnóstico Sungrow, alarme 010 Sungrow
 
 ---
 
 ## [TEXTO DO POST — VERSÃO HUMANIZADA FINAL]
 
-O **erro Grid Lost no inversor Sungrow** trava o sistema, e o integrador recebe a ligação do cliente às 10h da manhã com inversor parado e zero geração no dia. Parece problema de rede. Às vezes é. Mas na maioria dos casos que chegam até nós, a rede elétrica estava funcionando normalmente — e o inversor estava errado sobre o que aconteceu.
+**Sungrow Grid Lost** aparece no display, o inversor desliga, e o integrador começa o checklist clássico: disjuntor, cabeamento, reset. Na metade dos casos, o equipamento volta. Na outra metade, não volta — e aí começa a divergência de diagnóstico.
 
-Na nossa bancada, o padrão é consistente: o inversor reporta Grid Lost, o técnico verifica a tomada mais próxima, vê tensão, decide que é bug e faz reset. O inversor volta por alguns dias. O ciclo se repete até que não volta mais. Nesse ponto, o cliente quer trocar o equipamento. Antes de assinar o pedido de compra, vale a pena medir o que está chegando de fato nos bornes de entrada AC do inversor.
+Na nossa bancada, esse alarme chega com dois perfis bem distintos. No primeiro, o inversor estava saudável mas houve um evento de rede — pico de frequência, subtensão momentânea da concessionária, oscilação durante comutação de cargas pesadas. O equipamento travou, mas o problema estava fora dele. No segundo perfil, o grid está completamente normal e o inversor continua reportando Grid Lost. Nesse caso, o problema está dentro da caixa.
 
-O "Grid Lost" — ou "AC Grid Lost", dependendo da versão de firmware — indica que o circuito de supervisão de rede do Sungrow não está detectando tensão AC dentro dos parâmetros operacionais. Isso não significa, obrigatoriamente, que a rede elétrica sumiu. Significa que o inversor não está vendo a rede.
-
-São dois problemas completamente diferentes.
+O Grid Lost no Sungrow (também identificado como Alarm 010 ou variantes de "No Grid" em alguns modelos) é a mensagem do inversor dizendo que não consegue detectar tensão CA na saída. As causas podem ser banais ou graves. O diagnóstico é o que decide qual.
 
 ---
 
 ## O que causa esse erro no Sungrow
 
-O circuito de supervisão de rede nos inversores Sungrow (famílias SG, SH e SG-RT) monitora continuamente a tensão, a frequência e, nos modelos trifásicos, a simetria de fases. Quando qualquer desses parâmetros sai do envelope operacional — ou desaparece completamente — o inversor dispara a proteção anti-ilhamento, abre o relé de rede e registra o erro.
+O circuito de supervisão de rede nos inversores Sungrow (famílias SG, SH e SG-RT) monitora continuamente tensão, frequência e, nos modelos trifásicos, a simetria de fases. Quando qualquer desses parâmetros sai dos limites configurados — ou some completamente — o equipamento abre o relé de saída, desconecta da rede e registra o alarme.
 
-A proteção anti-ilhamento nos modelos Sungrow homologados para o Brasil segue a ABNT NBR 16149, que exige desconexão em menos de 2 segundos quando a frequência sai de 55–65 Hz ou a tensão ultrapassa 10% da nominal. Isso é correto e obrigatório. O problema começa quando o inversor dispara fora dessas condições — e continua reportando Grid Lost com rede presente.
+A proteção anti-ilhamento nos modelos Sungrow homologados para o Brasil segue a ABNT NBR 16149, que exige desconexão em menos de 2 segundos quando a frequência sai de 55–65 Hz ou a tensão ultrapassa 10% da nominal. Isso é correto e obrigatório. O problema começa quando o inversor dispara fora dessas condições — e continua reportando Grid Lost com a rede presente.
 
 Causas reais, em ordem de frequência:
 
 1. **Disjuntor AC com mau contato ou subdimensionado** — micro-abertura cíclica que o técnico não detecta sem medição direta no barramento de saída
-2. **Cabos AC subdimensionados ou com queda de tensão excessiva** — o inversor não enxerga a tensão mínima no borne AC mesmo com rede presente no quadro
-3. **Terminal de conexão AC com aperto insuficiente** — vibração e ciclos térmicos afrouxam terminais de cobre progressivamente; o contato piora durante geração de pico
-4. **Relé de rede interno com falha de fechamento** — contato oxidado ou com carbonização que não fecha com confiabilidade, gerando leitura de tensão intermitente no circuito de supervisão
-5. **Circuito de amostragem de tensão AC com deriva** — divisor resistivo ou amplificador operacional na placa de controle com leitura distorcida por corrosão ou variação de temperatura
-6. **Transiente de rede da concessionária** — queda de tensão momentânea de 200 ms já basta para disparar a proteção em alguns firmwares Sungrow, dependendo da parametrização
+2. **Cabos AC com queda de tensão excessiva** — o inversor não enxerga a tensão mínima no borne AC mesmo com rede presente no quadro
+3. **Terminal de conexão AC com aperto insuficiente** — vibração e ciclos térmicos afrouxam terminais de cobre progressivamente; o contato piora durante picos de geração
+4. **Relé de saída CA com falha de fechamento** — contato oxidado ou carbonizado que não fecha com confiabilidade, gerando leitura intermitente no circuito de supervisão. Isso acontece mais do que o integrador imagina.
+5. **Circuito de amostragem de tensão CA com deriva** — divisor resistivo ou amplificador operacional na placa de controle com leitura distorcida por corrosão ou variação de temperatura
+6. **Instabilidade da rede da concessionária** — frequência fora dos limites (±0,5 Hz do padrão 60 Hz conforme ANEEL) ou queda de tensão momentânea de 200 ms, suficiente para disparar a proteção dependendo da parametrização do firmware
 
-Nenhum desses pontos aparece com visual de "inversor queimado". O equipamento parece intacto. Por isso o Grid Lost leva tanto tempo para ser diagnosticado corretamente.
+Sem separar causa externa de interna, o diagnóstico não começa.
 
 ---
 
@@ -73,79 +71,104 @@ Nenhum desses pontos aparece com visual de "inversor queimado". O equipamento pa
 
 O diagnóstico começa do ponto mais externo e vai entrando. Não o contrário.
 
-**Procedimento de verificação:**
-
-1. Meça a tensão CA no barramento do QDC (quadro de distribuição) com carga real ligada — não em tomada
+1. Meça a tensão CA no barramento do QDC com carga real ligada — não em tomada
 2. Meça na saída do disjuntor dedicado do inversor
-3. Meça diretamente nos bornes de conexão AC do inversor, com o equipamento em standby
+3. Meça diretamente nos bornes de conexão AC do inversor com o equipamento em standby
 4. Calcule a queda de tensão entre o ponto 2 e o ponto 3: qualquer valor acima de 3V com o inversor desligado indica resistência elevada no cabeamento ou nos terminais
-5. Com o inversor desenergizado, retire os cabos AC dos bornes e meça a resistência de cada condutor entre o QDC e o inversor — limite prático: máximo 0,3 Ω por condutor em cabos até 15 m
-6. Verifique o torque de aperto dos terminais conforme a especificação Sungrow: 1,5 a 2,5 Nm para bornes AC residenciais
+5. Com o inversor desenergizado, meça a resistência de cada condutor CA entre o QDC e o inversor — limite prático: máximo 0,3 Ω por condutor em cabos até 15 m
+6. Verifique o torque de aperto dos terminais: 1,5 a 2,5 N·m para bornes AC residenciais Sungrow
+7. Com a rede confirmada e o disjuntor íntegro, ligue o inversor e observe — o Grid Lost aparece imediatamente ou após tentativa de sincronização?
 
-Se a tensão chega corretamente nos bornes e o inversor continua reportando Grid Lost após religar, o problema é interno.
+Se o alarme aparece antes de qualquer tentativa de sincronizar, o circuito de medição interno é o suspeito principal.
 
-Nesse ponto, o diagnóstico vai para a placa. O circuito de supervisão AC do Sungrow usa um divisor resistivo para escalonamento de tensão, seguido de um condicionador de sinal. Na bancada, o procedimento é medir a tensão antes e depois do divisor. Se a tensão real está presente na entrada mas o sinal processado está ausente ou distorcido, o problema está nos resistores de precisão ou no amplificador de condicionamento.
+Sinais físicos que apontam falha interna:
+- No osciloscópio, forma de onda CA ausente nos pinos de leitura da placa de controle mesmo com tensão presente nos terminais de saída
+- Resistores do divisor de tensão CA com mudança de coloração (marrom-escuro ou deformação leve) — sobrecarga pontual no circuito de medição
+- Relé com marcas de queima ou resíduo escuro nos contatos visíveis durante abertura mecânica
 
-Inversores Sungrow que operam no litoral brasileiro — especialmente no trecho entre Pernambuco, Alagoas e Sergipe — chegam com esse circuito corroído por névoa salina. A corrosão aumenta a resistência dos resistores de divisão e distorce completamente a leitura. O inversor reporta Grid Lost porque genuinamente não está lendo tensão nenhuma, mesmo com a rede normal.
+Não é sempre que esses sinais estão visíveis. Às vezes só a medição de resistência revela o defeito.
+
+Inversores Sungrow instalados no litoral nordestino — especialmente nos modelos SG5KTL e SG8KTL em Pernambuco, Alagoas e Sergipe — chegam com os terminais CA com oxidação severa por névoa salina. O Grid Lost nesse contexto é frequentemente um problema de resistência de contato, não falha eletrônica interna.
 
 ---
 
 ## O erro mais comum do mercado
 
-O técnico mede a tensão na tomada mais próxima do quadro, vê 220 V, e conclui que a rede está normal. Fecha o chamado como "falha transitória da concessionária" e reseta o inversor.
+O técnico mede a tensão na tomada mais próxima do quadro, vê 220V, e conclui que a rede está normal. Fecha o chamado como "falha transitória da concessionária" e reseta o inversor.
 
-Ninguém mediu os bornes AC do inversor. Ninguém verificou o disjuntor dedicado sob carga. Ninguém apertou os terminais.
+Isso não é diagnóstico. É exclusão com uma variável só.
 
-O inversor volta, funciona por uma semana, e o Grid Lost aparece de novo — normalmente no horário de pico de geração, quando a corrente AC está no máximo e a queda de tensão nos cabos atinge o valor mais alto. Não é coincidência. É física: corrente alta em cabo subdimensionado gera queda de tensão que empurra a leitura do inversor para fora do envelope da ABNT NBR 16149.
+Ninguém mediu os bornes AC do inversor. Ninguém verificou o disjuntor dedicado sob carga. Ninguém apertou os terminais. O inversor volta, funciona por uma semana, e o Grid Lost reaparece — normalmente no horário de pico de geração, quando a corrente AC está no máximo e a queda de tensão nos cabos atinge o valor mais alto. Não é coincidência. É física: corrente alta em cabo subdimensionado gera queda de tensão que empurra a leitura do inversor para fora do envelope da ABNT NBR 16149.
 
-O segundo erro frequente é trocar o inversor inteiro por "falha recorrente de rede" sem checar o relé interno. O relé de rede num Sungrow residencial custa entre R$ 30 e R$ 80. O inversor novo vai ao telhado, o relé defeituoso desce no lixo junto com o chassi de R$ 3.500. Três semanas depois, o cliente liga de novo — porque o cabeamento subdimensionado continua lá.
+O Sungrow armazena log de eventos com timestamp. Se o Grid Lost ocorreu entre 13h e 14h num dia de calor extremo, cruzar com os dados de demanda da concessionária local pode revelar o padrão. Em regiões do sertão nordestino e do interior do Sudeste, inversores desligam no pico da tarde por subtensão de rede — o barramento da concessionária afunda quando os equipamentos de ar-condicionado entram simultaneamente. A instalação está correta. A rede que falhou.
+
+Condenar o inversor sem olhar o log de eventos é o erro mais caro do mercado.
 
 ---
 
 ## Quando o reparo é viável
 
-A decisão depende do que o diagnóstico encontrou:
+Para causas externas, não há reparo no inversor. A correção é na instalação.
 
-**Em campo, sem envio para bancada:**
-- Disjuntor com mau contato: substituição direta, sem mexer no inversor
-- Cabo AC com queda de tensão: redimensionamento ou substituição do trecho
-- Terminais com aperto insuficiente: retorque dentro da especificação Sungrow
+Para causas internas, o critério é direto:
 
-**Em bancada, reparo interno:**
-- Relé de rede com falha de contato: substituição do componente, custo de R$ 30–80 mais mão de obra
-- Divisor resistivo com deriva por corrosão: troca dos resistores de precisão, custo de componente abaixo de R$ 20
-- Amplificador de condicionamento com drift: identificação e substituição em nível SMD
+- Relé de saída CA com falha de contato: componente substituível em bancada. O relé é geralmente um modelo padronizado (Omron G2R ou equivalente), com especificação rastreável no datasheet da placa. Custo do componente: R$ 30 a R$ 80.
+- Divisor resistivo com deriva por corrosão: troca dos resistores de precisão, custo de componente abaixo de R$ 20.
+- Amplificador de condicionamento com drift: identificação e substituição em nível SMD — custo de componente baixo, o que determina o valor é a hora de bancada.
+- Placa de controle com dano extenso por raio, surto ou infiltração de água: o reparo depende do mapeamento do dano. Pode ser viável, pode não ser.
 
-Um inversor Sungrow SG5K-D ou SG8K-D novo sai entre R$ 2.500 e R$ 4.500 dependendo da potência e do canal de compra. Um reparo no relé de rede ou no circuito de supervisão AC, quando bem diagnosticado, fica entre R$ 300 e R$ 600.
+Um inversor Sungrow residencial novo de 5 kW está entre R$ 3.200 e R$ 4.800. Um de 8 kW, entre R$ 4.500 e R$ 6.500. Reparo do relé de saída na bancada: R$ 300 a R$ 600.
 
-O que não está claro é quem vai abrir o equipamento e medir o que precisa ser medido antes de emitir o laudo.
+A conta é simples.
 
 ---
 
 ## Conclusão
 
-O erro Grid Lost no Sungrow não significa que a rede elétrica falhou. Significa que o inversor não está vendo a rede. São diagnósticos diferentes, soluções diferentes, custos diferentes.
+Grid Lost não é sentença de morte do inversor. Na maioria dos casos que chegam até nós, o equipamento está eletronicamente saudável — o problema estava no disjuntor mal fixado, no cabo CA com terminal frouxo, ou na rede da concessionária que oscilou e ninguém registrou.
 
-Envie seu inversor para a TEC Solar. Realizamos diagnóstico eletrônico completo em nível de placa e devolvemos um laudo técnico detalhado — mesmo que o reparo não seja viável. Atendemos todo o Brasil via logística reversa. [Falar com a TEC Solar no WhatsApp](https://wa.me/5538998891587) | [@tec_solar_moc](https://www.instagram.com/tec_solar_moc/)
+Nos casos em que o defeito é interno, o relé de saída CA é o suspeito principal. Um componente de R$ 60 que, sem diagnóstico, vira justificativa para troca de inversor novo.
 
-Antes de pedir inversor novo, mede os bornes AC com o equipamento em standby. Um aperto de terminal de 2 minutos já resolveu mais Grid Lost do que qualquer reset de fábrica.
+Antes de condenar, diagnostica.
+
+## Envie seu inversor para diagnóstico
+
+Antes de comprar equipamento novo, envie para a nossa bancada. A TEC Solar realiza diagnóstico eletrônico completo em nível de componente — abrimos o inversor, medimos a placa, identificamos a causa raiz e entregamos um laudo técnico detalhado.
+
+Se o reparo for viável, você recebe o equipamento funcionando por uma fração do custo de substituição. Se não for, o laudo serve de base para qualquer decisão.
+
+Atendemos todo o Brasil via logística reversa.
+
+<div style="display:flex; flex-direction:column; gap:12px; margin-top:20px;">
+
+<a href="https://wa.me/5538998891587?text=Ol%C3%A1%2C%20vim%20pelo%20blog%20e%20quero%20enviar%20meu%20inversor%20para%20diagn%C3%B3stico" target="_blank" style="background:#25D366; color:white; padding:14px 24px; border-radius:8px; text-decoration:none; font-weight:bold; text-align:center;">
+👉 Falar no WhatsApp agora
+</a>
+
+<a href="https://www.instagram.com/tec_solar_moc?igsh=MWl2djYzeXk2Zm51dQ%3D%3D&utm_source=qr" target="_blank" style="background:#E1306C; color:white; padding:14px 24px; border-radius:8px; text-decoration:none; font-weight:bold; text-align:center;">
+📸 Seguir no Instagram
+</a>
+
+<a href="https://youtube.com/@tecsolar-reparodeinversores?si=kG3Njqipg8QRbZSD" target="_blank" style="background:#FF0000; color:white; padding:14px 24px; border-radius:8px; text-decoration:none; font-weight:bold; text-align:center;">
+▶️ Ver vídeos no YouTube
+</a>
+
+</div>
 
 ---
 
 ## [LINKS INTERNOS SUGERIDOS]
 
-- Âncora: "falha de isolamento em inversor solar" → Link para: post sobre Growatt Erro 102 – Falha de Isolamento (Post 01)
-- Âncora: "placa de controle com deriva de leitura" → Link para: post sobre placa de controle vs. placa de potência (Post 43)
-- Âncora: "inversor parado com sistema funcionando" → Link para: post sobre inversor solar parado – checklist completo (Post 11)
-- Âncora: "relé de bypass com defeito" → Link para: post sobre relés de bypass em inversores (Post 54)
+- Âncora: 'proteção anti-ilhamento' → URL: /growatt-erro-102-falha-de-isolamento → Contexto: seção "O que causa", ao mencionar a desconexão automática por segurança
+- Âncora: 'falha de isolamento em inversor solar' → URL: /sma-erro-3501-falha-isolamento-diagnostico-fotovoltaico → Contexto: seção "O que causa", ao mencionar diagnóstico em nível de placa como método comum
+- Âncora: 'instabilidade da rede da concessionária' → URL: /deye-f01-f02-tensao-de-rede-alta-e-baixa → Contexto: seção "O erro mais comum do mercado", ao mencionar oscilação de rede como causa não identificada
 
 ---
 
 ## [LINKS EXTERNOS SUGERIDOS]
 
-- Texto âncora: "ABNT NBR 16149" → Fonte: ABNT – Sistemas fotovoltaicos — Requisitos de conexão à rede elétrica de distribuição (abnt.org.br)
-- Texto âncora: "proteção anti-ilhamento" → Fonte: ANEEL – Resolução Normativa 482/2012 e 687/2015 (aneel.gov.br)
-- Texto âncora: "relé de rede em inversores solares" → Fonte: Sungrow – SG Series Installation and Operation Manual (sungrowpower.com)
+- Texto âncora: "ABNT NBR 16149" → URL: https://www.abnt.org.br → Fonte: ABNT — Sistemas fotovoltaicos — Requisitos de conexão à rede elétrica de distribuição
+- Texto âncora: "padrão 60 Hz conforme ANEEL" → URL: https://www.aneel.gov.br/distribuicao4 → Fonte: ANEEL — Módulo 8 do PRODIST, Qualidade da Energia Elétrica
 
 ---
 
@@ -156,9 +179,8 @@ IMAGEM PRINCIPAL:
 → Por que foi escolhida: Painel de distribuição elétrica residencial com disjuntores — contexto direto do diagnóstico de perda de rede descrito no post
 → Nome do arquivo: sungrow-grid-lost-perda-de-rede-diagnostico.webp
 → Alt Text (máx. 125 caracteres): Quadro de distribuição elétrica com disjuntor AC de inversor Sungrow — diagnóstico de erro Grid Lost perda de rede
-→ Legenda: Fig. 1 — Ponto de medição no disjuntor dedicado do inversor: primeiro passo no diagnóstico do erro Grid Lost
+→ Legenda: Fig. 1 — Ponto de medição no disjuntor dedicado do inversor: primeiro passo no diagnóstico do Grid Lost
 → Onde inserir: Topo do post, antes da introdução
-→ Converter para WebP — máximo 150 KB
 
 ---
 
@@ -169,6 +191,5 @@ IMAGEM SECUNDÁRIA:
 → Por que foi escolhida: Técnico usando multímetro em equipamento eletrônico — representa a medição de tensão nos bornes AC e o diagnóstico do circuito de supervisão
 → Nome do arquivo: medicao-bornes-ac-inversor-sungrow-2.webp
 → Alt Text (máx. 125 caracteres): Técnico medindo tensão nos bornes AC de inversor Sungrow com multímetro para diagnóstico de erro Grid Lost
-→ Legenda: Fig. 2 — Medição direta nos bornes AC do inversor em standby. A queda de tensão entre o QDC e o borne é o primeiro indicador de problema no cabeamento
+→ Legenda: Fig. 2 — Medição direta nos bornes AC do inversor em standby. Queda de tensão entre QDC e borne indica problema no cabeamento ou nos terminais
 → Onde inserir: Após H2 "Como identificar na prática"
-→ Converter para WebP — máximo 150 KB
