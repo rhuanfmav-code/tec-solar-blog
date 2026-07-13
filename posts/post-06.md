@@ -22,7 +22,7 @@ weg-e001-sobretensao-cc-diagnostico
 
 ## [META DESCRIPTION]
 
-Inversor WEG com erro E001? Saiba se é problema de string mal configurada ou falha no circuito de medição CC — diagnóstico em nível de placa.
+Inversor WEG com erro E001? Veja se é string mal dimensionada ou falha no circuito de medição CC — diagnóstico em nível de placa. TEC Solar.
 
 ---
 
@@ -34,107 +34,127 @@ Códigos de Erro e Falhas
 
 ## [TAGS]
 
-WEG, E001, Sobretensão CC, erro inversor solar, diagnóstico CC
+WEG E001, sobretensão CC inversor solar, string fotovoltaica temperatura, diagnóstico inversor WEG, circuito medição CC
 
 ---
 
 ## [TEXTO DO POST — VERSÃO HUMANIZADA FINAL]
 
-O **erro E001 no inversor WEG** aparece como "Sobretensão CC" no display e o sistema trava na hora — normalmente na primeira manhã fria do inverno ou num dia de céu limpo com irradiância alta. O integrador reseta, o inversor volta. Três dias depois repete. Ele reseta de novo. Na décima vez, o cliente quer trocar o equipamento.
+**WEG E001** aparece no display num dia de sol frio e o inversor desliga. O integrador vai ao site, reseta, o equipamento volta. Uma semana depois, mesma coisa. Depois da quinta ocorrência, o cliente quer trocar o equipamento.
 
-Na nossa bancada, o E001 chega com duas histórias completamente diferentes. A primeira é de projeto: string com Voc calculado para 25°C, instalada num local onde a temperatura cai muito abaixo disso nas manhãs de inverno. A segunda é eletrônica: circuito de medição de tensão CC com deriva, reportando sobretensão onde fisicamente não existe. O diagnóstico de um não serve para o outro. E trocar o inversor sem identificar qual dos dois causou o erro não vai resolver o problema — vai só adiar.
+Na nossa bancada, esse erro chega com dois perfis completamente distintos. No primeiro, a string foi calculada para 25°C e instalada em Curitiba, na Serra Gaúcha ou no planalto catarinense — onde as manhãs de inverno chegam a zero grau e o Voc dos painéis sobe além do limite máximo do inversor. No segundo, a string está dentro dos parâmetros do datasheet e o E001 aparece mesmo assim. Circuito de medição com problema. Dois diagnósticos completamente diferentes, e o procedimento para um não serve para o outro.
+
+O inversor não distingue automaticamente qual dos dois casos está acontecendo. Quem precisa distinguir é o técnico.
 
 ---
 
 ## O que causa o erro E001 no WEG
 
-O E001 dispara quando a tensão CC nas entradas do inversor ultrapassa o valor máximo de projeto — 1000 V para as famílias SIW300H e SIW500H, conforme a especificação técnica WEG alinhada à IEC 62109. No instante da detecção, o circuito de proteção de entrada abre e o inversor entra em fault.
+O E001 nos modelos SIW (SIW300H, SIW500H e variantes da família SIW10/20/25GT) é a proteção de sobretensão CC. Quando a tensão nos terminais de entrada ultrapassa o limite máximo — 1000 V nos modelos monofásicos, conforme a especificação técnica WEG alinhada à IEC 62109 — o circuito de proteção abre e o equipamento entra em fault.
 
-Causas reais, em ordem de frequência:
+A leitura dessa tensão é feita por um divisor resistivo de alta tensão na placa de controle. O sinal passa por um amplificador operacional de condicionamento e chega ao ADC do microcontrolador. Qualquer deriva nessa cadeia de medição gera leitura diferente da realidade — e o inversor entra em proteção sem que a string tenha ultrapassado nenhum limite real.
 
-1. **String com Voc calculado para 25°C** — o cálculo deve usar a temperatura mínima histórica do local de instalação. No Sul do Brasil (Curitiba, Serra Gaúcha, planalto catarinense), as manhãs de inverno chegam a -5°C ou menos. A cada grau Celsius abaixo de 25°C, o Voc de uma célula monocristalina aumenta entre 0,26% e 0,35% — coeficiente de temperatura negativo, presente no datasheet de qualquer painel. Em uma string de 20 painéis com Voc de 41,5 V a 25°C, a diferença entre calcular para 25°C e para -5°C supera 80 V. Em projetos próximos ao limite de 1000 V, essa margem não existe.
-   — É o erro de dimensionamento mais silencioso do mercado: o sistema funciona normalmente o ano todo e só falha no pico do inverno.
+Causas reais em ordem de frequência:
 
-2. **Painel substituído por modelo diferente sem recalcular a string** — troca por painel com Voc maior do que o original, mesmo que a potência nominal seja parecida.
+1. **String dimensionada para 25°C sem correção de temperatura** — o Voc dos painéis de silício cristalino sobe com o frio. O coeficiente de temperatura (αV, em %/°C) é sempre negativo e está no datasheet de cada painel. No Sul do Brasil, as temperaturas mínimas históricas ficam entre -3°C e -8°C dependendo da altitude e da cidade. A diferença entre calcular para 25°C e para -5°C num string de 20 painéis com Voc de 41 V pode superar 80 V. Em projetos próximos ao limite de 1.000 V, essa margem não existe.
+2. **Substituição de painel por modelo com Voc maior** — potência parecida, mas o Voc do novo painel excede o do original. Sem recalcular a string, o limite máximo passa a ser violado nas condições mais críticas.
+3. **Resistores do divisor de tensão CC com deriva** — componentes SMD de alta precisão (1 MΩ e superiores) perdem tolerância por envelhecimento, calor cumulativo ou infiltração de umidade. A relação de divisão muda e o ADC passa a ler tensão mais alta do que a tensão real nos bornes.
+4. **Amplificador operacional com offset deslocado** — surto ou envelhecimento provoca drift de offset no op-amp de condicionamento. O resultado é leitura sistematicamente mais alta, independentemente da tensão real da string.
+5. **MOV de proteção parcialmente degradado** — varistor com capacitância residual elevada injeta ruído no ponto de amostragem durante transitórios de irradiância, causando leituras espúrias que disparam a proteção fora de condição real de sobretensão.
+6. **Condensação em inversores sem vedação adequada** — umidade interna ataca os terminais dos resistores SMD de alta tensão, aumentando resistência de contato e distorcendo a leitura do divisor. Instalações próximas ao oceano no litoral Sul do Brasil concentram esse padrão.
 
-3. **Resistores do divisor de tensão CC com deriva** — o circuito de medição de entrada usa uma cadeia de resistores SMD de alta tensão (1 MΩ ou superior) para escalonar a tensão CC ao nível do ADC do microcontrolador. Corrosão nos terminais ou degradação por temperatura altera a relação de divisão e gera leitura mais alta que a tensão real.
-
-4. **Amplificador operacional de condicionamento com offset positivo** — o op-amp que processa o sinal do divisor apresenta deriva de offset, reportando ao microcontrolador uma tensão maior do que a real. O inversor entra em proteção sem que a string tenha ultrapassado nenhum limite.
-
-5. **MOV de proteção da entrada parcialmente degradado** — um varistor com falha parcial pode injetar ruído no barramento CC durante picos de irradiância e causar leituras espúrias no circuito de amostragem.
-
-6. **Inversores sem transformador com fuga CC para terra** — em topologias transformerless, corrente de fuga entre o string CC e o terra pode distorcer a referência de medição de tensão. Esse mecanismo é menos frequente, mas aparece em instalações sem aterramento adequado do sistema fotovoltaico.
+Seis causas com assinatura de falha diferente uma da outra.
 
 ---
 
 ## Como identificar na prática
 
-Antes de qualquer reset ou recomendação de substituição, mede.
+O primeiro passo é medir a tensão real nos terminais CC do inversor com multímetro calibrado (categoria III, faixa mínima de 1.000 V). Não use o dado do datalogger nem o valor do display como referência — ambos dependem do mesmo circuito de medição que pode estar com problema.
 
-1. Meça a tensão CC real nas entradas do inversor com multímetro calibrado (categoria III, 1000 V mínimo) — não use o dado do datalogger como referência
-2. Calcule o Voc teórico da string para a temperatura ambiente no momento da medição: `Voc(T) = Voc(25°C) × [1 + α × (T − 25)]`, onde α é o coeficiente de temperatura do painel (valor negativo, em %/°C)
-3. Se a tensão medida nos bornes está dentro dos limites do inversor: o problema é o circuito de medição interno
-4. Se a tensão real está acima do limite: o projeto de string precisa ser corrigido — não há reparo eletrônico que resolva isso
-5. Em bancada, aplique tensão CC controlada na entrada (fonte regulada) e monitore o valor reportado pelo inversor via display ou comunicação serial — qualquer discrepância entre o valor aplicado e o valor reportado confirma deriva no circuito de medição
-6. Localize os resistores do divisor de alta tensão no PCB de entrada; meça a resistência com o inversor desenergizado e compare com os valores nominais — tolerância aceitável: ±1% para componentes de precisão; fora disso, troca
+1. Registre a temperatura ambiente no horário do fault — de manhã cedo, com sol presente e temperatura baixa
+2. Calcule o Voc da string para essa temperatura: **Voc(T) = Voc_STC × [1 + (αV/100) × (T − 25)]**, onde αV é o coeficiente do datasheet (valor negativo, em %/°C)
+3. Compare o Voc calculado com o limite máximo do modelo WEG
+4. Se o Voc calculado supera o limite: a string está fora de especificação — corrija o projeto
+5. Se o Voc calculado está dentro do limite: meça a tensão real nos bornes CC com o inversor em standby e compare com o valor reportado no display
+6. Em bancada, aplique tensão CC controlada de valor conhecido na entrada e monitore o que o inversor reporta — qualquer discrepância acima de 30 V entre o valor aplicado e o valor lido confirma deriva no circuito de medição
+7. Com o inversor desenergizado e strings desconectados, meça a resistência dos resistores do divisor de alta tensão no PCB e compare com os valores nominais — tolerância aceitável para componentes de precisão: ±1%
 
-Resistores com coloração escurecida, varnish com bolhas ou trilha com oxidação ao redor são indicativos diretos.
+Instalações no Sul do Brasil — especialmente em altitude acima de 600 m na Serra Gaúcha, no planalto catarinense e nos campos de Curitiba — concentram os casos de E001 por Voc real elevado nas manhãs de inverno com irradiância intensa.
 
 ---
 
 ## O erro mais comum do mercado
 
-O técnico reseta, o erro some. Acontece porque o sol já subiu, a temperatura dos painéis aumentou e o Voc caiu para dentro do limite. O chamado é fechado como "falha transitória" sem nenhuma medição.
+O integrador vai ao site, reseta o inversor, que volta a operar. Como o sol já está alto e a temperatura subiu, o Voc caiu para dentro do limite. O chamado é encerrado como "falha transitória" sem nenhuma medição.
 
-Na próxima manhã fria, o E001 volta. Depois da quinta ou sexta ocorrência, o integrador conclui que o inversor tem defeito e pede substituição. O WEG novo sobe ao telhado. A string continua com os mesmos 20 painéis calculados para 25°C. Primeira manhã de inverno: E001. Ciclo reinicia.
+O E001 retorna na próxima manhã fria. Depois da quinta ocorrência, o integrador conclui que o inversor tem defeito e solicita substituição. O inversor novo sobe ao telhado. A string permanece com os mesmos painéis calculados para 25°C. Primeira manhã de inverno: E001. O ciclo recomeça.
 
-O que ninguém mapeou é que cada ciclo de fault por sobretensão real estressou progressivamente os IGBTs e os capacitores do barramento CC. O que era um problema de projeto pode ter gerado dano eletrônico cumulativo real. Agora o inversor tem dois problemas: o de projeto, que continua, e o eletrônico, que surgiu dos resets repetidos.
+O que ninguém mapeou: cada ciclo de fault por sobretensão real estressou progressivamente os IGBTs e os capacitores do barramento CC. O que era só problema de projeto pode ter gerado dano eletrônico cumulativo. Agora o inversor tem dois problemas — o de dimensionamento, que continua, e o eletrônico, que surgiu dos resets repetidos.
+
+Ainda não existe resposta automática para isso. Depende do que o técnico vai encontrar quando abrir e medir.
 
 ---
 
 ## Quando o reparo é viável
 
-Se for problema de projeto de string, a solução é em campo — nenhum componente de inversor resolve:
+Se o problema é projeto de string: não há componente eletrônico a trocar. A correção é no campo — reduzir o número de painéis em série ou substituir por modelo com Voc menor. O inversor está correto. Ele está fazendo o que deve: protegendo o barramento de uma tensão que realmente está alta.
 
-- Reduzir o número de painéis em série na string
-- Substituir por painel com Voc menor
-- Custo: horas de engenharia e eventual ajuste de cabeamento
+Se o problema é o circuito de medição:
 
-Se for falha no circuito de medição:
+- Resistores do divisor CC com deriva: troca dos componentes SMD com estação de ar quente, custo de componente entre R$ 5 e R$ 25 por resistor, rastreável pelo código impresso
+- Op-amp de condicionamento com offset: substituição do CI, componente entre R$ 10 e R$ 50 dependendo do encapsulamento
+- Dano extenso por surto na cadeia analógica: se limitado ao front-end de medição, viável. Se atingiu o microcontrolador, o escopo muda completamente
 
-- Resistores do divisor: R$ 5 a R$ 20 por componente, requer soldagem SMD com estação de ar quente
-- Op-amp de condicionamento: R$ 10 a R$ 50 dependendo do encapsulamento e especificação
-- PCB de entrada com corrosão generalizada: substituição do conjunto, R$ 300 a R$ 600 incluindo mão de obra
-- Inversor WEG SIW300H 3 kW novo: a partir de R$ 3.500. SIW500H acima de 5 kW: R$ 5.500 a R$ 9.000
-
-O reparo é viável quando existe diagnóstico que aponta para o componente específico. Sem medir, não tem como saber — e o mercado tende a trocar o inversor sem medir.
+Inversor WEG SIW500H de 5 kW novo: a partir de R$ 4.500. Trifásico de 10 kW: entre R$ 8.000 e R$ 12.000. Reparo de circuito de medição com calibração de bancada: R$ 400 a R$ 900.
 
 ---
 
 ## Conclusão
 
-O E001 no WEG tem dois universos distintos: string fora de especificação de tensão, ou circuito de medição com problema. Um se resolve sem abrir o inversor. O outro precisa de bancada, de componentes e de alguém que sabe o que está medindo.
+E001 no WEG tem dois caminhos. Um se resolve com cálculo e ajuste de projeto — sem abrir o inversor, sem componente nenhum. O outro precisa de bancada, de resistores de precisão e de alguém que sabe injetar tensão de referência e ler o que o ADC está enxergando.
 
-Envie seu inversor para a TEC Solar. Realizamos diagnóstico eletrônico completo em nível de placa e devolvemos um laudo técnico detalhado — mesmo que o reparo não seja viável. Atendemos todo o Brasil via logística reversa. [Falar com a TEC Solar no WhatsApp](https://wa.me/5538998891587) | [@tec_solar_moc](https://www.instagram.com/tec_solar_moc/)
+O que une os dois é a medição. Sem ela, o diagnóstico é um chute.
 
-Antes de pedir inversor novo, recalcula o Voc da string para a temperatura mínima do local. Em metade dos casos de E001, o número já resolve.
+Antes de condenar, diagnostica.
+
+## Envie seu inversor para diagnóstico
+
+Antes de comprar equipamento novo, envie para a nossa bancada. A TEC Solar realiza diagnóstico eletrônico completo em nível de componente — abrimos o inversor, medimos a placa, identificamos a causa raiz e entregamos um laudo técnico detalhado.
+
+Se o reparo for viável, você recebe o equipamento funcionando por uma fração do custo de substituição. Se não for, o laudo serve de base para qualquer decisão.
+
+Atendemos todo o Brasil via logística reversa.
+
+<div style="display:flex; flex-direction:column; gap:12px; margin-top:20px;">
+
+<a href="https://wa.me/5538998891587?text=Ol%C3%A1%2C%20vim%20pelo%20blog%20e%20quero%20enviar%20meu%20inversor%20para%20diagn%C3%B3stico" target="_blank" style="background:#25D366; color:white; padding:14px 24px; border-radius:8px; text-decoration:none; font-weight:bold; text-align:center;">
+👉 Falar no WhatsApp agora
+</a>
+
+<a href="https://www.instagram.com/tec_solar_moc?igsh=MWl2djYzeXk2Zm51dQ%3D%3D&utm_source=qr" target="_blank" style="background:#E1306C; color:white; padding:14px 24px; border-radius:8px; text-decoration:none; font-weight:bold; text-align:center;">
+📸 Seguir no Instagram
+</a>
+
+<a href="https://youtube.com/@tecsolar-reparodeinversores?si=kG3Njqipg8QRbZSD" target="_blank" style="background:#FF0000; color:white; padding:14px 24px; border-radius:8px; text-decoration:none; font-weight:bold; text-align:center;">
+▶️ Ver vídeos no YouTube
+</a>
+
+</div>
 
 ---
 
 ## [LINKS INTERNOS SUGERIDOS]
 
-- Âncora: "circuito de medição de tensão CC" → Link para: post sobre placa de controle vs. placa de potência (Post 43)
-- Âncora: "falha de isolamento no sistema fotovoltaico" → Link para: post sobre Growatt Erro 102 – Falha de Isolamento (Post 01)
-- Âncora: "sobretensão CC em inversor Fronius" → Link para: post sobre Fronius State 102 – Tensão CC Muito Alta (Post 02)
-- Âncora: "inversor parado com sistema operando" → Link para: post sobre inversor solar parado – checklist completo (Post 11)
+- Âncora: 'tensão CC nos terminais de entrada' → URL: /fronius-state-102-tensao-cc-alta-causa-diagnostico → Contexto: seção "O que causa", ao descrever o limite máximo de entrada e a proteção de sobretensão CC — o Fronius State 102 trata do mesmo fenômeno em outra marca
+- Âncora: 'string bem dimensionada' → URL: /growatt-erro-102-falha-de-isolamento → Contexto: seção "O que causa", ao mencionar que erros de string geram faults consecutivos — contexto de dimensionamento correto
+- Âncora: 'diagnóstico em nível de placa' → URL: /sma-erro-3501-falha-isolamento-diagnostico-fotovoltaico → Contexto: seção "Quando o reparo é viável", ao descrever diagnóstico eletrônico em bancada antes de condenar o inversor
 
 ---
 
 ## [LINKS EXTERNOS SUGERIDOS]
 
-- Texto âncora: "IEC 62109" → Fonte: IEC – Safety of power converters for use in photovoltaic power systems (iec.ch)
-- Texto âncora: "coeficiente de temperatura do painel" → Fonte: INMETRO – Programa Brasileiro de Etiquetagem para módulos fotovoltaicos (inmetro.gov.br)
-- Texto âncora: "tensão máxima de entrada do inversor WEG" → Fonte: WEG – Manual de Instalação e Operação SIW300H / SIW500H (weg.net)
+- Texto âncora: "IEC 62109" → URL: https://www.iec.ch/homepage → Fonte: IEC — Safety of power converters for use in photovoltaic power systems
+- Texto âncora: "αV é o coeficiente do datasheet" → URL: https://www.inmetro.gov.br/qualidade/rtepac/modulos_fotovoltaicos.asp → Fonte: INMETRO — Programa Brasileiro de Etiquetagem para módulos fotovoltaicos
 
 ---
 
@@ -144,10 +164,9 @@ IMAGEM PRINCIPAL:
 → URL para download: https://images.unsplash.com/photo-1508514177221-188b1cf16e9d?w=1200
 → Por que foi escolhida: Inversor solar instalado com conexões CC visíveis — contexto direto do ponto de medição de tensão descrito no diagnóstico do E001
 → Nome do arquivo: weg-e001-sobretensao-cc-diagnostico.webp
-→ Alt Text (máx. 125 caracteres): Inversor solar WEG com entradas CC — diagnóstico de erro E001 sobretensão CC por string mal configurada ou falha de medição
-→ Legenda: Fig. 1 — Ponto de medição da tensão CC nos bornes de entrada do inversor WEG: primeiro passo no diagnóstico do erro E001
+→ Alt Text (máx. 125 caracteres): Inversor solar WEG com entradas CC — diagnóstico de erro E001 sobretensão CC string mal configurada ou falha de medição
+→ Legenda: Fig. 1 — Ponto de medição nos bornes CC do inversor WEG: primeiro passo no diagnóstico do erro E001
 → Onde inserir: Topo do post, antes da introdução
-→ Converter para WebP — máximo 150 KB
 
 ---
 
@@ -157,7 +176,6 @@ IMAGEM SECUNDÁRIA:
 → URL para download: https://images.unsplash.com/photo-1581092580497-e0d23cbdf1dc?w=1200
 → Por que foi escolhida: Técnico com multímetro medindo componente eletrônico em bancada — representa o diagnóstico do divisor resistivo e do circuito de medição CC descrito no post
 → Nome do arquivo: diagnostico-circuito-medicao-cc-weg-e001-2.webp
-→ Alt Text (máx. 125 caracteres): Técnico medindo tensão CC com multímetro nos bornes de entrada de inversor WEG para diagnóstico do erro E001 sobretensão
-→ Legenda: Fig. 2 — Medição direta nos bornes CC do inversor com multímetro calibrado. A discrepância entre a tensão real e o valor reportado pelo inversor aponta para falha no circuito de medição
+→ Alt Text (máx. 125 caracteres): Técnico medindo tensão CC com multímetro nos bornes de inversor WEG para diagnóstico do erro E001 sobretensão
+→ Legenda: Fig. 2 — Medição direta nos bornes CC do inversor com multímetro calibrado. Discrepância entre valor real e valor reportado confirma falha no circuito de medição
 → Onde inserir: Após H2 "Como identificar na prática"
-→ Converter para WebP — máximo 150 KB
