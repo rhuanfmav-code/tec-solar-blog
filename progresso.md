@@ -1,5 +1,5 @@
 # Controle de Posts Gerados
 
-Último post gerado: Post 06
+Último post gerado: Post 07
 
-Posts gerados até agora: Posts 01 a 06
+Posts gerados até agora: Posts 01 a 07
