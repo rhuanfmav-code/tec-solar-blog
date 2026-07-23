@@ -2,162 +2,175 @@
 
 ---
 
-## [PALAVRA-CHAVE FOCO]
+[PALAVRA-CHAVE FOCO]
 
-SMA 3701 tensão CC muito alta diagnóstico
-
----
-
-## [TÍTULO SEO — Title Tag]
-
-SMA 3701: Tensão CC Muito Alta — Causa e Diagnóstico
+SMA 3701 tensão CC muito alta
 
 ---
 
-## [SLUG — URL do Post]
+[TÍTULO SEO — Title Tag]
 
-sma-3701-tensao-cc-muito-alta-diagnostico
-
----
-
-## [META DESCRIPTION]
-
-SMA 3701: tensão CC muito alta no Sunny Boy. Saiba como separar string mal dimensionado de defeito no circuito de medição antes de trocar o inversor.
+SMA 3701: Tensão CC Muito Alta — Diagnóstico Completo
 
 ---
 
-## [CATEGORIA]
+[SLUG — URL do Post]
+
+sma-3701-tensao-cc-muito-alta-string-ou-falha-de-medicao
+
+---
+
+[META DESCRIPTION]
+
+SMA 3701: tensão CC alta demais. Saiba separar string fora do limite de falha no circuito de medição interno — diagnóstico técnico em nível de bancada.
+
+---
+
+[CATEGORIA]
 
 Códigos de Erro e Falhas
 
 ---
 
-## [TAGS]
+[TAGS]
 
-SMA 3701, tensão CC inversor solar, Sunny Boy diagnóstico, string fotovoltaico sobretenso, divisor de tensão inversor
-
----
-
-## [TEXTO DO POST — VERSÃO HUMANIZADA FINAL]
-
-O **SMA 3701 — tensão CC muito alta** trava o inversor antes mesmo de ele injetar potência na rede. O sistema para, a geração vai a zero, e quem chega ao quadro encontra o Sunny Boy em modo de erro com uma informação que parece clara mas não é: a tensão está alta — mas o código não diz se está alta de verdade ou se o inversor está medindo errado.
-
-Na nossa bancada, esse código chega com frequência acompanhado de uma decisão já tomada: "string mal dimensionado." Às vezes está. Mas recebemos equipamentos vindos da região Sul do Brasil onde o instalador já havia recalculado o string, retirado um painel e o 3701 voltou dois dias depois. Quando o inversor chegou até nós, o problema era um divisor de tensão CC com resistor SMD fora de especificação — lendo 18% acima do valor real. O string estava dentro do limite desde o início.
-
-Antes de mexer no projeto elétrico ou condenar o inversor, medir. Sempre medir primeiro.
+SMA 3701, tensão CC inversor solar, sobretensão CC SMA, diagnóstico string fotovoltaica, circuito de medição inversor
 
 ---
+
+[TEXTO DO POST — VERSÃO HUMANIZADA FINAL]
+
+O **SMA 3701 tensão CC muito alta** aparece no monitoramento, o inversor para, e o técnico recebe o chamado sem muito contexto. O log registra o evento, a planta está parada, e a pergunta imediata é: o que mudou?
+
+Na nossa bancada, esse código chega com dois históricos distintos. O mais comum é o inversor instalado no segundo semestre, com string no limite máximo do modelo. Nos primeiros meses funcionou sem problema. Junho chegou, o 3701 passou a aparecer antes das 8h, e o instalador entrou em contato sem saber explicar o que havia mudado. Nada mudou — a temperatura caiu. O segundo histórico é diferente: sistema com 3 a 5 anos, mesma string desde o início, e o 3701 começou a aparecer de forma intermitente sem relação com temperatura ou horário. Esse segundo perfil é problema de medição interna.
+
+São dois caminhos de diagnóstico completamente distintos. Identificar qual é o caso antes de mexer em qualquer coisa economiza tempo e evita que o problema volte na semana seguinte.
 
 ## O que causa o SMA 3701
 
-O SMA Sunny Boy monitora a tensão CC nos terminais de entrada por um circuito de condicionamento de sinal dedicado: um divisor resistivo de alta impedância reduz a tensão de entrada ao nível de operação do conversor ADC no DSP. Quando o valor lido ultrapassa o limiar de Vmax configurado — 600 V nos modelos residenciais da série anterior, até 1000 V nos modelos mais recentes — o evento 3701 é disparado e a conversão é interrompida imediatamente.
+O SMA monitora a tensão CC de entrada por um divisor resistivo de alta impedância que alimenta o conversor A/D do DSP. Quando o valor medido ultrapassa o limite configurado — Udc máx, que varia por modelo entre 600 V, 800 V e 1000 V — o evento 3701 é disparado e o estágio CC é desativado. A ABNT NBR 16274 define os parâmetros operacionais de inversores fotovoltaicos conectados à rede. A IEC 62109-1 estabelece os requisitos de segurança no estágio de entrada CC. O 3701 é o cumprimento dessas exigências.
 
-Isso significa que a leitura pode refletir a realidade ou pode estar errada. As causas se dividem em dois grupos com soluções completamente diferentes.
+As causas se dividem em dois grupos.
 
-**Tensão real elevada — o string está fora do limite:**
+Causas ligadas à string — a tensão realmente está alta:
 
-- String dimensionado sem contemplar a temperatura mínima registrada no local de instalação. Painéis com coeficiente de temperatura de Voc de -0,34%/°C têm tensão de circuito aberto cerca de 10% maior a -5°C do que a 25°C. Em regiões serranas de Minas Gerais, do Paraná e de Santa Catarina, isso não é hipótese — é cenário real de inverno. A NBR 16149 exige que o cálculo de Vmax da string contemple a temperatura mínima histórica do local, não a média
-- Painel substituto instalado durante manutenção com Voc maior do que o original — troca feita sem comparar os datasheets dos dois modelos
-- Conexão errada de dois strings em série em vez de paralelo, dobrando a tensão de entrada do MPP tracker
-- Diodo de bypass com curto em um ou mais painéis do string, alterando o comportamento de tensão em condições de sombra parcial e empurrando a tensão total para fora do ponto de operação esperado
+- String com mais painéis em série do que o modelo suporta na temperatura mínima local. Painéis de silício cristalino têm coeficiente de temperatura da Voc entre -0,30%/°C e -0,36%/°C. Em manhãs de 5°C — frequentes no sul de Minas, na Serra Gaúcha e nas regiões serranas do Paraná e Santa Catarina — a Voc real é cerca de 7% maior que o STC. Em uma string de 16 painéis com Voc de 40 V cada, isso representa 44,8 V adicionais que não aparecem no cálculo feito com a planilha de projeto.
+- Painéis com Voc significativamente acima do datasheet — variação de lote, painel substituído por modelo diferente, ou módulo com falha interna que eleva a tensão de circuito aberto
+- String dimensionado com temperatura de projeto de 25°C sem aplicação do fator de correção para a mínima histórica do local
+- Módulos com Voc desbalanceada por degradação assimétrica — painel com isolamento interno comprometido pode apresentar comportamento de tensão aberrante em certas condições de irradiância, puxando a leitura do MPPT para fora do esperado
 
-**Tensão aparente elevada — o circuito de medição está errando:**
+Causas internas — o inversor está medindo errado:
 
-- Resistores SMD do divisor de tensão CC com tolerância desviada por ciclos térmicos acumulados. Esses componentes operam sob estresse contínuo e, com o tempo, saem da especificação de 0,1% para 3–5% — desvio suficiente para que a leitura ultrapasse o limiar de 3701 quando a tensão real ainda está dentro do limite
-- Capacitores de desacoplamento no circuito de condicionamento do ADC com ESR elevado, introduzindo ruído na amostragem e causando leituras instáveis acima do threshold
-- Canal ADC do DSP com degradação parcial por descarga eletrostática — não queima completamente, mas passa a reportar valores sistematicamente acima do real
-- Varistor MOV na entrada CC operando próximo ao nível de clamping durante condições normais de tensão, sintoma de proteção de entrada degradada e não de tensão fora do limite
-
-Dois cenários com diagnósticos opostos. Soluções opostas. Contas opostas.
-
----
+- Resistores SMD do divisor de tensão CC com valor derivado por envelhecimento ou stress térmico. Um resistor de 1 MΩ com desvio de 5% do nominal altera proporcionalmente a leitura — o DSP pode registrar 680 V onde a tensão real é 580 V.
+- Capacitor de filtro do circuito de medição CC com ESR elevado, gerando ruído na amostra e leituras instáveis acima do threshold de proteção
+- Offset do conversor A/D desviado — ocorre principalmente em inversores com mais de 5 anos de operação em ambiente quente e empoeirado, situação comum em instalações de telhado no Brasil central
+- Parâmetros de calibração corrompidos na memória do DSP por surto de tensão ou descarga eletrostática — menos frequente, mas quando acontece o comportamento é errático e não responde a reinicializações
 
 ## Como identificar na prática
 
-O primeiro passo não é abrir o inversor. É medir a tensão real nos terminais de entrada antes de qualquer outra coisa.
+A ferramenta que diferencia os dois grupos não é o multímetro usado no horário da visita técnica.
 
-1. Com o disjuntor CA do inversor aberto e os strings CC expostos à irradiação solar, medir a tensão CC nos terminais de entrada com multímetro calibrado — positivo e negativo de cada entrada MPPT separadamente
-2. Comparar o valor medido com o Voc calculado para as condições do momento: aplicar o coeficiente de temperatura de Voc do painel à temperatura ambiente registrada no instante da medição
-3. Se a tensão medida estiver dentro do limite operacional do modelo: o problema está no circuito interno de medição — o string não precisa ser alterado
-4. Se a tensão real estiver acima do Vmáx do inversor: o string precisa de adequação antes de qualquer trabalho em bancada
-5. Com o inversor em bancada, medir a tensão real nos pontos de entrada internos com osciloscópio e comparar com o valor que o DSP está reportando na interface. Discrepância de 10% ou mais entre o valor medido fisicamente e o valor reportado aponta diretamente para o divisor resistivo ou para o ADC
-6. Identificar os resistores do divisor de tensão CC no esquema do modelo e medir o valor real com multímetro de alta precisão (4,5 dígitos). Resistores de 100 kΩ lendo 106 kΩ ou mais, combinados em série no divisor, somam desvio suficiente para disparar o 3701 com tensão real dentro do limite
+1. Exporte o log de eventos do SMA via Sunny Portal ou interface local RS485/Bluetooth. O evento 3701 registra o timestamp e o valor exato de Udc medido internamente no momento da desconexão.
 
-Um padrão que aparece com alguma regularidade: o 3701 ocorrendo em horários específicos — manhã fria ou final de tarde. String com subdimensionamento térmico se manifesta nas temperaturas mais baixas do dia. Circuito interno com problema térmico pode fazer o mesmo. Registrar o horário das falhas antes de qualquer conclusão.
+2. Calcule a Voc corrigida para a temperatura mínima histórica do local: **Voc_corrigida = Voc_STC × n_painéis × [1 + αVoc × (T_mínima − 25)]**. Se o resultado supera o Udc máx do modelo, o problema é dimensional. Nenhum componente com defeito.
 
----
+3. Meça a tensão CC real nos terminais do inversor nos mesmos horários históricos das falhas — preferencialmente entre 6h30 e 8h em dias frios. Compare com o valor registrado no log.
+
+4. Se o log registrou 690 V enquanto o multímetro indicava 570 V no mesmo momento, o circuito interno de medição está divergindo da realidade. Esse é o sinal mais claro de falha eletrônica no divisor resistivo.
+
+5. Com o inversor desligado e o circuito CC totalmente descarregado, meça a resistência dos resistores do divisor de tensão na placa de controle. Compare com os valores nominais do esquema do modelo — desvio acima de 2% em resistores de precisão é causa suficiente para o disparo incorreto.
+
+6. Avalie o padrão temporal: 3701 restrito a manhãs de inverno, antes das 9h, aponta para causa dimensional. 3701 aleatório, qualquer horário, com Udc registrado inconsistente com a string real, direciona para o circuito interno.
+
+7. Verifique o histórico de eventos anterior ao primeiro 3701. Se houver registros de outros eventos fora do padrão — subtensão súbita, falha de comunicação, eventos sem código identificado — pode indicar surto que corrompeu os parâmetros de medição.
 
 ## O erro mais comum do mercado
 
-Reconfigurar o string sem medir a tensão real nos terminais primeiro.
+O técnico chega às 11h, temperatura a 31°C, painéis a 55°C. Mede 510 V nos terminais. Registra "tensão dentro do limite, evento transitório" e fecha o chamado.
 
-O instalador vê o 3701, revisa o projeto, percebe que o string está próximo ao limite e remove um painel "como precaução". O inversor volta a funcionar. Na próxima manhã fria de julho, o 3701 retorna — porque o problema nunca foi o string.
+O 3701 tinha ocorrido às 7h10, com 7°C. A tensão real naquele momento estava em 635 V. O SMA desligou corretamente — foi o diagnóstico que falhou.
 
-O oposto também acontece: substituir o inversor sem verificar se a tensão real realmente estava acima do limite. Um SMA Sunny Boy residencial custa entre R$ 3.000 e R$ 5.000 novo. Um divisor de tensão CC reconstruído com resistores SMD de precisão sai por menos de R$ 100 em componentes. Não são situações equivalentes — mas sem medir antes, é impossível saber em qual delas você está.
-
-Condenar sem medir não é diagnóstico. É aposta.
-
----
+A mesma lógica invertida vale para a falha de medição: o técnico mede a tensão externamente, encontra valor normal, e conclui que o inversor está disparando sem motivo. O circuito interno pode estar lendo 120 V acima do real. Isso não aparece em nenhuma medição feita do lado de fora do equipamento.
 
 ## Quando o reparo é viável
 
-Se o diagnóstico confirmou origem interna, o componente define o prognóstico.
+Se a causa for dimensional, não há componente defeituoso. A solução é reduzir a string ou trocar por modelo com Udc máx mais alto.
 
-**Resistores SMD do divisor de tensão CC** — componentes passivos, substituição com equivalentes de tolerância ≤ 0,1%. Reparo viável, custo de componentes baixo. Exige identificação correta no esquema do modelo e multímetro de precisão para verificação pós-reparo.
+Se o diagnóstico confirmou falha no circuito de medição interna:
 
-**Capacitores de desacoplamento no condicionamento ADC** — substituição direta com equivalentes de mesma especificação. Viável em bancada equipada.
+- Resistores SMD do divisor CC: componentes passivos de custo baixo, substituição com resistores de precisão 0,1% ou 0,5%. É o cenário mais frequente na bancada e o de resolução mais direta.
+- Capacitor de filtro CC: substituição direta, custo mínimo, resultado imediato.
+- Offset do conversor A/D: viabilidade depende do modelo do CI e da disponibilidade do procedimento de recalibração — alguns modelos SMA permitem recalibração via parâmetros de firmware, outros não. Precisa verificar no modelo específico antes de qualquer conclusão.
+- Parâmetros corrompidos na memória: substituição ou regravação do IC de memória, viável quando o arquivo de calibração correto está disponível para o modelo.
 
-**Varistor MOV da entrada CC** — componente de proteção, substituição com equivalente dentro da especificação do datasheet. Necessário independente da decisão sobre o restante.
-
-**Canal ADC do DSP com degradação** — o cenário mais trabalhoso. Dependendo do modelo, pode exigir substituição do DSP ou da placa de controle completa. A viabilidade depende do que está disponível no mercado para aquele modelo específico e do custo comparado ao inversor novo. Não há como concluir isso antes de abrir o equipamento e medir.
-
-O que define se o reparo é possível não é o código de erro — é o componente que falhou.
-
----
+Inversores SMA Sunny Boy e Sunny Tripower custam entre R$ 3.800 e R$ 22.000 dependendo da potência. O diagnóstico em bancada sai por uma fração disso. E define com clareza se o reparo faz sentido ou se o problema está no projeto desde o início.
 
 ## Conclusão
 
-SMA 3701 não diz se o string está errado ou se a placa está lendo errado. Diz só que a tensão registrada pelo DSP passou do limite. São dois diagnósticos, duas soluções e duas contas completamente diferentes.
+SMA 3701 é proteção de sobretensão CC. O inversor detectou tensão acima do Udc máx e desligou o estágio de entrada — como deve fazer. A questão é se a tensão estava realmente alta ou se o divisor resistivo interno estava reportando um número falso.
 
-Antes de reprojetar o string ou comprar um inversor novo, leve até a bancada. Meça a tensão real. Compare com o que o circuito está reportando. É aí que o 3701 mostra o que realmente é.
+Essa diferença só aparece com o log do evento, a Voc calculada na temperatura certa, e a medição dos componentes na placa. Não dá para saber pela visita às 11h com o sol a pino.
 
-Envie seu inversor para a TEC Solar. Realizamos diagnóstico eletrônico completo em nível de placa e devolvemos um laudo técnico detalhado — mesmo que o reparo não seja viável. Atendemos todo o Brasil via logística reversa. [Falar com a TEC Solar no WhatsApp](https://wa.me/5538998891587) | [@tec_solar_moc](https://www.instagram.com/tec_solar_moc/)
+## Envie seu inversor para diagnóstico
+
+Antes de comprar equipamento novo, envie para a nossa bancada. A TEC Solar realiza diagnóstico eletrônico completo em nível de componente — abrimos o inversor, medimos a placa, identificamos a causa raiz e entregamos um laudo técnico detalhado.
+
+Se o reparo for viável, você recebe o equipamento funcionando por uma fração do custo de substituição. Se não for, o laudo serve de base para qualquer decisão.
+
+Atendemos todo o Brasil via logística reversa.
+
+<div style="display:flex; flex-direction:column; gap:12px; margin-top:20px;">
+
+<a href="https://wa.me/5538998891587?text=Ol%C3%A1%2C%20vim%20pelo%20blog%20e%20quero%20enviar%20meu%20inversor%20para%20diagn%C3%B3stico" target="_blank" style="background:#25D366; color:white; padding:14px 24px; border-radius:8px; text-decoration:none; font-weight:bold; text-align:center;">
+👉 Falar no WhatsApp agora
+</a>
+
+<a href="https://www.instagram.com/tec_solar_moc?igsh=MWl2djYzeXk2Zm51dQ%3D%3D&utm_source=qr" target="_blank" style="background:#E1306C; color:white; padding:14px 24px; border-radius:8px; text-decoration:none; font-weight:bold; text-align:center;">
+📸 Seguir no Instagram
+</a>
+
+<a href="https://youtube.com/@tecsolar-reparodeinversores?si=kG3Njqipg8QRbZSD" target="_blank" style="background:#FF0000; color:white; padding:14px 24px; border-radius:8px; text-decoration:none; font-weight:bold; text-align:center;">
+▶️ Ver vídeos no YouTube
+</a>
+
+</div>
 
 ---
 
-## [LINKS INTERNOS SUGERIDOS]
+[LINKS INTERNOS SUGERIDOS]
 
-- Âncora: "tensão CC nos terminais de entrada" → Link para: post sobre SMA 3501: Falha de Isolamento (Post 04)
-
----
-
-## [LINKS EXTERNOS SUGERIDOS]
-
-- Texto âncora: "NBR 16149" → Fonte: ABNT — Sistemas fotovoltaicos — Características da interface de conexão com a rede elétrica de distribuição (abnt.org.br)
-- Texto âncora: "coeficiente de temperatura de Voc" → Fonte: IEC 60891 — Photovoltaic devices: procedures for temperature and irradiance corrections (iec.ch)
+- Âncora: 'tensão CC de entrada' → URL: /abb-f003-tensao-cc-alta-string-mal-dimensionada-ou-defeito-de-medicao → Contexto: Seção "O que causa o SMA 3701", na frase sobre o divisor resistivo que monitora a tensão CC de entrada — referência cruzada com o ABB F003 (Post 09), mesmo fenômeno em outra marca
+- Âncora: 'coeficiente de temperatura da Voc' → URL: /fronius-state-102-tensao-cc-muito-alta-string-mal-dimensionada-ou-falha-no-sensor-de-tensao → Contexto: Seção "O que causa o SMA 3701", lista de causas dimensionais — referência cruzada com Fronius State 102 (Post 02), que aborda o efeito de temperatura na Voc da string
+- Âncora: 'por que os IGBTs queimam' → URL: /por-que-os-igbts-queimam-em-inversores-solares-as-6-causas-reais → Contexto: Seção "Quando o reparo é viável", ao mencionar stress térmico nos componentes — link para Post 10 que detalha o impacto de ciclos térmicos
+- Âncora: 'inversor solar parou de funcionar' → URL: /inversor-solar-parou-de-funcionar-checklist-completo → Contexto: Introdução, ao mencionar a planta parada — link para o checklist de diagnóstico inicial (Post 11)
 
 ---
 
-## [IMAGEM PRINCIPAL — USE ESTA]
+[LINKS EXTERNOS SUGERIDOS]
+
+- Texto âncora: "ABNT NBR 16274" → URL: https://www.abnt.org.br → Fonte: ABNT — norma técnica para avaliação de desempenho de sistemas fotovoltaicos conectados à rede, incluindo parâmetros operacionais de inversores
+- Texto âncora: "IEC 62109-1" → URL: https://www.aneel.gov.br → Fonte: ANEEL — referência às normas internacionais de segurança para conversores de energia usados em sistemas fotovoltaicos, adotadas como base pela regulação brasileira
+
+---
+
+[IMAGEM PRINCIPAL — USE ESTA]
 
 IMAGEM PRINCIPAL:
 → URL para download: https://images.unsplash.com/photo-1509391366360-2e959784a276?w=1200
-→ Por que foi escolhida: Inversor solar instalado com conexão CC visível — representa diretamente o ponto onde a tensão de string entra no SMA Sunny Boy e onde o 3701 é disparado
+→ Por que foi escolhida: Inversor solar instalado em parede com conexões CC visíveis — representa o ponto de entrada onde a tensão CC é monitorada e onde o SMA 3701 é disparado
 → Nome do arquivo: sma-3701-tensao-cc-muito-alta-diagnostico.webp
-→ Alt Text (máx. 125 caracteres): Inversor solar SMA Sunny Boy instalado — diagnóstico do erro 3701 por tensão CC muito alta no string fotovoltaico
-→ Legenda: Fig. 1 — SMA 3701 pode indicar string sobretenso ou falha no circuito de medição interno; apenas a medição real diferencia os dois
+→ Alt Text (máx. 125 caracteres): Inversor solar SMA instalado com entradas CC — diagnóstico do erro 3701 por tensão CC acima do limite máximo
+→ Legenda: Fig. 1 — O SMA 3701 indica tensão CC acima do Udc máx: pode ser string mal dimensionado para a temperatura mínima local ou falha no circuito interno de medição
 → Onde inserir: Topo do post, antes da introdução
-→ Converter para WebP — máximo 150 KB
 
 ---
 
-## [IMAGEM SECUNDÁRIA — USE NO MEIO DO POST]
+[IMAGEM SECUNDÁRIA — USE NO MEIO DO POST]
 
 IMAGEM SECUNDÁRIA:
 → URL para download: https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=1200
-→ Por que foi escolhida: Técnico medindo com multímetro em instalação elétrica — representa o procedimento de medição da tensão CC real nos terminais descrito na seção "Como Identificar na Prática"
+→ Por que foi escolhida: Técnico medindo com multímetro em instalação elétrica — representa o procedimento de medição da tensão CC real nos terminais descrito na seção "Como identificar na prática"
 → Nome do arquivo: sma-3701-medicao-tensao-cc-string-multimetro-2.webp
 → Alt Text (máx. 125 caracteres): Técnico medindo tensão CC com multímetro em string fotovoltaico — diagnóstico SMA 3701 tensão muito alta
-→ Legenda: Fig. 2 — Medir a tensão real nos terminais de entrada antes de abrir o inversor é o primeiro passo do diagnóstico do SMA 3701
+→ Legenda: Fig. 2 — Medir a tensão real nos terminais de entrada e cruzar com o log do evento é o primeiro passo do diagnóstico do SMA 3701
 → Onde inserir: Após H2 "Como identificar na prática"
-→ Converter para WebP — máximo 150 KB
