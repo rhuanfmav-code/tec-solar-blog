@@ -1,165 +1,183 @@
-# Post 16 — Sungrow Arc Fault (AFCI): Arco Elétrico Detectado — conector MC4 mal crimpado
+# Post 16 — Sungrow Arc Fault (AFCI): Arco Elétrico Detectado — Conector MC4 Mal Crimpado
 
 ---
 
-## [PALAVRA-CHAVE FOCO]
+[PALAVRA-CHAVE FOCO]
 
-Sungrow Arc Fault AFCI conector MC4 mal crimpado
-
----
-
-## [TÍTULO SEO — Title Tag]
-
-Sungrow Arc Fault AFCI: arco elétrico e MC4 mal crimpado
+Sungrow Arc Fault AFCI conector MC4
 
 ---
 
-## [SLUG — URL do Post]
+[TÍTULO SEO — Title Tag]
+
+Sungrow Arc Fault: AFCI Disparado por MC4 Mal Crimpado
+
+---
+
+[SLUG — URL do Post]
 
 sungrow-arc-fault-afci-conector-mc4-mal-crimpado
 
 ---
 
-## [META DESCRIPTION]
+[META DESCRIPTION]
 
-Sungrow com erro Arc Fault AFCI? Veja como diagnosticar MC4 mal crimpado, rastrear o arco CC e decidir quando o inversor precisa de bancada.
+Sungrow Arc Fault disparando? Entenda como o AFCI detecta arcos no string CC e por que o conector MC4 mal crimpado é a causa mais comum — diagnóstico técnico completo.
 
 ---
 
-## [CATEGORIA]
+[CATEGORIA]
 
 Códigos de Erro e Falhas
 
 ---
 
-## [TAGS]
+[TAGS]
 
-Sungrow Arc Fault, AFCI solar, conector MC4 solar, arco elétrico CC, diagnóstico inversor solar
-
----
-
-## [TEXTO DO POST — VERSÃO HUMANIZADA FINAL]
-
-O **arco elétrico detectado pelo AFCI Sungrow** não é um erro de configuração. Não some com reinicialização. Quando o inversor dispara esse alerta, ele detectou — com medição real de espectro de frequência — uma descarga elétrica acontecendo dentro do circuito CC da string.
-
-Na nossa bancada, esse erro chega com uma história quase sempre igual: inversor com shutdown recorrente, técnico que reiniciou e "voltou", semanas de operação intermitente — até o dia em que uma caixa de passagem chegou com marcas de calor. O padrão se repete, e quase sempre começa num conector MC4 crimpado com alicate comum, sem ferramenta calibrada para aquele conector específico.
+Sungrow Arc Fault, AFCI inversor solar, conector MC4 mal crimpado, arco elétrico CC, diagnóstico string fotovoltaico
 
 ---
 
-## O que causa o arco elétrico no sistema CC
+[TEXTO DO POST — VERSÃO HUMANIZADA FINAL]
 
-O arco elétrico em corrente contínua é diferente do arco CA. Na corrente alternada, a descarga se extingue no cruzamento por zero. No CC não existe esse mecanismo. Uma vez estabelecido, o arco persiste e se alimenta da própria resistência de contato — que aumenta com o calor gerado, que aumenta o arco, que aumenta o calor.
+O **Sungrow Arc Fault AFCI** aparece no display e o inversor desliga o string sem aviso. A planta para no meio do dia. O técnico recebe o chamado sem saber se está diante de um arco real no cabeamento ou de um falso disparo do sistema de proteção.
 
-O sistema AFCI do Sungrow monitora continuamente o espectro de frequência da corrente de cada string. Arcos elétricos produzem ruído de alta frequência — tipicamente entre 10 kHz e 1 MHz — sobreposto ao sinal CC normal. O algoritmo de detecção identifica essa assinatura espectral e interrompe o rastreamento da MPPT afetada antes que o arco evolua para dano permanente.
+Na nossa bancada, o padrão que mais chega tem entre 18 e 24 meses de instalação. MC4 crimpado em campo, com ferramenta sem calibração ou cabo de bitola errada. O conector funcionou por meses enquanto o encaixe estava firme. Depois de ciclos de dilatação e contração por temperatura — rotineiros nas instalações do Norte e Nordeste, onde a amplitude térmica diária passa de 20°C — a folga foi abrindo. Virou resistência de contato. Virou calor. Virou arco.
 
-Isso é proteção ativa. O inversor não está com defeito — ele funcionou corretamente.
+Esse arco não aparece no multímetro. O Sungrow detecta.
 
-As causas mais frequentes em campo:
+## O que causa o Arc Fault no Sungrow
 
-1. Conector MC4 crimpado com alicate comum — compressão irregular no ferrule, contato parcial com resistência elevada
-2. Conectores de marcas diferentes ligados entre si — housing com geometria incompatível, vedação mecânica precária e ponto de concentração de umidade
-3. Isolação do cabo CC danificada por UV prolongado, roedor ou pressão de fixação com abraçadeira apertada demais
-4. Terminação solta no barramento de entrada do inversor ou na caixa de string
-5. Corrosão nos pinos MC4 por infiltração de água — condição comum em instalações no litoral nordestino, onde a névoa salina penetra em conectores com vedação comprometida
-6. Pino mal assentado no housing antes da crimpagem — passa na inspeção visual inicial, mas opera com contato parcial sob carga
+O AFCI (Arc Fault Circuit Interrupter) monitora a forma de onda de corrente CC do string em alta frequência. O algoritmo usa FFT (transformada rápida de Fourier) para identificar componentes espectrais entre 100 kHz e 1 MHz sobrepostos à corrente DC. Essa assinatura é característica de arcos elétricos em série. Quando o nível cruza o limiar, o inversor abre o circuito do string e registra o evento. O processo está alinhado com a IEC 62548:2016, que define requisitos de design para sistemas fotovoltaicos incluindo proteção contra arcos em CC.
 
-A IEC 62548 e a ABNT NBR 16274 exigem que conectores fotovoltaicos sejam crimpados com ferramenta homologada pelo fabricante do conector. Alicate comum não garante compressão uniforme. A junta pode parecer firme, ter continuidade no multímetro em teste estático e mesmo assim apresentar resistência de contato elevada o suficiente para gerar arco sob a corrente real da string em operação.
+As causas se dividem em dois grupos.
 
----
+Causas que geram arco real no string:
+
+- MC4 com crimpa deficiente: cabo de bitola fora do especificado, ferramenta sem calibração, ou condutor não inserido até o fundo antes de cravar. É a causa mais frequente no campo, de longe.
+- Conectores de fabricantes diferentes misturados no mesmo string. Stäubli, Amphenol e genéricos de baixo custo têm tolerâncias internas distintas. O encaixe incompleto gera resistência de contato que cresce com cada ciclo térmico.
+- Isolamento de cabo CC danificado ao longo do percurso, com condutor exposto em contato com estrutura metálica aterrada.
+- Caixa de junção de painel com diodo bypass em curto, criando caminho alternativo de corrente com potencial de arco dentro do próprio módulo.
+- Terminais de string box com folga ou oxidação, ponto que a manutenção preventiva ignora com frequência.
+- Solda interna deteriorada em células de módulos com mais de 7 anos, problema agravado em regiões com alta variação térmica diária como o Cerrado e o semiárido nordestino.
+
+Causas que geram falso disparo:
+
+- Inversores próximos no mesmo telhado produzindo ruído eletromagnético de alta frequência captado pelo circuito de detecção.
+- Cabos CC longos, acima de 60 m, funcionando como antena para interferência.
+- Aterramento com impedância elevada, alterando o comportamento do circuito de amostragem.
+- Módulos de tecnologia HIT (heterojunção) em modelos Sungrow mais antigos — a assinatura espectral desses painéis pode ser lida como arco pelo firmware.
 
 ## Como identificar na prática
 
-O que você vai encontrar:
+A diferença entre arco real e falso disparo aparece antes de qualquer medição no campo.
 
-1. Registro de "Arc Fault" ou "AFCI Alarm" no histórico do iSolarCloud — com timestamp da primeira ocorrência e identificação da entrada MPPT
-2. Corrente da string afetada caindo abruptamente antes do shutdown completo visível no gráfico de monitoramento
-3. Após reinicialização manual, o sistema pode operar por horas ou dias antes de repetir — o arco é intermitente no início e se torna permanente com o avanço da degradação do contato
-4. MC4 com oxidação nos pinos, deformação no housing ou temperatura anormal ao toque logo após período de geração
-5. Caixa de string ou bandeja de cabos com marcas de calor localizadas próximas a uma emenda
+1. Registre o horário e a condição climática nos disparos. AFCI ocorrendo em dias de vento forte ou logo após chuva pesada aponta para vibração de cabo ou variação na impedância de aterramento.
 
-Procedimento de verificação em campo:
+2. Exporte o histórico de eventos via Sungrow Cloud ou RS485 local. Arc Fault isolado, sem eventos precedentes de subtensão ou desequilíbrio de corrente, indica que o string operava normalmente até o disparo.
 
-1. Acessar o iSolarCloud ou o display do inversor — identificar qual MPPT disparou e registrar o horário exato do evento
-2. Desligar o sistema completamente e percorrer o trajeto da string afetada do painel até o inversor
-3. Verificar cada MC4: o encaixe correto é firme, com clique audível; qualquer folga ou resistência irregular ao desconectar indica problema
-4. Medir resistência de contato com miliohmímetro em cada emenda — valor aceitável abaixo de 0,1 Ω; acima disso, trocar o conector
-5. Testar a isolação do cabo com megohmetro a 1000 V CC — resultado abaixo de 1 MΩ indica isolação comprometida e o trecho precisa de substituição
-6. Aplicar câmera termográfica sob carga parcial para localizar pontos quentes não visíveis a olho nu
+3. Inspecione cada MC4 visualmente. Procure deformação na carcaça plástica (sinal de calor), coloração escurecida no terminal metálico e folga mecânica. O conector deve travar com clique audível e resistir a tração de 40 N conforme IEC 62852.
 
-Em instalações no interior de Minas Gerais e de Goiás — onde a variação térmica entre manhã e tarde pode passar de 20 °C — o ciclo de expansão e contração mecânica dos cabos é mais agressivo. Conectores com crimpagem fraca cedem mais rápido nessas condições e o arco se instala antes do que em climas mais estáveis.
+4. Use câmera termográfica durante o horário de geração. Um MC4 com resistência de contato elevada aparece com 5°C a 20°C acima dos conectores vizinhos. Câmeras de entrada disponíveis por menos de R$ 2.000 resolvem esse diagnóstico sem precisar de equipamento profissional.
 
----
+5. Isole o string por segmentos. Desconecte a metade mais próxima do inversor e observe se o AFCI repete. Se não repetir, a falha está nos conectores da metade desconectada. Inverta o teste para confirmar o segmento exato.
+
+6. Meça a resistência de isolamento de cada string com megôhmímetro a 1000 V CC, entre condutor positivo e terra, e condutor negativo e terra. Abaixo de 1 MΩ indica isolamento comprometido em cabo ou painel — não em conector.
+
+7. Confirme que todos os MC4 são da mesma marca e linha de produto. Variação de 0,2 mm nas dimensões internas entre fabricantes distintos é suficiente para resistência de contato anormal em temperatura alta.
 
 ## O erro mais comum do mercado
 
-Reiniciar e aguardar.
+O técnico chega, encontra o inversor solar parado, reseta o equipamento. O sistema volta a funcionar. Em dois ou três dias o Arc Fault retorna.
 
-AFCI não é evento aleatório. Quando dispara pela primeira vez, existe uma causa física real e verificável. Aguardar o segundo ou terceiro evento para investigar é deixar o sistema operando com foco de incêndio potencial — especialmente em telhados com estrutura de madeira ou telha com revestimento combustível.
+Isso acontece porque MC4 com crimpa ruim não muda de aparência externamente. O contato que gerou o arco parece idêntico ao conector ao lado. Sem teste de tração, termografia ou desmontagem, o problema não se revela.
 
-O segundo erro é trocar o inversor sem inspecionar o cabeamento. Se o arco está no MC4, no trecho de cabo ou na caixa de string, o inversor novo vai apresentar Arc Fault nas primeiras horas de operação. Resultado: equipamento novo, custo de instalação repetido, problema original intacto.
+Cada evento de arco degrada ainda mais o terminal. O que hoje dispara o AFCI e para o sistema com segurança, depois de mais alguns ciclos pode gerar calor suficiente para carbonizar o cabo ao redor do conector. Nesse estágio o risco não é parada de geração.
 
----
+O reset sem investigação adiou o problema. Não resolveu.
 
 ## Quando o reparo é viável
 
-Na maioria dos casos de AFCI Sungrow, o inversor não precisa de bancada. O problema está no campo.
+O Arc Fault raramente indica problema interno no inversor. A falha está quase sempre no string.
 
-O conector MC4 defeituoso, o cabo com isolação comprometida ou a terminação solta são reparos mecânicos de custo baixo. Ferramenta de crimpagem calibrada, conector certificado, trecho de cabo substituído. O inversor reinicia e não apresenta mais Arc Fault.
+MC4 com crimpa deficiente: substituição do par. Conectores de fabricante certificado (Stäubli, Amphenol) custam entre R$ 15 e R$ 30 o par. A crimpa correta exige ferramenta calibrada para o modelo específico — ferramenta genérica em conector de fabricante determinado reproduz o defeito.
 
-O cenário que exige bancada é quando o arco ocorreu internamente — nos terminais de entrada CC, no barramento ou no circuito de detecção AFCI do próprio inversor. Isso acontece quando o sistema operou com arco ativo por tempo longo sem intervenção. Nesses casos, há risco de dano nos componentes do estágio de entrada, nos capacitores de filtro do barramento CC ou na placa de controle.
+Cabo CC com isolamento danificado: localização por termografia ou inspeção visual no percurso completo. Substituição com cabo solar certificado (seção conforme NBR NM 247-3), não com cabo comum mesmo que provisório.
 
-Critério objetivo: se o Arc Fault dispara em menos de 5 minutos após reinicialização, independente de qual string está ativa, o problema pode ser interno ao inversor. Se dispara apenas com a string específica identificada no histórico e sob carga solar, o problema está no campo.
+Caixa de junção de painel com diodo bypass em curto: viabilidade depende do fabricante e da disponibilidade da peça. Em módulos com suporte ativo no Brasil, a substituição é direta. Em módulos sem representação, depende de pesquisa de componente antes de qualquer definição.
 
-Mesmo quando o diagnóstico aponta para o campo, vale inspecionar os terminais de entrada do inversor antes de religar. Um arco que queimou o pino de um MC4 pode ter deixado resíduo metálico no terminal de entrada do equipamento.
+O calor gerado por arcos recorrentes não fica restrito ao conector. Quando o arco persiste em vários ciclos, o efeito térmico pode alcançar o estágio de potência — é uma das explicações para por que os IGBTs queimam em inversores com histórico de problema no string antes da proteção AFCI atuar.
 
----
+Quando o string está verificado e o AFCI continua disparando sem causa identificada: pode ser defeito no próprio circuito interno de detecção. Já recebemos equipamentos com esse histórico exato. Ao abrir a placa, encontramos resistores de amostragem com desvio fora do tolerado. Esse defeito é reparável — mas precisa de análise em bancada para confirmar antes de qualquer conclusão.
 
 ## Conclusão
 
-Arco elétrico CC não é glitch. Não passa sozinho com o tempo.
+O Arc Fault do Sungrow está funcionando quando dispara. O sistema detectou assinatura espectral fora do padrão e desligou o string, que é exatamente o que ele deve fazer.
 
-O que o Sungrow sinaliza com o Arc Fault é que detectou uma condição capaz de destruir cabos, queimar caixas e — em telhados residenciais com estrutura de madeira — evoluir para incêndio. O inversor fez o que deveria: desligou e avisou.
+A questão não é o inversor. É o que produziu essa assinatura.
 
-Rastreie o ponto de falha antes de reiniciar. Inspecione cada MC4 da string afetada antes de concluir qualquer coisa sobre o inversor.
+Na maioria dos casos que chegam até nós: um MC4 com crimpa errada, instalado com pressa, com ferramenta inadequada. O conector ficou firme por 18 meses antes de começar a falhar. Vai continuar falhando até ser substituído.
 
-Se após a inspeção completa do cabeamento o problema persistir, o inversor precisa de diagnóstico eletrônico. Envie seu inversor para a TEC Solar. Realizamos diagnóstico eletrônico completo em nível de placa e devolvemos um laudo técnico detalhado — mesmo que o reparo não seja viável. Atendemos todo o Brasil via logística reversa. [Falar com a TEC Solar no WhatsApp](https://wa.me/5538998891587) | [@tec_solar_moc](https://www.instagram.com/tec_solar_moc/)
+## Envie seu inversor para diagnóstico
+
+Antes de comprar equipamento novo, envie para a nossa bancada. A TEC Solar realiza diagnóstico eletrônico completo em nível de componente — abrimos o inversor, medimos a placa, identificamos a causa raiz e entregamos um laudo técnico detalhado.
+
+Se o reparo for viável, você recebe o equipamento funcionando por uma fração do custo de substituição. Se não for, o laudo serve de base para qualquer decisão.
+
+Atendemos todo o Brasil via logística reversa.
+
+<div style="display:flex; flex-direction:column; gap:12px; margin-top:20px;">
+
+<a href="https://wa.me/5538998891587?text=Ol%C3%A1%2C%20vim%20pelo%20blog%20e%20quero%20enviar%20meu%20inversor%20para%20diagn%C3%B3stico" target="_blank" style="background:#25D366; color:white; padding:14px 24px; border-radius:8px; text-decoration:none; font-weight:bold; text-align:center;">
+👉 Falar no WhatsApp agora
+</a>
+
+<a href="https://www.instagram.com/tec_solar_moc?igsh=MWl2djYzeXk2Zm51dQ%3D%3D&utm_source=qr" target="_blank" style="background:#E1306C; color:white; padding:14px 24px; border-radius:8px; text-decoration:none; font-weight:bold; text-align:center;">
+📸 Seguir no Instagram
+</a>
+
+<a href="https://youtube.com/@tecsolar-reparodeinversores?si=kG3Njqipg8QRbZSD" target="_blank" style="background:#FF0000; color:white; padding:14px 24px; border-radius:8px; text-decoration:none; font-weight:bold; text-align:center;">
+▶️ Ver vídeos no YouTube
+</a>
+
+</div>
 
 ---
 
-## [LINKS INTERNOS SUGERIDOS]
+[LINKS INTERNOS SUGERIDOS]
 
-- Âncora: "falha de isolamento" → Link para: post sobre Sungrow GFCI Fault: Corrente de Fuga à Terra (Post 27) — ainda não publicado, não inserir link no texto
-- Âncora: "conector MC4" → Link para: post sobre Canadian Solar Falha 117: Falha de Isolamento (Post 18) — ainda não publicado, não inserir link no texto
-
----
-
-## [LINKS EXTERNOS SUGERIDOS]
-
-- Texto âncora: "ABNT NBR 16274" → Fonte: ABNT — Sistemas fotovoltaicos conectados à rede — Requisitos mínimos para documentação, ensaios de comissionamento, inspeção e avaliação de desempenho (abnt.org.br)
-- Texto âncora: "IEC 62548" → Fonte: IEC — Photovoltaic arrays: design requirements (iec.ch)
+- Âncora: 'inversor solar parado' → URL: /inversor-solar-parou-de-funcionar-checklist-completo → Contexto: Seção "O erro mais comum do mercado", primeira frase — referência ao checklist de diagnóstico inicial (Post 11), onde o técnico encontra o sistema parado sem causa aparente
+- Âncora: 'resistência de isolamento' → URL: /growatt-erro-102-falha-de-isolamento-string-leakage-causa-raiz-e-como-diagnosticar-na-bancada → Contexto: Seção "Como identificar na prática", passo 6 — referência cruzada com Post 01 (Growatt 102), que trata de diagnóstico de isolamento comprometido no string CC
+- Âncora: 'por que os IGBTs queimam' → URL: /por-que-os-igbts-queimam-em-inversores-solares-as-6-causas-reais → Contexto: Seção "Quando o reparo é viável", ao mencionar o efeito térmico de arcos recorrentes no estágio de potência — referência cruzada com Post 10
+- Âncora: 'falha de isolamento' → URL: /sma-3501-falha-de-isolamento-diagnostico-completo-sistema-fotovoltaico → Contexto: Seção "O que causa o Arc Fault", item sobre isolamento de cabo CC danificado — referência ao Post 04 (SMA 3501)
 
 ---
 
-## [IMAGEM PRINCIPAL — USE ESTA]
+[LINKS EXTERNOS SUGERIDOS]
+
+- Texto âncora: "IEC 62548:2016" → URL: https://www.abnt.org.br → Fonte: ABNT — norma técnica internacional adotada como referência para requisitos de design em sistemas fotovoltaicos, incluindo proteção contra arcos em CC
+- Texto âncora: "IEC 62852" → URL: https://www.inmetro.gov.br → Fonte: INMETRO — referência à norma de conectores para aplicação CC em sistemas fotovoltaicos, que especifica o ensaio de tração mínima de 40 N para MC4
+
+---
+
+[IMAGEM PRINCIPAL — USE ESTA]
 
 IMAGEM PRINCIPAL:
 → URL para download: https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1200
 → Por que foi escolhida: Conectores MC4 em cabos de painel solar — representa diretamente o ponto onde o arco elétrico se forma e onde o diagnóstico do AFCI Sungrow começa
-→ Nome do arquivo: sungrow-arc-fault-afci-conector-mc4-arco-eletrico.webp
-→ Alt Text (máx. 125 caracteres): Conectores MC4 em sistema solar fotovoltaico — diagnóstico do erro Arc Fault AFCI Sungrow por crimpagem incorreta
-→ Legenda: Fig. 1 — Conector MC4 mal crimpado é a causa mais comum do Arc Fault AFCI em inversores Sungrow; o arco começa no contato parcial e evolui silenciosamente
+→ Nome do arquivo: sungrow-arc-fault-afci-conector-mc4-diagnostico.webp
+→ Alt Text (máx. 125 caracteres): Conectores MC4 em instalação fotovoltaica — diagnóstico do Sungrow Arc Fault AFCI por crimpa deficiente no string CC
+→ Legenda: Fig. 1 — O Sungrow Arc Fault AFCI detecta arcos no string CC: na maioria dos casos, a origem é um conector MC4 com crimpa deficiente ou de fabricantes incompatíveis
 → Onde inserir: Topo do post, antes da introdução
-→ Converter para WebP — máximo 150 KB
 
 ---
 
-## [IMAGEM SECUNDÁRIA — USE NO MEIO DO POST]
+[IMAGEM SECUNDÁRIA — USE NO MEIO DO POST]
 
 IMAGEM SECUNDÁRIA:
 → URL para download: https://images.unsplash.com/photo-1581092335397-9583eb92d232?w=1200
-→ Por que foi escolhida: Técnico realizando medição com multímetro em painel de controle elétrico — representa o procedimento de rastreamento do ponto de arco descrito na seção "Como Identificar na Prática"
-→ Nome do arquivo: sungrow-arc-fault-afci-diagnostico-campo-mc4-2.webp
-→ Alt Text (máx. 125 caracteres): Técnico medindo continuidade em conector MC4 solar — procedimento de diagnóstico do Arc Fault AFCI Sungrow em campo
-→ Legenda: Fig. 2 — Medir resistência de contato em cada MC4 com miliohmímetro é etapa obrigatória antes de qualquer conclusão sobre o inversor
+→ Por que foi escolhida: Técnico realizando inspeção em instalação elétrica — representa o procedimento de diagnóstico termográfico e de medição descrito na seção "Como identificar na prática"
+→ Nome do arquivo: sungrow-arc-fault-afci-inspecao-string-mc4-2.webp
+→ Alt Text (máx. 125 caracteres): Técnico inspecionando instalação solar fotovoltaica — diagnóstico Sungrow Arc Fault AFCI por termografia em conector MC4
+→ Legenda: Fig. 2 — Câmera termográfica durante o horário de geração identifica MC4 com resistência de contato elevada: diferença de 5°C a 20°C em relação aos conectores vizinhos
 → Onde inserir: Após H2 "Como identificar na prática"
-→ Converter para WebP — máximo 150 KB
