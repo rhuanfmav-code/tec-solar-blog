@@ -1,163 +1,169 @@
-# Post 17 — WEG E003: Subtensão CC — painel insuficiente, sombra ou defeito interno?
+# Post 17 — WEG E003: Subtensão CC — Painel Insuficiente, Sombra ou Defeito Interno?
 
 ---
 
-## [PALAVRA-CHAVE FOCO]
+[PALAVRA-CHAVE FOCO]
 
-erro E003 inversor WEG subtensão CC diagnóstico
-
----
-
-## [TÍTULO SEO — Title Tag]
-
-WEG E003: subtensão CC — string, sombra ou defeito interno?
+WEG E003 subtensão CC
 
 ---
 
-## [SLUG — URL do Post]
+[TÍTULO SEO — Title Tag]
 
-weg-e003-subtensao-cc-diagnostico
-
----
-
-## [META DESCRIPTION]
-
-WEG E003 indica subtensão no barramento CC. Veja como diagnosticar se o problema está na string, no sombreamento ou no circuito de medição interno do inversor.
+WEG E003 Subtensão CC: Causa Real e Como Diagnosticar
 
 ---
 
-## [CATEGORIA]
+[SLUG — URL do Post]
+
+weg-e003-subtensao-cc-causa-diagnostico
+
+---
+
+[META DESCRIPTION]
+
+WEG E003 indica subtensão CC: string mal dimensionada, sombra nos painéis ou falha no circuito interno. Diagnóstico técnico completo na bancada.
+
+---
+
+[CATEGORIA]
 
 Códigos de Erro e Falhas
 
 ---
 
-## [TAGS]
+[TAGS]
 
-WEG E003, subtensão CC inversor solar, diagnóstico inversor WEG, falha medição CC, erro inversor solar
-
----
-
-## [TEXTO DO POST — VERSÃO HUMANIZADA FINAL]
-
-O **erro E003 do inversor WEG** traduz uma condição simples: a tensão CC no barramento de entrada caiu abaixo do mínimo que o MPPT consegue rastrear. O código é direto. O problema raramente é.
-
-Na nossa bancada, esse erro chega com um padrão quase sempre igual: inversor instalado corretamente, funcionou por meses, começou a falhar nas horas mais quentes do dia. Técnico verifica o display, registra o E003, mede a tensão na string às 14h, tudo dentro do esperado — e não encontra nada. O equipamento reinicia. Dois dias depois, mesmo erro, mesmo horário.
-
-O que acontece nesse padrão não é coincidência. É física de semicondutor combinada com um circuito de medição que pode derivar. Vamos dissecar.
+WEG E003, subtensão CC inversor, string subdimensionado solar, falha circuito medição tensão, diagnóstico inversor WEG
 
 ---
 
-## O que o inversor WEG está medindo — e onde isso falha
+[TEXTO DO POST — VERSÃO HUMANIZADA FINAL]
 
-A tensão CC de entrada é monitorada por um divisor resistivo de alta impedância conectado ao barramento positivo e negativo. O sinal passa por um condicionador analógico e vai para o ADC do DSP de controle. Quando o firmware lê tensão abaixo do limiar mínimo do MPPT — que varia conforme o modelo, ficando entre 100 V e 200 V na linha residencial WEG —, a inversão para CA é bloqueada e o E003 é registrado.
+**WEG E003** é o código de subtensão CC dos inversores da linha SIW. Quando aparece, o inversor detectou tensão de entrada abaixo do limiar mínimo de operação e travou a geração. O display trava, o sistema para, e a string CC está eletricamente intacta — o que confunde qualquer um que chega para diagnosticar.
 
-Existem quatro caminhos para chegar nessa leitura baixa:
+Na nossa bancada, o E003 aparece com dois perfis bem distintos. No primeiro, o integrador montou a string com o menor número de painéis para fechar o orçamento. Em irradiância plena funciona. Quando a tarde fecha ou a temperatura de célula sobe acima de 55°C no verão do Centro-Oeste, a Voc cai abaixo da janela do inversor e o E003 trava a máquina. No segundo perfil, a string está correta, os painéis medem dentro do esperado, e o erro aparece mesmo com sol forte. Aí o problema é interno.
 
-**String subdimensionada ou calculada sem margem de temperatura**
-Módulos de silício policristalino e monocristalino têm coeficiente de temperatura de tensão negativo — entre –0,30%/°C e –0,45%/°C para Voc. No Centro-Oeste e no Nordeste brasileiro, onde módulos montados em telhados de cerâmica chegam a 70 °C no pico do dia, a tensão de circuito aberto de cada módulo cai em até 18 V em relação ao valor STC. Uma string dimensionada "no limite" do Vmin MPPT em condições ideais pode ficar abaixo do limiar a 70 °C de módulo.
+Separar esses dois casos muda completamente o diagnóstico e o que fazer com o equipamento.
 
-**Sombreamento parcial — o vilão não óbvio**
-Um único módulo sombreado ativa os diodos de bypass internos, "cortando" grupos de células da série. Esse corte reduz a tensão total da string de forma não linear. Uma sombra de meio metro quadrado — de uma caixa d'água, de um galho, de uma antena de TV — pode tirar 40 V a 60 V de uma string inteira.
+## O que causa o E003
 
-É o tipo de problema que não aparece na inspeção visual rápida.
+Nos modelos SIW300H, SIW500H e SIW600H, a tensão mínima de operação fica entre 200 V e 250 V CC dependendo da faixa de potência. Quando a tensão cai abaixo desse valor, o MPPT não consegue operar e o inversor registra E003.
 
-**Conector MC4 com resistência de contato elevada**
-Crimp irregular, oxidação no pino ou encaixe incompleto geram queda de tensão série proporcional à corrente. Nos picos de geração — quando a string está entregando 8 A a 10 A — a queda em um único MC4 defeituoso pode ser suficiente para disparar o E003. Em irradiância baixa, o mesmo conector passa despercebido.
+As origens se dividem em quatro grupos:
 
-**Defeito no divisor resistivo de medição interno**
-Esse é o cenário que mais gera diagnóstico errado. Um dos resistores SMD do divisor deriva de valor por envelhecimento acelerado, por surto de tensão ou por umidade que penetrou no gabinete. O inversor passa a ler tensão abaixo do real — a string pode estar gerando 180 V normais enquanto o firmware enxerga 130 V e bloqueia a operação.
+- String com painéis insuficientes em série: a Voc calculada em STC beira o mínimo. Em temperatura de célula elevada (a perda é de ~0,3%/°C), a tensão entra na zona proibida. O inversor opera bem no inverno e exibe E003 no pico térmico do verão. No norte de Minas e no Nordeste, onde a temperatura de superfície de módulo alcança 70°C nos meses secos, essa margem desaparece rápido.
+- Sombreamento parcial no string: um painel sombreado derruba a tensão de toda a string. Sombra de caixa-d'água, antena ou beiral atingindo dois ou três módulos nas horas críticas é suficiente para o E003 disparar mesmo com o restante dos painéis gerando normalmente.
+- Resistência elevada no cabeamento CC: conector MC4 oxidado, cabo subdimensionado ou emenda improvisada causam queda de tensão proporcional à corrente. Com irradiância plena, o sistema opera. Com 30% de nuvens, a corrente cai, a queda de tensão também cai, e o E003 some. Parece intermitente. Não é.
+- Falha no circuito de sensoriamento interno: o divisor resistivo de alta tensão na placa de controle converte a tensão do barramento CC para o range do ADC. Resistores com desvio fora de tolerância ou contaminados por umidade reportam tensão abaixo do real. O inversor registra E003 com a entrada CC fisicamente dentro dos limites.
 
----
+A última causa é a menos intuitiva. Também é a que mais gera remessa de equipamento sem necessidade.
 
 ## Como identificar na prática
 
-Antes de concluir qualquer coisa, faça as medições na ordem abaixo:
+A sequência de diagnóstico parte do externo e avança para dentro apenas quando necessário.
 
-1. Com irradiância direta no momento da falha, meça a tensão CC diretamente nos bornes de entrada do inversor — positivo para negativo, multímetro DC, escala adequada.
-2. Calcule a tensão esperada da string com correção de temperatura: Voc_real = Voc_STC × [1 + (coef_temp × (T_módulo – 25))]. Para módulo a 65 °C com Voc de 44 V e coeficiente de –0,35%/°C: 44 × [1 + (–0,0035 × 40)] = 44 × 0,86 ≈ 37,8 V por módulo.
-3. Percorra toda a string inspecionando cada MC4: encaixe com travamento mecânico completo, pino sem oxidação (cobre limpo, sem tom esverdeado ou escuro).
-4. Meça a corrente da string com alicate amperímetro DC. Corrente significativamente abaixo do Isc esperado para aquela irradiância aponta sombreamento ou módulo com defeito interno.
-5. Se a tensão medida externamente está dentro do esperado e o E003 persiste, o problema é interno — o inversor precisa de bancada.
+1. Meça a tensão CC diretamente nos terminais DC+/DC− do inversor durante a tentativa de inicialização. Não no combiner box. No terminal do inversor.
 
-Com o equipamento aberto:
+2. Compare com o valor mínimo do datasheet do modelo. Se a tensão medida estiver dentro do mínimo e o E003 persiste, o circuito de sensoriamento interno está com desvio.
 
-6. Meça a tensão diretamente no barramento CC interno, antes do capacitor de barramento, e compare com a leitura nos bornes externos. Divergência maior que 5% indica problema no circuito de entrada ou no divisor resistivo.
-7. Localize o divisor resistivo de medição de tensão CC na placa de controle — geralmente resistores de valor alto em série (da ordem de centenas de kΩ a MΩ) entre o barramento e o pino de ADC.
-8. Meça cada resistor do divisor fora do circuito. Compare com o valor de referência no esquema elétrico WEG (disponível no manual técnico ou a pedido).
+3. Se a tensão no terminal estiver abaixo do mínimo, meça na saída dos painéis, no início do string. Diferença grande entre os dois pontos indica queda no cabeamento.
 
----
+4. Registre os horários do E003 no log do inversor. Ocorrências nas primeiras e últimas horas do dia indicam string no limite de tensão. Ocorrências constantes ao longo do dia indicam cabeamento comprometido ou circuito interno com defeito.
+
+5. Verifique cada painel do string com medição individual de Voc. Painel com Voc 15% abaixo dos demais tem célula degradada ou diodo bypass em curto.
+
+6. Inspecione MC4 e passagens de cabo com câmera térmica durante geração. Ponto quente acima de 15°C em relação ao entorno é resistência de contato elevada — queda de tensão visível sem precisar de multímetro no ponto exato.
+
+7. Se as verificações externas não encontrarem causa: abra o inversor e meça os resistores do divisor de tensão do circuito de sensoriamento CC. Desvio acima de 1% em resistores de 100 kΩ ou superiores justifica leitura incorreta no ADC.
 
 ## O erro mais comum do mercado
 
-A maior parte dos casos de E003 que chegam até a TEC Solar passou por pelo menos uma tentativa de diagnóstico antes. O fluxo costuma ser esse: técnico mede a tensão externamente, vê que está normal, e conclui que o problema é interno. O equipamento vai para assistência, onde atualizam o firmware — que não tem relação alguma com o circuito analógico de medição — e devolvem com laudo "sem defeito encontrado".
+O técnico chega, mede a string no combiner box, obtém 350 V. Bem acima do mínimo do inversor. Conclui que o equipamento tem defeito interno e encaminha para assistência sem mais verificações.
 
-O detalhe que ninguém mede: a tensão que o firmware lê versus a tensão real no barramento. Essa comparação exige abrir o equipamento e acessar o ponto certo no circuito. Sem isso, o diagnóstico é sempre incompleto.
+A assistência testa o inversor isolado da string, encontra tudo funcionando, devolve o equipamento. O E003 volta em dois dias.
 
-O segundo erro recorrente: substituir o inversor inteiro com a justificativa de que "a string está boa, deve ser problema do equipamento". Em muitos casos, o reparo do divisor resistivo ou do circuito de condicionamento sai por menos de R$ 500. O inversor novo fica entre R$ 3.500 e R$ 6.000 dependendo da potência. A diferença não precisa de muita análise.
+O que não foi medido: a tensão no terminal de entrada do inversor, depois de 70 metros de cabo 4 mm² com dois MC4 oxidados no percurso. No combiner box, 350 V. No terminal do inversor, sob irradiância moderada, 305 V. Abaixo do mínimo do modelo. Em dia ensolarado a corrente sobe, a queda de tensão sobe junto, e o E003 aparece — justamente quando mais se espera que o sistema funcione.
 
----
+Esse diagnóstico incorreto tem custo real: frete de ida, frete de volta, prazo de espera. E a falha continua no string.
 
 ## Quando o reparo é viável
 
-Se o E003 vem de defeito no circuito de medição — e não de dano no estágio de potência —, o reparo é tecnicamente viável na maioria dos casos.
+Quando o diagnóstico confirma causa interna no circuito de sensoriamento, o reparo é simples e os custos não chegam perto do valor de um equipamento novo.
 
-Cenários reparáveis:
-- Resistor SMD derivado no divisor de medição: substituição pontual com solda SMD fina
-- Capacitor de filtro de sinal com ESR elevado causando leitura instável sob carga: troca do componente
-- Trilha danificada por surto de tensão com queima localizada: jumper de trilha + reposição do componente afetado
-- Conector de entrada com terminal oxidado: limpeza química e recuperação do contato
+Substituição dos resistores do divisor de alta tensão: peças de R$ 15 a R$ 60, trabalho de 1 a 2 horas em bancada com estação de solda de precisão. Em resistores SMD de 0805 ou 1206, a substituição exige solda quente ou estação a ar, mas não é procedimento complexo para quem trabalha com eletrônica de placa.
 
-O reparo deixa de ser viável quando o surto que danificou o circuito de medição também atingiu o barramento de potência — queimando IGBTs, capacitores de barramento ou a placa de gate driver. Nesses casos, o custo de peças pode se aproximar do valor de um inversor novo.
+Substituição de capacitores de filtro no circuito de amostragem: custo semelhante. Capacitores cerâmicos SMD nesse circuito degradam mais rápido em ambientes com umidade elevada — instalações próximas ao litoral do Espírito Santo e do Rio de Janeiro são mais suscetíveis, e recebemos vários WEGs com esse histórico exato.
 
-Critério rápido de triagem: se o E003 aparece com a string completamente desconectada, o problema é definitivamente interno. Se aparece apenas sob geração, a string ainda é suspeita primária.
+Um WEG SIW500H novo está entre R$ 3.200 e R$ 4.800. O reparo do circuito de sensoriamento raramente ultrapassa R$ 500 em peças e mão de obra.
 
-Ainda assim, mesmo com string suspeita, o circuito de medição interno precisa ser validado antes de qualquer conclusão final.
-
----
+A exceção: quando a leitura incorreta de tensão fez o MPPT operar fora dos limites por tempo prolongado, gerando instabilidade no barramento e danificando o estágio de potência. Nesse caso, a placa de potência entra na avaliação. A decisão precisa de laudo técnico, não de estimativa no campo.
 
 ## Conclusão
 
-E003 tem quatro causas possíveis e duas localizações completamente distintas — uma no campo, uma dentro do equipamento. Diagnosticar como "problema de painel" ou "defeito do inversor" sem medir os dois lados é suposição com custo alto.
+O WEG E003 é um dos erros que mais chega sem diagnóstico completo. A medição foi feita no lugar errado, a causa ficou no string, e o inversor viajou de ida e volta sem necessidade.
 
-Envie seu inversor para a TEC Solar. Realizamos diagnóstico eletrônico completo em nível de placa e devolvemos um laudo técnico detalhado — mesmo que o reparo não seja viável. Atendemos todo o Brasil via logística reversa. [Falar com a TEC Solar no WhatsApp](https://wa.me/5538998891587) | [@tec_solar_moc](https://www.instagram.com/tec_solar_moc/)
+O que resolve antes de qualquer remessa: multímetro no terminal de entrada. Não no início do cabeamento.
+
+## Envie seu inversor para diagnóstico
+
+Antes de comprar equipamento novo, envie para a nossa bancada. A TEC Solar realiza diagnóstico eletrônico completo em nível de componente — abrimos o inversor, medimos a placa, identificamos a causa raiz e entregamos um laudo técnico detalhado.
+
+Se o reparo for viável, você recebe o equipamento funcionando por uma fração do custo de substituição. Se não for, o laudo serve de base para qualquer decisão.
+
+Atendemos todo o Brasil via logística reversa.
+
+<div style="display:flex; flex-direction:column; gap:12px; margin-top:20px;">
+
+<a href="https://wa.me/5538998891587?text=Ol%C3%A1%2C%20vim%20pelo%20blog%20e%20quero%20enviar%20meu%20inversor%20para%20diagn%C3%B3stico" target="_blank" style="background:#25D366; color:white; padding:14px 24px; border-radius:8px; text-decoration:none; font-weight:bold; text-align:center;">
+👉 Falar no WhatsApp agora
+</a>
+
+<a href="https://www.instagram.com/tec_solar_moc?igsh=MWl2djYzeXk2Zm51dQ%3D%3D&utm_source=qr" target="_blank" style="background:#E1306C; color:white; padding:14px 24px; border-radius:8px; text-decoration:none; font-weight:bold; text-align:center;">
+📸 Seguir no Instagram
+</a>
+
+<a href="https://youtube.com/@tecsolar-reparodeinversores?si=kG3Njqipg8QRbZSD" target="_blank" style="background:#FF0000; color:white; padding:14px 24px; border-radius:8px; text-decoration:none; font-weight:bold; text-align:center;">
+▶️ Ver vídeos no YouTube
+</a>
+
+</div>
 
 ---
 
-## [LINKS INTERNOS SUGERIDOS]
+[LINKS INTERNOS SUGERIDOS]
 
-- Âncora: "conector MC4 com resistência de contato elevada" → Link para: post sobre Sungrow Arc Fault AFCI: Arco Elétrico Detectado (Post 16) — publicado, inserir link
-- Âncora: "falha de isolamento" → Link para: post sobre Canadian Solar Falha 117: Falha de Isolamento (Post 18) — ainda não publicado, não inserir link no texto
-
----
-
-## [LINKS EXTERNOS SUGERIDOS]
-
-- Texto âncora: "ABNT NBR 16690" → Fonte: ABNT — Instalações elétricas de sistemas fotovoltaicos (abnt.org.br)
-- Texto âncora: "coeficiente de temperatura de tensão" → Fonte: Datasheet do fabricante do módulo (ex: Canadian Solar, Risen, Jinko) — disponível no site do fabricante
+- Âncora: 'o sistema para' → URL: /inversor-solar-parou-de-funcionar-checklist-completo → Contexto: Introdução, segunda frase — referência ao checklist completo de diagnóstico inicial (Post 11), indicado quando o técnico encontra o inversor parado sem causa aparente
+- Âncora: 'danificando o estágio de potência' → URL: /por-que-os-igbts-queimam-em-inversores-solares-as-6-causas-reais → Contexto: Seção "Quando o reparo é viável", ao mencionar o dano secundário por operação fora dos limites — referência cruzada com Post 10 sobre causas reais de falha nos IGBTs
+- Âncora: 'resistência de contato elevada' → URL: /sungrow-arc-fault-afci-conector-mc4-mal-crimpado → Contexto: Seção "Como identificar na prática", passo 6 — referência cruzada com Post 16, que detalha como a resistência de contato em MC4 gera queda de tensão e dispara proteções
 
 ---
 
-## [IMAGEM PRINCIPAL — USE ESTA]
+[LINKS EXTERNOS SUGERIDOS]
+
+- Texto âncora: "limiar mínimo de operação" → URL: https://www.weg.net → Fonte: WEG — fabricante dos inversores SIW; especificações técnicas de tensão mínima de entrada por modelo disponíveis no catálogo oficial
+- Texto âncora: "MPPT não consegue operar" → URL: https://www.aneel.gov.br → Fonte: ANEEL — Resolução Normativa n.º 1.059/2023, que regulamenta a conexão de sistemas fotovoltaicos à rede de distribuição e define parâmetros operacionais para inversores grid-tied no Brasil
+
+---
+
+[IMAGEM PRINCIPAL — USE ESTA]
 
 IMAGEM PRINCIPAL:
 → URL para download: https://images.unsplash.com/photo-1509391366360-2e959784a276?w=1200
-→ Por que foi escolhida: Painéis solares em telhado residencial com inversor — representa diretamente o contexto de instalação onde o E003 ocorre e onde o diagnóstico começa
-→ Nome do arquivo: weg-e003-subtensao-cc-inversor-solar.webp
-→ Alt Text (máx. 125 caracteres): Painéis solares em telhado residencial com inversor WEG — diagnóstico do erro E003 subtensão CC na string fotovoltaica
-→ Legenda: Fig. 1 — O erro E003 pode ter origem na string, no sombreamento ou no circuito de medição interno do inversor WEG; o diagnóstico correto exige medir os dois lados
+→ Por que foi escolhida: Painel solar com cabeamento CC visível — representa o ponto de origem do diagnóstico do WEG E003, onde a medição de tensão no string deve começar
+→ Nome do arquivo: weg-e003-subtensao-cc-string-fotovoltaico.webp
+→ Alt Text (máx. 125 caracteres): String fotovoltaico com cabeamento CC — diagnóstico do WEG E003 subtensão por string subdimensionado ou resistência no cabeamento
+→ Legenda: Fig. 1 — O WEG E003 começa com a medição de tensão CC diretamente no terminal do inversor, não no combiner box ou no início do string
 → Onde inserir: Topo do post, antes da introdução
-→ Converter para WebP — máximo 150 KB
 
 ---
 
-## [IMAGEM SECUNDÁRIA — USE NO MEIO DO POST]
+[IMAGEM SECUNDÁRIA — USE NO MEIO DO POST]
 
 IMAGEM SECUNDÁRIA:
 → URL para download: https://images.unsplash.com/photo-1565043666747-69f6646db940?w=1200
-→ Por que foi escolhida: Técnico realizando medição com multímetro em equipamento eletrônico — representa o procedimento de comparação de tensão interna versus externa descrito na seção de diagnóstico
-→ Nome do arquivo: weg-e003-subtensao-cc-diagnostico-bancada-2.webp
-→ Alt Text (máx. 125 caracteres): Técnico medindo tensão CC com multímetro em placa de inversor solar — diagnóstico do erro WEG E003 em bancada eletrônica
-→ Legenda: Fig. 2 — A comparação entre tensão medida externamente e tensão lida pelo firmware é a etapa que define se o problema é no campo ou no circuito de medição interno
+→ Por que foi escolhida: Técnico realizando medição com multímetro em equipamento eletrônico — representa o procedimento de diagnóstico descrito na seção "Como identificar na prática"
+→ Nome do arquivo: weg-e003-subtensao-cc-medicao-terminal-2.webp
+→ Alt Text (máx. 125 caracteres): Técnico medindo tensão CC com multímetro no terminal do inversor WEG — diagnóstico do erro E003 subtensão no barramento
+→ Legenda: Fig. 2 — A medição de tensão CC deve ser feita diretamente nos terminais DC+/DC− do inversor durante a tentativa de inicialização — não no combiner box
 → Onde inserir: Após H2 "Como identificar na prática"
-→ Converter para WebP — máximo 150 KB
