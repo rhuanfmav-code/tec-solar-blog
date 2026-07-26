@@ -2,166 +2,176 @@
 
 ---
 
-## [PALAVRA-CHAVE FOCO]
+[PALAVRA-CHAVE FOCO]
 
-Canadian Solar Falha 117 falha de isolamento diagnóstico
-
----
-
-## [TÍTULO SEO — Title Tag]
-
-Canadian Solar Falha 117: Diagnóstico de Isolamento CC
+Canadian Solar Falha 117 falha de isolamento
 
 ---
 
-## [SLUG — URL do Post]
+[TÍTULO SEO — Title Tag]
 
-canadian-solar-falha-117-diagnostico-isolamento-cc
-
----
-
-## [META DESCRIPTION]
-
-Falha 117 Canadian Solar indica queda de isolamento CC. Veja como usar o megohmmeter, isolar string por string e encontrar o ponto de falha antes de trocar o inversor.
+Canadian Solar Falha 117: Falha de Isolamento Solar
 
 ---
 
-## [CATEGORIA]
+[SLUG — URL do Post]
+
+canadian-solar-falha-117-falha-de-isolamento
+
+---
+
+[META DESCRIPTION]
+
+Canadian Solar Falha 117 indica isolamento comprometido no campo. Veja como diagnosticar com megôhmetro antes de enviar o inversor para reparo.
+
+---
+
+[CATEGORIA]
 
 Códigos de Erro e Falhas
 
 ---
 
-## [TAGS]
+[TAGS]
 
-Canadian Solar Falha 117, falha de isolamento inversor solar, diagnóstico isolamento CC, megohmmeter inversor, resistência de isolamento fotovoltaico
-
----
-
-## [TEXTO DO POST — VERSÃO HUMANIZADA FINAL]
-
-A **Canadian Solar Falha 117** é um dos erros de isolamento mais frequentes que chegam até nós — e também um dos mais mal diagnosticados no campo. Quando o display exibe esse código, o inversor sinalizou que a resistência de isolamento da malha CC caiu abaixo do limite mínimo aceitável. O equipamento não pifou. Ele detectou um risco real e se protegeu.
-
-Na nossa bancada, esse erro chega com uma história quase sempre igual: o técnico trocou o inversor, o novo foi instalado, e dois dias depois o mesmo código voltou. O problema nunca estava no inversor. Estava no cabo roteado sob a laje ou no painel com backsheet deteriorada que ninguém tinha verificado.
+Canadian Solar Falha 117, falha de isolamento solar, teste megôhmetro string, diagnóstico CC fotovoltaico, isolamento cabo painel
 
 ---
+
+[TEXTO DO POST — VERSÃO HUMANIZADA FINAL]
+
+A **Canadian Solar Falha 117** interrompe a geração quando o inversor detecta que a resistência de isolamento do sistema fotovoltaico caiu abaixo do limite mínimo de segurança. O display registra o alarme, o inversor desliga a saída CC e a geração para. Sem aquecimento aparente, sem odor, sem componente visualmente danificado — só o equipamento parado e o cliente sem geração.
+
+Na nossa bancada, esse erro chega com o mesmo histórico toda vez: o técnico foi ao local, resetou o equipamento, o sistema voltou a gerar por horas ou dias, e a Falha 117 retornou. Depois de dois ou três ciclos assim, o inversor foi enviado como "defeito eletrônico". Em boa parte dos casos que chegam com esse histórico, o inversor funciona exatamente como foi projetado. O problema está no campo.
+
+Medir antes de mandar.
 
 ## O que causa a Falha 117
 
-Os inversores Canadian Solar das séries CSI-GR e CSI-T monitoram continuamente a resistência de isolamento da malha CC por meio de um circuito interno chamado IMD (Isolation Monitoring Device). Esse circuito injeta uma tensão de referência no barramento e mede qualquer corrente que retorne pelo condutor de aterramento. Quando a impedância cai abaixo de aproximadamente 100 kΩ — o limiar varia por modelo e configuração — o inversor desliga o estágio de potência e registra a Falha 117.
+Nos inversores CSI da Canadian Solar, a Falha 117 indica que a resistência de isolamento medida entre o barramento CC e o terra de proteção ficou abaixo do limiar operacional. Para modelos monofásicos, o limite fica em torno de 600 kΩ. Para modelos trifásicos, 1 MΩ. Abaixo desses valores, o inversor desliga e registra a falha — comportamento obrigatório conforme a IEC 62109-2, norma de segurança para inversores fotovoltaicos adotada no mercado brasileiro.
 
-As origens mais comuns no campo são estas:
+É uma proteção. Não é defeito do inversor.
 
-1. Cabo CC com isolamento perfurado ou desgastado — abrasão em passagens por borda de calha, telha cerâmica ou parafuso exposto é o caso mais frequente
-2. Backsheet rachada ou delaminada no painel solar — a umidade infiltra pela microfissura e cria caminho resistivo entre a célula e o frame metálico aterrado
-3. Junction box com vedação rompida — infiltração de água no bloco de diodos ou nos bornes cria uma conexão resistiva com o terra que o inversor detecta facilmente
-4. Conector MC4 mal crimpado — pino fora de posição ou vedação de borracha danificada abre caminho para umidade nos bornes energizados
-5. PID em estágio avançado — em sistemas com barramento acima de 600 V e sem compensador, o processo de degradação por tensão induzida pode comprometer o isolamento de painéis específicos
-6. Falso positivo do circuito IMD na placa de controle — capacitor de desacoplamento com derivação ou resistor de medição fora de especificação faz o inversor acusar falha mesmo com o sistema externo saudável
+As origens mais comuns na instalação:
 
-Esse sexto caso é o menos óbvio e costuma aparecer quando todos os testes externos já foram feitos e o erro persiste. Ainda não existe resposta rápida para ele. Depende do que você vai encontrar na placa.
-
----
+- **Cabos CC com isolamento degradado**: exposição UV intensa, curvatura forçada em borda de calha ou esmagamento sob estrutura metálica rompe o dielétrico do cabo. Em telhados no Nordeste e no Centro-Oeste — onde a temperatura de superfície do telhado ultrapassa 70°C nos meses secos — a degradação do PVC externo avança bem mais rápido do que o fabricante projeta para clima temperado.
+- **Conectores MC4 com umidade interna**: crimpagem fora do padrão ou conector parcialmente encaixado exposto à chuva acumula condensação. A umidade cria um caminho resistivo entre o condutor e a carcaça metálica aterrada.
+- **Caixa de junção do painel infiltrada**: água acumulada dentro da junction box dissolve resíduos minerais e forma uma ponte condutiva entre o circuito elétrico e a moldura do painel.
+- **Painel com delaminação no laminado**: umidade que entra entre a célula e o encapsulante EVA aumenta a corrente de fuga em direção à moldura metálica aterrada. Painéis com mais de 8 anos de campo ou instalados sem ventilação adequada são os mais suscetíveis.
+- **DPS com varistor degradado**: o elemento varistor do dispositivo de proteção contra surto se deteriora com o uso e pode criar caminho de baixa resistência para o terra mesmo sem nenhum evento de surto recente.
+- **Cabo em contato direto com perfil de alumínio**: sem grampos de fixação adequados, o cabo CC encosta na borda do perfil e o isolamento se desgasta progressivamente com vibração e dilatação térmica.
 
 ## Como identificar na prática
 
-O diagnóstico começa com o megohmmeter. Não com o multímetro.
+O diagnóstico da Falha 117 começa com o megôhmetro. O multímetro convencional não aplica tensão suficiente para revelar falhas de isolamento em circuitos CC de alta tensão.
 
-O multímetro aplica no máximo 9 V na medição de resistência. A tensão de operação de um string de 10 painéis em série está entre 300 V e 600 V. Uma falha de isolamento que só se manifesta sob tensão real é completamente invisível para o multímetro.
+Procedimento:
 
-O procedimento correto:
+1. Desligue o inversor e abra o disjuntor CC
+2. Desconecte os cabos CC do inversor — positivo e negativo de cada string, individualmente
+3. Ajuste o megôhmetro para 500 Vcc (ou 1000 Vcc para strings com tensão de circuito aberto acima de 500 V)
+4. Meça a resistência de isolamento de cada string separadamente:
+   - Positivo da string → barra de terra de proteção (PE)
+   - Negativo da string → barra PE
+5. Registre e compare os valores:
+   - Acima de 10 MΩ: isolamento saudável
+   - Entre 1 MΩ e 10 MΩ: atenção, inspecionar os pontos de risco antes de religar
+   - Abaixo de 1 MΩ: falha de isolamento confirmada nessa string
+   - Abaixo de 100 kΩ: falha severa, não religar sem localizar a origem
+6. Na string problemática, desconecte painel por painel e reaplique a medição após cada remoção — o valor que sobe aponta o painel ou trecho de cabo com defeito
+7. Com a string problemática isolada, inspecione fisicamente cada conector MC4: oxidação, eflorescência branca (depósito por infiltração de água), carbonização ou conector parcialmente encaixado
 
-1. Desligar o inversor e aguardar a descarga do barramento CC
-2. Desconectar todos os strings do inversor ao mesmo tempo — não um por vez
-3. Aplicar 500 VDC com megohmmeter entre positivo e terra de cada string individualmente, depois entre negativo e terra
-4. Valor mínimo aceitável: 1 MΩ conforme IEC 62109-1. Qualquer leitura abaixo disso exige investigação
-5. Identificar qual string está com leitura baixa e, dentro dele, isolar painel por painel para localizar o ponto exato
-6. Percorrer fisicamente todo o trajeto dos cabos CC daquele string — prestar atenção a pontos onde o cabo dobra, passa por metal exposto ou fica sem proteção mecânica
-7. Abrir cada junction box do string suspeito e verificar umidade, oxidação nos bornes e integridade visual dos diodos de bypass
-
-Em instalações no Norte e no Nordeste do Brasil — onde a umidade relativa é alta mesmo nas épocas secas e a amplitude térmica diária é menor — o padrão de infiltração é diferente. A água não seca durante o dia. O erro de isolamento tende a ser constante em vez de intermitente. Isso muda a prioridade do diagnóstico: em vez de suspeitar primeiro de condensação, suspeite de penetração por fissura permanente.
-
-Se todos os strings passarem na medição com o megohmmeter e o erro persistir com o inversor reconectado, o problema é interno.
-
----
+Câmera térmica durante a geração complementa bem: ponto quente em MC4 ou em trecho de cabo indica resistência de contato elevada — sinal de que o isolamento já está cedendo antes de a falha aparecer no display.
 
 ## O erro mais comum do mercado
 
-O erro é não usar o megohmmeter.
+O inversor vai para assistência antes de qualquer medição de campo.
 
-Diagnóstico de isolamento CC com multímetro não tem validade técnica em sistemas fotovoltaicos. Ponto.
+É o caminho mais demorado e mais caro. E, na maioria das ocorrências, completamente evitável.
 
-O segundo equívoco mais frequente é testar um único string, não encontrar nada, e concluir que o problema é o inversor. A Falha 117 é disparada por qualquer ponto da malha CC conectada ao barramento — um único cabo com isolamento degradado em qualquer string é suficiente para travar o sistema inteiro. O procedimento correto exige desconectar todos os strings e testá-los individualmente, sem exceção.
+O raciocínio é: "o inversor acusou a falha, logo o defeito é do inversor". Só que o equipamento registra o que o circuito externo impõe — se o isolamento do campo está comprometido, o alarme é correto. A assistência testa o inversor sem a string conectada, não encontra nada, devolve com "sem problema identificado". O sistema volta ao campo e a Falha 117 retorna no primeiro dia de chuva.
 
-O terceiro erro, menos óbvio, é ignorar os conectores MC4. Em instalações feitas com pressa ou por equipes sem treinamento específico, o MC4 mal crimpado ou sem o travamento mecânico completo é frequente. O pino fora de posição cria um caminho de alta impedância que piora progressivamente com o calor e a umidade. No campo, parece um defeito aleatório e intermitente.
+Outro erro recorrente: o técnico localiza o painel com baixa resistência de isolamento e cota a substituição no mesmo dia. Sem abrir a junction box. Sem inspecionar os conectores. Em boa parte dos casos, o problema é um MC4 com umidade que custa menos de R$ 10,00 e é resolvido em campo em 20 minutos.
 
----
+O diagnóstico precede a compra. Sempre.
 
 ## Quando o reparo é viável
 
-Quando o problema está no sistema externo, o reparo é quase sempre viável e direto:
+Se o campo estiver dentro dos parâmetros — todas as strings com resistência de isolamento acima de 1 MΩ — e a Falha 117 persistir com o inversor reconectado, o problema pode ser interno.
 
-- Substituição de trecho de cabo CC danificado: custo de material mais mão de obra, frequentemente abaixo de R$ 500
-- MC4 com vedação comprometida: custo de conector novo é irrisório; o tempo de diagnóstico e localização é o maior custo
-- Painel com backsheet deteriorada: depende se há garantia ativa — alguns fabricantes cobrem, muitos não, especialmente em módulos com mais de cinco anos
-- Painel com PID avançado: tratamento possível com equipamento específico, mas a relação custo-benefício precisa ser avaliada caso a caso
+Dentro do inversor, o circuito de monitoramento de isolamento usa resistores de alta impedância, capacitores de filtro e um CI de medição. Esses componentes têm vida útil menor que o restante do circuito em ambientes com umidade alta e amplitude térmica acentuada. Resistores de 1 MΩ a 10 MΩ em encapsulamento SMD com desvio de valor geram leitura incorreta no ADC — o inversor "vê" isolamento baixo mesmo com o campo em ordem.
 
-Quando o problema é interno ao inversor, o diagnóstico em bancada define o caminho. Se o defeito estiver nos componentes do circuito IMD — resistores de medição SMD derivados, capacitores de referência com ESR elevado, amplificador de instrumentação com offset fora do especificado —, o reparo eletrônico é executável. Custo típico na TEC Solar: entre R$ 400 e R$ 700.
+O reparo desse circuito é possível e o custo fica bem abaixo de um equipamento novo. Um CSI de 5 kW novo está entre R$ 3.500 e R$ 5.500 no mercado atual. O conserto do circuito de sensoriamento sai por uma fração disso, com componentes rastreáveis e laudo técnico.
 
-Um inversor Canadian Solar de 3 a 5 kW novo sai por R$ 3.000 a R$ 5.000. Condenar sem diagnóstico é uma decisão financeira ruim antes de qualquer coisa.
-
----
+Há casos em que a corrente de fuga não controlada danificou componentes do estágio de potência ao longo do tempo. Nesses casos, o laudo define o que é recuperável — não existe resposta sem abrir o equipamento e medir.
 
 ## Conclusão
 
-A Falha 117 não é defeito do inversor na maior parte dos casos. O inversor está funcionando como foi projetado para funcionar: monitorando o isolamento e parando quando encontra risco.
+A Falha 117 é o Canadian Solar fazendo o que foi programado para fazer. O inversor identificou um caminho de fuga entre o circuito CC e o terra e desligou a geração para proteger a instalação.
 
-O problema está em algum ponto entre os painéis e o barramento CC. Pode ser óbvio na primeira inspeção, pode ser difícil de encontrar.
+O megôhmetro resolve o diagnóstico antes de qualquer decisão de remessa.
 
-Envie seu inversor para a TEC Solar. Realizamos diagnóstico eletrônico completo em nível de placa e devolvemos um laudo técnico detalhado — mesmo que o reparo não seja viável. Atendemos todo o Brasil via logística reversa. [Falar com a TEC Solar no WhatsApp](https://wa.me/5538998891587) | [@tec_solar_moc](https://www.instagram.com/tec_solar_moc/)
+Se o campo vier limpo e a falha continuar, a bancada abre o circuito de monitoramento e identifica o componente com desvio. Campo primeiro, bancada depois.
+
+## Envie seu inversor para diagnóstico
+
+Antes de comprar equipamento novo, envie para a nossa bancada. A TEC Solar realiza diagnóstico eletrônico completo em nível de componente — abrimos o inversor, medimos a placa, identificamos a causa raiz e entregamos um laudo técnico detalhado.
+
+Se o reparo for viável, você recebe o equipamento funcionando por uma fração do custo de substituição. Se não for, o laudo serve de base para qualquer decisão.
+
+Atendemos todo o Brasil via logística reversa.
+
+<div style="display:flex; flex-direction:column; gap:12px; margin-top:20px;">
+
+<a href="https://wa.me/5538998891587?text=Ol%C3%A1%2C%20vim%20pelo%20blog%20e%20quero%20enviar%20meu%20inversor%20para%20diagn%C3%B3stico" target="_blank" style="background:#25D366; color:white; padding:14px 24px; border-radius:8px; text-decoration:none; font-weight:bold; text-align:center;">
+👉 Falar no WhatsApp agora
+</a>
+
+<a href="https://www.instagram.com/tec_solar_moc?igsh=MWl2djYzeXk2Zm51dQ%3D%3D&utm_source=qr" target="_blank" style="background:#E1306C; color:white; padding:14px 24px; border-radius:8px; text-decoration:none; font-weight:bold; text-align:center;">
+📸 Seguir no Instagram
+</a>
+
+<a href="https://youtube.com/@tecsolar-reparodeinversores?si=kG3Njqipg8QRbZSD" target="_blank" style="background:#FF0000; color:white; padding:14px 24px; border-radius:8px; text-decoration:none; font-weight:bold; text-align:center;">
+▶️ Ver vídeos no YouTube
+</a>
+
+</div>
 
 ---
 
-## [LINKS INTERNOS SUGERIDOS]
+[LINKS INTERNOS SUGERIDOS]
 
-- Âncora: "Sungrow GFCI Fault: Corrente de Fuga à Terra" → Link para: Post 27 — ainda não publicado, não inserir link no texto
-- Âncora: "conector MC4 mal crimpado" → Link para: Post 16 — Sungrow Arc Fault (AFCI): Arco Elétrico Detectado — publicado, inserir link
-
----
-
-## [LINKS EXTERNOS SUGERIDOS]
-
-- Texto âncora: "IEC 62109-1" → Fonte: IEC — Safety of power converters for use in photovoltaic power systems (iec.ch)
-- Texto âncora: "Isolation Monitoring Device" → Fonte: Bender GmbH — Application notes on IMD in PV systems (bender.de)
-- Texto âncora: "PID (Potential Induced Degradation)" → Fonte: Fraunhofer ISE — Potential Induced Degradation in PV modules (ise.fraunhofer.de)
+- Âncora: 'resistência de isolamento' → URL: /growatt-erro-102-falha-de-isolamento-string-leakage → Contexto: Introdução e seção "O que causa a Falha 117" — referência cruzada com Post 01, que aborda o mesmo tipo de proteção em inversores Growatt e detalha o diagnóstico de string leakage
+- Âncora: 'MC4 com umidade' → URL: /sungrow-arc-fault-afci-conector-mc4-mal-crimpado → Contexto: Seção "O erro mais comum do mercado" — referência cruzada com Post 16, que detalha como conectores MC4 mal crimpados ou com falha de vedação geram proteções em inversores Sungrow
+- Âncora: 'corrente de fuga' → URL: /sma-3501-falha-de-isolamento-diagnostico-completo → Contexto: Seção "Quando o reparo é viável" — referência cruzada com Post 04, que trata da mesma classe de falha em inversores SMA e discute os limites de corrente de fuga em sistemas fotovoltaicos
 
 ---
 
-## [IMAGEM PRINCIPAL — USE ESTA]
+[LINKS EXTERNOS SUGERIDOS]
+
+- Texto âncora: "IEC 62109-2" → URL: https://www.abnt.org.br → Fonte: ABNT — a norma brasileira ABNT NBR IEC 62109-2 adota os requisitos da IEC 62109-2 para segurança de inversores fotovoltaicos conectados à rede, incluindo a obrigatoriedade do monitoramento de isolamento em tempo real
+- Texto âncora: "resistência de isolamento" → URL: https://www.aneel.gov.br → Fonte: ANEEL — Resolução Normativa n.º 1.059/2023 regulamenta a conexão de sistemas de micro e minigeração distribuída à rede, com requisitos de segurança que incluem monitoramento de isolamento CC
+
+---
+
+[IMAGEM PRINCIPAL — USE ESTA]
 
 IMAGEM PRINCIPAL:
-→ URL para download: https://images.unsplash.com/photo-1509391366360-2e959784a276?w=1200
-→ Por que foi escolhida: Instalação de painéis solares em telhado residencial com cabeamento CC visível — representa diretamente o contexto onde a Falha 117 ocorre e onde o diagnóstico de isolamento começa
-→ Nome do arquivo: canadian-solar-falha-117-falha-isolamento-cc.webp
-→ Alt Text (máx. 125 caracteres): Painéis solares em telhado com cabeamento CC — diagnóstico da Canadian Solar Falha 117 de isolamento CC na string fotovoltaica
-→ Legenda: Fig. 1 — A Falha 117 do Canadian Solar indica queda de resistência de isolamento na malha CC; o diagnóstico começa pelos cabos e painéis antes de qualquer intervenção no inversor
+→ URL para download: https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1200
+→ Por que foi escolhida: Cabos CC de sistema fotovoltaico sobre telhado — representa o ponto de origem da Canadian Solar Falha 117, onde o diagnóstico de isolamento começa antes de qualquer remessa do inversor
+→ Nome do arquivo: canadian-solar-falha-117-falha-isolamento-cabo-fotovoltaico.webp
+→ Alt Text (máx. 125 caracteres): Cabos CC de sistema fotovoltaico em telhado — diagnóstico da Canadian Solar Falha 117 por cabo ou painel com isolamento comprometido
+→ Legenda: Fig. 1 — A Canadian Solar Falha 117 exige diagnóstico de isolamento no campo antes da remessa do inversor para bancada
 → Onde inserir: Topo do post, antes da introdução
-→ Converter para WebP — máximo 150 KB
 
 ---
 
-## [IMAGEM SECUNDÁRIA — USE NO MEIO DO POST]
+[IMAGEM SECUNDÁRIA — USE NO MEIO DO POST]
 
 IMAGEM SECUNDÁRIA:
-→ URL para download: https://images.unsplash.com/photo-1581093806997-124204d9fa9d?w=1200
-→ Por que foi escolhida: Técnico realizando medição com instrumento de teste em equipamento eletrônico — representa o uso do megohmmeter para diagnóstico de isolamento descrito na seção de identificação prática
-→ Nome do arquivo: canadian-solar-falha-117-megohmmeter-diagnostico-2.webp
-→ Alt Text (máx. 125 caracteres): Técnico medindo resistência de isolamento com megohmmeter em string fotovoltaica — diagnóstico Canadian Solar Falha 117
-→ Legenda: Fig. 2 — O megohmmeter aplicando 500 VDC é o instrumento correto para diagnóstico de isolamento em strings fotovoltaicos; o multímetro convencional não detecta falhas sob tensão real de operação
+→ URL para download: https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?w=1200
+→ Por que foi escolhida: Técnico realizando medição com equipamento de teste — representa o procedimento de diagnóstico com megôhmetro descrito na seção "Como identificar na prática"
+→ Nome do arquivo: canadian-solar-falha-117-teste-megohmetro-string-2.webp
+→ Alt Text (máx. 125 caracteres): Técnico realizando teste de isolamento com megôhmetro em string fotovoltaico — diagnóstico da Canadian Solar Falha 117
+→ Legenda: Fig. 2 — O megôhmetro ajustado para 500 Vcc é o único instrumento capaz de revelar falhas de isolamento em circuitos CC de alta tensão fotovoltaica
 → Onde inserir: Após H2 "Como identificar na prática"
-→ Converter para WebP — máximo 150 KB
-
-<!-- trigger-video-workflow -->
-<!-- trigger-v3-fixed -->
-
-<!-- trigger-v4-causas-label -->
