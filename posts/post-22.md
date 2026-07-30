@@ -2,115 +2,97 @@
 
 ---
 
-## [PALAVRA-CHAVE FOCO]
-
-diferença entre inversor on-grid e off-grid defeitos
-
----
-
-## [TÍTULO SEO — Title Tag]
-
-On-grid vs off-grid: por que os defeitos são diferentes
+[PALAVRA-CHAVE FOCO]
+defeitos inversor on-grid vs off-grid
 
 ---
 
-## [SLUG — URL do Post]
+[TÍTULO SEO — Title Tag]
+Inversor On-Grid vs. Off-Grid: Por Que os Defeitos Diferem
 
+---
+
+[SLUG — URL do Post]
 inversor-on-grid-vs-off-grid-defeitos-diferentes
 
 ---
 
-## [META DESCRIPTION]
-
-On-grid e off-grid têm arquiteturas distintas. Veja por que os defeitos são diferentes e como diagnosticar cada tipo sem cometer erros de bancada.
+[META DESCRIPTION]
+Inversor on-grid e off-grid falham por razões distintas. Entenda a diferença de arquitetura e como diagnosticar cada tipo corretamente.
 
 ---
 
-## [CATEGORIA]
-
+[CATEGORIA]
 Manutenção e Diagnóstico
 
 ---
 
-## [TAGS]
-
-inversor on-grid off-grid diferença, defeitos inversor solar, diagnóstico inversor off-grid, reparo inversor solar bancada, falha inversor fotovoltaico
-
----
-
-## [TEXTO DO POST — VERSÃO HUMANIZADA FINAL]
-
-O **inversor on-grid** e o **inversor off-grid** parecem cumprir a mesma função para quem olha de fora: converter energia solar em corrente alternada utilizável. Mas a arquitetura interna de cada um é diferente o suficiente para que os modos de falha sejam completamente distintos.
-
-Na nossa bancada, recebemos com frequência inversores off-grid que passaram por técnico antes de chegar até nós. O padrão se repete: a rotina de diagnóstico foi a mesma usada em on-grid, nada foi encontrado, o equipamento foi devolvido ao cliente como "sem defeito aparente". O cliente retornou porque o inversor não carregava a bateria direito. O estágio de carregamento nunca tinha sido verificado.
+[TAGS]
+inversor on-grid, inversor off-grid, diagnóstico inversor solar, reparo inversor solar, on-grid vs off-grid
 
 ---
 
-## A arquitetura define onde o problema aparece
+[TEXTO DO POST — VERSÃO HUMANIZADA FINAL]
 
-O inversor on-grid trabalha com referência externa: a rede elétrica. Ele sincroniza fase, frequência e tensão com o que a concessionária entrega. Quando a rede cai ou fica fora do padrão, o inversor para — por projeto. Isso é exigência de norma (ABNT NBR 16149 / IEC 62116). O circuito responsável por isso é chamado de proteção anti-ilha.
+**Inversor on-grid e off-grid** têm funções diferentes, arquiteturas eletrônicas diferentes — e quando quebram, falham por razões completamente distintas. Usar o mesmo checklist de diagnóstico para os dois é o caminho mais rápido para um laudo errado e uma substituição desnecessária.
 
-O inversor off-grid gera a própria referência de tensão e frequência. Não existe rede como ponto fixo. Ele precisa manter 220 V / 60 Hz estáveis com qualquer carga conectada, sem ajuda externa. Para isso, tem um estágio inversor de saída geralmente baseado em transformador e, na maioria dos modelos, um estágio de carregador de bateria separado — com seus próprios MOSFETs, indutores e circuito de controle.
+Na nossa bancada, essa confusão chega de forma parecida: o integrador aparece com um off-grid dizendo que "parou igual ao on-grid que vocês consertaram semana passada". O sintoma no display pode até ser semelhante. Mas o circuito responsável não tem nada a ver com o outro.
 
-São dois produtos diferentes, com componentes diferentes e pontos de falha diferentes.
+## Por que os defeitos são diferentes entre on-grid e off-grid
 
----
+O inversor on-grid tem uma função central: sincronizar a saída CA com a rede da concessionária. Para isso, ele usa um circuito PLL (Phase-Locked Loop) que monitora em tempo real a frequência e a fase da rede. Esse circuito fica sob estresse contínuo — qualquer oscilação na rede chega direto nele.
 
-## Os defeitos que aparecem no on-grid
+Além disso, todo inversor on-grid tem proteção antiilhamento, obrigatória pela ABNT NBR 16149, que monitora tensão, frequência e variação de potência para desligar o equipamento quando a rede some. O relé responsável por esse desligamento é acionado dezenas de vezes por mês em redes instáveis. Em áreas rurais do Nordeste e do interior de Minas Gerais, não é incomum ver esse relé com registros de centenas de operações em poucos meses.
 
-O ponto mais sensível de um on-grid transformerless — topologia dominante nos inversores de string atuais — é o circuito de monitoramento de isolamento entre o barramento CC e a terra. Qualquer painel com isolamento degradado, conector MC4 amolecido ou cabo com falha de cobertura gera corrente de fuga que o inversor detecta e usa como motivo para desligar. A falha está no sistema fotovoltaico, mas o inversor que exibe o erro — e é quem vai para a bancada.
+O inversor off-grid ou híbrido não depende da rede para funcionar. Ele gera sua própria referência de frequência e tensão internamente, e ainda precisa gerenciar o ciclo completo de carga e descarga da bateria. Isso exige componentes que o on-grid simplesmente não tem: conversor DC-DC bidirecional, relé de transferência (bypass), interface com o BMS da bateria e lógica de prioridade de carga.
 
-O segundo ponto crítico é o relé de anti-ilhamento. É um contato eletromecânico que abre quando o inversor detecta ausência de rede. Em regiões com muitas oscilações de rede — interior do Nordeste e do Norte, onde a qualidade da concessionária é historicamente instável — esse relé acumula arcos nos contatos ao longo dos anos. O contato fica resistivo, o inversor passa a falhar ao tentar se reconectar à rede.
+Cada um desses pontos adiciona um modo de falha que não existe no on-grid.
 
-O terceiro ponto é o circuito de PLL (Phase-Locked Loop) e detecção de cruzamento por zero. Se os capacitores eletrolíticos do filtro de PLL aumentam ESR, o inversor começa a enxergar variações de frequência que não existem — e desliga por falsa proteção de frequência.
+## Como identificar o tipo de falha em cada arquitetura
 
-IGBTs no on-grid falham principalmente por evento: surto de rede que escapa pelo varistor, curto momentâneo no barramento CC. Não por desgaste progressivo com a mesma frequência que acontece no off-grid.
+Para o inversor on-grid, os padrões mais recorrentes na bancada são:
 
----
+1. Erro de sincronização com a rede — o display exibe "grid fault" ou frequência fora do padrão sem que a rede esteja realmente fora de especificação
+2. IGBT do estágio de inversão com curto — geralmente após pico da concessionária ou retorno brusco de energia depois de uma queda
+3. Driver de gate com falha parcial — o IGBT recebe tensão de gate incorreta e opera no limite por semanas até queimar sem nenhum novo evento externo
+4. Relé de antiilhamento travado ou com resistência de contato elevada — o inversor sincroniza mas não entrega potência
+5. Capacitor do barramento DC fora de especificação — tensão instável antes do estágio de inversão, identificável com osciloscópio nas condições de carga real
+6. Sensor de corrente ou tensão com leitura falsa — o inversor exibe código de erro mas o estágio de potência está íntegro; trocar o conjunto seria desperdiçar o equipamento
 
-## Os defeitos que aparecem no off-grid
+Para o inversor off-grid e híbrido, o diagnóstico começa em pontos completamente diferentes:
 
-No off-grid, o estágio de carregador de bateria é o que falha com mais frequência. Esse circuito opera continuamente enquanto há fonte de energia disponível — painel, rede auxiliar ou gerador. Os MOSFETs do estágio de carregamento sofrem ciclagem térmica intensa, especialmente em instalações rurais sem ventilação adequada do quadro, comuns em fazendas e sítios no cerrado e no sertão. A falha típica é o MOSFET em curto, que pode destruir o indutor do estágio e queimar trilhas da placa junto.
+1. Relé de transferência (bypass) com resistência de contato elevada ou travado em uma posição — o sistema não comuta corretamente entre modo bateria e modo rede
+2. MOSFET ou IGBT do conversor DC-DC bidirecional queimado — a bateria não carrega mesmo com tensão CA presente e disjuntores fechados
+3. Perda de comunicação com o BMS — o inversor desliga sem evento aparente; o log interno mostra falha no protocolo CAN ou RS485
+4. Falha no oscilador interno de referência — a saída CA apresenta frequência ou tensão instável, o que num on-grid seria impossível porque ele usa a rede como referência
+5. Placa de controle com defeito no setor de gerenciamento de energia — mais difícil de isolar sem o diagrama do modelo específico; cada fabricante tem lógica proprietária
+6. Relé de carga da bateria queimado — tensão de bateria presente no barramento, corrente de carga zerada
 
-O segundo problema característico do off-grid é a degradação dos capacitores do barramento CC e do filtro de saída. Como o inversor opera 24 horas — carregando a bateria quando há sol e convertendo energia da bateria quando não há — a temperatura interna nunca cai tanto quanto num on-grid que para à noite. A vida útil dos eletrolíticos cai de forma mensurável com temperatura de operação elevada e contínua. ESR sobe. Ripple de tensão aumenta. O circuito de controle começa a tomar decisões erradas com base em leituras de tensão distorcidas.
+Não existe checklist único que funcione para os dois tipos. Quem aplica o mesmo protocolo em ambos vai errar em pelo menos um deles.
 
-O relé de saída do off-grid enfrenta demanda diferente. Em sistemas residenciais, o inversor absorve partidas de motor de geladeira, ar-condicionado, bomba d'água — sobrecargas transitórias repetidas que o on-grid nunca sofre diretamente, porque a rede amortece. No off-grid, toda a corrente de partida passa pelo inversor.
+## Quando a falha é eletrônica interna
 
-O transformador de saída, quando presente, é ponto de avaliação obrigatória em casos de sobrecarga grave: enrolamentos com sinais de superaquecimento, verniz com cheiro diferente, resistência de enrolamento fora do esperado são indicadores que não aparecem em on-grid transformerless.
+No on-grid, a maioria dos casos que chegam até nós tem falha eletrônica interna depois de um evento externo: pico de tensão, queda e retorno brusco da rede, curtocircuito momentâneo na string. O cabeamento e os painéis podem estar intactos. O problema está dentro.
 
----
+Os componentes mais afetados são os IGBTs do estágio de inversão e o driver de gate entre a placa de controle e o IGBT. Esse driver é frequentemente ignorado no diagnóstico de mercado. Quando falha parcialmente — sem evidência visual de queima — o IGBT passa a operar fora das condições nominais de tensão de gate e vai ao curto em semanas, sem nenhum novo evento externo perceptível.
 
-## O erro que se repete no mercado
+Já no off-grid e híbrido, a falha eletrônica interna costuma aparecer depois de ciclos intensos de carga e descarga. O Norte e o Nordeste do Brasil têm esse perfil: sistema trabalhando no limite durante horas de sol e com demanda concentrada à noite. Os MOSFETs do conversor DC-DC bidirecional são os mais estressados nesse regime.
 
-O técnico aplica no off-grid o mesmo roteiro do on-grid: mede os IGBTs, testa o estágio de saída, verifica a placa de controle. Não acha nada. Devolve o equipamento.
+Quando o defeito não é óbvio? Medir. Com o equipamento aberto, alimentado em bancada e sob carga controlada.
 
-O estágio de carregador nunca foi verificado.
+Ainda não existe atalho que substitua isso.
 
-É um circuito separado dentro do mesmo equipamento, com seus próprios semicondutores e controle. Em muitos modelos, está numa seção física diferente da placa ou numa placa filha. Técnico que trata off-grid como on-grid vai deixar essa seção intacta enquanto o problema está exatamente ali.
+## Vale a pena consertar os dois tipos?
 
-Não é falta de capacidade técnica. É ausência de método específico para o tipo de equipamento.
+Em inversores on-grid de 3 a 15 kW, o reparo em nível de componente costuma representar entre 15% e 35% do valor de um equipamento novo equivalente. Se o IGBT ou o driver queimou de forma isolada, sem dano extenso na placa de controle, o reparo é direto e o resultado é durável.
 
----
+No off-grid e híbrido, a conta muda porque o equipamento novo custa consideravelmente mais. Um inversor híbrido de 5 kW sai entre R$ 8.000 e R$ 20.000 dependendo da marca e da capacidade integrada. Reparar o conversor DC-DC ou o relé de transferência por uma fração desse valor é, na maioria dos casos, a decisão economicamente evidente.
 
-## Quando o reparo é viável
+O que inviabiliza o reparo em qualquer um dos dois tipos é dano extenso na placa de controle: microcontrolador queimado por sobretensão sem repositório de firmware disponível, rastreadores do DSP com dano irreversível, memória de configuração corrompida sem procedimento documentado de reprogramação. Esses casos existem. São a minoria do que chega na bancada.
 
-No on-grid, o reparo é viável quando o dano é localizado: relé de anti-ilhamento com contatos gastos, capacitores de filtro com ESR elevado, resistores de divisor de tensão fora de valor. São componentes acessíveis, com custo baixo e substituição direta. Quando o IGBT falhou por evento, a viabilidade depende de quanto o evento se espalhou — se ficou no módulo de potência e no driver, o reparo custa bem menos do que um inversor novo.
+A maioria chega consertável.
 
-No off-grid, o reparo do estágio de carregador exige identificação precisa dos MOSFETs, que muitas vezes são de modelos menos comuns. Equivalentes técnicos existem para a maioria. A decisão passa por: extensão do dano, se o transformador foi afetado e o preço de um inversor off-grid equivalente no mercado.
-
-Um inversor off-grid de qualidade custa mais do que um on-grid equivalente. O argumento financeiro para o reparo é proporcionalmente mais forte.
-
----
-
-## Conclusão
-
-On-grid e off-grid não são versões do mesmo equipamento. São projetos com objetivos diferentes, topologias diferentes e modos de falha diferentes.
-
-Aplicar o mesmo diagnóstico nos dois é como usar o mesmo protocolo de medição num motor CA e num motor CC: você mede, anota, e chega à conclusão errada.
-
----
-
-Condenaram seu inversor por causa desse erro?
+## Envie seu inversor para diagnóstico
 
 Antes de comprar equipamento novo, envie para a nossa bancada. A TEC Solar realiza diagnóstico eletrônico completo em nível de componente — abrimos o inversor, medimos a placa, identificamos a causa raiz e entregamos um laudo técnico detalhado.
 
@@ -118,50 +100,57 @@ Se o reparo for viável, você recebe o equipamento funcionando por uma fração
 
 Atendemos todo o Brasil via logística reversa.
 
-👉 [Envie seu inversor agora](https://wa.me/5538998891587) | [Falar no WhatsApp](https://wa.me/5538998891587)
+<div style="display:flex; flex-direction:column; gap:12px; margin-top:20px;">
+
+<a href="https://wa.me/5538998891587?text=Ol%C3%A1%2C%20vim%20pelo%20blog%20e%20quero%20enviar%20meu%20inversor%20para%20diagn%C3%B3stico" target="_blank" style="background:#25D366; color:white; padding:14px 24px; border-radius:8px; text-decoration:none; font-weight:bold; text-align:center;">
+👉 Falar no WhatsApp agora
+</a>
+
+<a href="https://www.instagram.com/tec_solar_moc?igsh=MWl2djYzeXk2Zm51dQ%3D%3D&utm_source=qr" target="_blank" style="background:#E1306C; color:white; padding:14px 24px; border-radius:8px; text-decoration:none; font-weight:bold; text-align:center;">
+📸 Seguir no Instagram
+</a>
+
+<a href="https://youtube.com/@tecsolar-reparodeinversores?si=kG3Njqipg8QRbZSD" target="_blank" style="background:#FF0000; color:white; padding:14px 24px; border-radius:8px; text-decoration:none; font-weight:bold; text-align:center;">
+▶️ Ver vídeos no YouTube
+</a>
+
+</div>
 
 ---
 
-## [LINKS INTERNOS SUGERIDOS]
+[LINKS INTERNOS SUGERIDOS]
 
-- Âncora: "Por que os IGBTs queimam em inversores solares" → Link para: post sobre as 6 causas reais de queima de IGBT (Post 10)
-- Âncora: "driver de IGBT" → Link para: O que é o driver de IGBT e por que sua falha destrói o estágio de potência (Post 21)
-
----
-
-## [LINKS EXTERNOS SUGERIDOS]
-
-- Texto âncora: "ABNT NBR 16149" → Fonte: ABNT — Sistemas fotovoltaicos — Características da interface de conexão com a rede elétrica de distribuição (abnt.org.br)
-- Texto âncora: "IEC 62116" → Fonte: IEC — Test procedure of islanding prevention measures for utility-interconnected photovoltaic inverters (iec.ch)
+- Âncora: 'IGBTs do estágio de inversão' → URL: /por-que-igbts-queimam-inversores-solares → Contexto: H2 "Como identificar o tipo de falha em cada arquitetura", item 2 da lista on-grid
+- Âncora: 'driver de gate entre a placa de controle e o IGBT' → URL: /o-que-e-driver-igbt-falha-estagio-potencia → Contexto: H2 "Quando a falha é eletrônica interna", segundo parágrafo
+- Âncora: 'Inversor solar parou de funcionar' → URL: /inversor-solar-parou-de-funcionar-checklist → Contexto: introdução, ao mencionar diagnóstico inicial
 
 ---
 
-## [IMAGEM PRINCIPAL — USE ESTA]
+[LINKS EXTERNOS SUGERIDOS]
+
+- Texto âncora: "ABNT NBR 16149" → URL: https://www.abnt.org.br/normalizacao/lista-de-publicacoes/abnt → Fonte: ABNT — norma técnica de conexão de microgeração ao sistema de distribuição
+- Texto âncora: "ciclo completo de carga e descarga da bateria" → URL: https://www.aneel.gov.br/resolucoes-normativas → Fonte: ANEEL — resoluções sobre armazenamento de energia e sistemas híbridos
+
+---
+
+[IMAGEM PRINCIPAL — USE ESTA]
 
 IMAGEM PRINCIPAL:
 → URL para download: https://images.unsplash.com/photo-1509391366360-2e959784a276?w=1200
-→ Por que foi escolhida: Painéis solares com instalação visível de inversor em ambiente externo — representa sistema fotovoltaico completo, contexto direto do post sobre tipos de inversores
-→ Nome do arquivo: inversor-on-grid-off-grid-diferenca-defeitos.webp
-→ Alt Text (máx. 125 caracteres): Instalação de inversores solares on-grid e off-grid — diferenças de arquitetura e modos de falha em diagnóstico técnico
-→ Legenda: Fig. 1 — On-grid e off-grid compartilham o mesmo nome mas operam com lógicas distintas; os pontos de falha são diferentes e o diagnóstico precisa acompanhar essa diferença
+→ Por que foi escolhida: Painel solar com inversor visível, representa sistema fotovoltaico completo
+→ Nome do arquivo: inversor-on-grid-vs-off-grid-diagnostico.webp
+→ Alt Text (máx. 125 caracteres): Inversor solar instalado — diferença entre on-grid e off-grid no diagnóstico eletrônico de falhas
+→ Legenda: Fig. 1 — Inversores on-grid e off-grid têm arquiteturas distintas e modos de falha diferentes
 → Onde inserir: Topo do post, antes da introdução
-→ Converter para WebP — máximo 150 KB
 
 ---
 
-## [IMAGEM SECUNDÁRIA — USE NO MEIO DO POST]
+[IMAGEM SECUNDÁRIA — USE NO MEIO DO POST]
 
 IMAGEM SECUNDÁRIA:
-→ URL para download: https://images.unsplash.com/photo-1581092160562-40aa08e78837?w=1200
-→ Por que foi escolhida: Técnico inspecionando placa eletrônica de equipamento de potência — representa a avaliação específica do estágio de carregador de bateria no off-grid descrita na seção de defeitos
-→ Nome do arquivo: diagnostico-inversor-off-grid-estágio-carregador-2.webp
-→ Alt Text (máx. 125 caracteres): Técnico diagnosticando placa de inversor off-grid com estágio de carregador de bateria — análise em bancada de reparo
-→ Legenda: Fig. 2 — O estágio de carregador de bateria é um circuito separado dentro do off-grid e é o ponto de falha mais ignorado em diagnósticos feitos com roteiro de on-grid
-→ Onde inserir: Após H2 "Os defeitos que aparecem no off-grid"
-→ Converter para WebP — máximo 150 KB
-
-<!-- trigger-video-workflow -->
-<!-- retrigger: fix-subtitulo-slides-vazios -->
-
-<!-- debug-elevenlabs-v2 -->
-<!-- trigger-adam-voice -->
+→ URL para download: https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1200
+→ Por que foi escolhida: Técnico com multímetro realizando diagnóstico em equipamento eletrônico
+→ Nome do arquivo: diagnostico-inversor-solar-bancada-2.webp
+→ Alt Text (máx. 125 caracteres): Técnico realizando diagnóstico de inversor solar em bancada com multímetro e osciloscópio
+→ Legenda: Fig. 2 — Diagnóstico em nível de componente exige abordagens diferentes para on-grid e off-grid
+→ Onde inserir: Após H2 "Como identificar o tipo de falha em cada arquitetura"
