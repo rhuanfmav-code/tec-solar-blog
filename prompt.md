@@ -422,6 +422,68 @@ Post 89 — Growatt Erro 603: Falha de Comunicação RS485 — placa de comunica
 Post 90 — Deye Híbrido: Os erros mais comuns em inversores híbridos e o que realmente os causa
 Post 91 — Circuito de pré-carga em inversores: o que é, como falha e como diagnosticar
 ════════════════════════════════════
+PARTE 2B — NOVO CALENDÁRIO EDITORIAL (Posts 92 em diante)
+════════════════════════════════════
+LÓGICA DO NOVO CALENDÁRIO:
+O calendário original esgotou a camada de "erro por marca". Os posts 84–91
+mostraram tração em quatro camadas com pouco conteúdo. O novo calendário
+prioriza estas camadas, nesta proporção:
+- CAMADA 1 — Inversores híbridos (BMS, bateria, backup/EPS, modo ilha): mercado em expansão
+- CAMADA 2 — Posts de argumento e conversão (trocar vs. consertar, laudo, garantia)
+- CAMADA 3 — Componentes internos (driver de gate, relé, fonte auxiliar, capacitor, MCU)
+- CAMADA 4 — Comunicação e telemetria (RS485, Modbus, datalogger, firmware, app)
+- CAMADA 5 — Marcas emergentes e nichos (Sofar, Huawei, SAJ, Solis, microinversores)
+As camadas são intercaladas por rodada para variar o tema a cada dia de publicação.
+Posts de erro/falha usam a estrutura da ETAPA 1. Posts de cluster (sem marca e
+código específicos) usam a "Estrutura de Posts de Cluster" definida no início deste arquivo.
+
+RODADA 11
+Post 92 — Deye Híbrido SUN-5K: Falha de Comunicação com a Bateria (BMS Fault) — CAN, RS485 ou bateria?
+Post 93 — Inversor fora de garantia: vale a pena consertar? A análise técnica e financeira definitiva
+Post 94 — Driver de gate do IGBT: função, modos de falha e diagnóstico na bancada
+Post 95 — Growatt SPH Híbrido: Erro de Bateria (BatVoltHigh/Low) — BMS ou estágio de carga?
+Post 96 — Inversor sumiu do app de monitoramento: Wi-Fi, datalogger ou placa de comunicação?
+Post 97 — O que é um laudo técnico de inversor e para que ele realmente serve
+Post 98 — Sofar Solar: os erros mais comuns e o perfil de falha da marca
+RODADA 12
+Post 99 — Sungrow SH Híbrido: Falha de Comunicação BMS — cabo CAN, bateria ou inversor?
+Post 100 — Fonte auxiliar (SMPS interna) do inversor: a falha que apaga o equipamento inteiro
+Post 101 — Trocar ou consertar inversor solar: como decidir com base técnica, não no medo
+Post 102 — Datalogger Growatt ShineWiFi/ShineLAN: falha de conexão e diagnóstico
+Post 103 — Capacitor de barramento CC: degradação, ESR alto e quando trocar
+Post 104 — Inversor híbrido não entra em modo ilha (off-grid) na queda de energia — EPS/backup
+Post 105 — Huawei SUN2000: erros mais comuns e diagnóstico da linha FusionSolar
+RODADA 13
+Post 106 — Relé de rede e relé de bypass: a falha silenciosa que derruba o inversor
+Post 107 — Bateria de lítio não carrega no inversor híbrido: BMS, SOC ou estágio de carga?
+Post 108 — Quanto custa consertar um inversor solar — e por que a resposta honesta é "depende"
+Post 109 — Modbus RTU e RS485: erros de comunicação e como rastrear o ponto de falha
+Post 110 — Sensor de corrente (shunt e efeito Hall): leitura falsa e diagnóstico
+Post 111 — Solis (Ginlong): os erros mais frequentes e o que é reparável
+Post 112 — Fabricante disse que não tem conserto: quando isso é verdade e quando não é
+RODADA 14
+Post 113 — Deye Híbrido: modo On-Grid/Off-Grid não comuta — relé, contator ou firmware?
+Post 114 — MCU e DSP da placa de controle: quando o cérebro do inversor falha
+Post 115 — Falha na atualização de firmware: como recuperar sem inutilizar o inversor
+Post 116 — O que o técnico errou ao condenar seu inversor: os diagnósticos apressados mais comuns
+Post 117 — SAJ: erros comuns, perfil de falha e viabilidade de reparo
+Post 118 — Fusível CC e varistor (MOV): a proteção que falha antes do inversor
+Post 119 — Growatt Híbrido: falha no modo backup (EPS) — carga não migra na queda de rede
+RODADA 15
+Post 120 — Microinversores (Hoymiles, APsystems, Deye): defeitos comuns comparados
+Post 121 — Garantia negada pelo fabricante: o laudo técnico independente como saída
+Post 122 — Fonte flyback do inversor: diagnóstico do estágio de baixa tensão
+Post 123 — Inversor mostra dados errados no app: sensor, medição ou telemetria?
+Post 124 — Deye e Growatt híbrido: SOC travado — bateria carregada mas o sistema não usa
+Post 125 — Transformador de isolamento e indutores de potência: defeitos e como testar
+Post 126 — Renovigi e marcas nacionais: o que muda (e o que não muda) no reparo
+RODADA 16
+Post 127 — Sungrow Híbrido: erro de sobrecarga na saída backup — dimensionamento ou defeito?
+Post 128 — Ponte retificadora e estágio de entrada CC: diagnóstico do front-end do inversor
+Post 129 — Por que o inversor híbrido é mais complexo de reparar que o on-grid comum
+Post 130 — Ventilador do inversor não gira: controle PWM, rolamento ou driver do ventilador?
+Post 131 — Checklist de bancada: como a TEC Solar diagnostica um inversor do zero
+════════════════════════════════════
 PARTE 3 — CHECKLIST DE PUBLICAÇÃO NO WORDPRESS
 ════════════════════════════════════
 ANTES DE PUBLICAR:
@@ -458,5 +520,5 @@ Você acorda com tudo pronto:
 - Post completo para publicação automática no WordPress
 - Vídeo MP4 gerado automaticamente pelo GitHub Actions em carrossel/post-[XX]/video-carrossel.mp4
 TEC Solar — Onde a energia solar volta a funcionar.
-91 posts | publicação automática | vídeo carrossel gerado via GitHub Actions
-Versão 9 — fluxo completo: pesquisa → rascunho → humanizer → output → vídeo MP4 automático
+131 posts | publicação automática | vídeo carrossel gerado via GitHub Actions
+Versão 10 — novo calendário editorial (92–131) com foco em híbridos, argumento, componentes e comunicação
