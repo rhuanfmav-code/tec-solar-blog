@@ -1,0 +1,60 @@
+name: Gerar Post Diário
+
+# Gera automaticamente o próximo post do calendário editorial e faz commit.
+# A publicação no WordPress fica a cargo do workflow "Publicar Post WordPress".
+#
+# Roda antes do cron de publicação (10:00 UTC / 07:00 BRT), garantindo que o
+# arquivo do post exista quando a publicação disparar.
+
+on:
+  schedule:
+    - cron: '0 8 * * *'   # 05:00 BRT (UTC-3) — 2h antes da publicação
+  workflow_dispatch:
+
+# Evita duas gerações simultâneas mexendo no mesmo branch.
+concurrency:
+  group: gerar-post-diario
+  cancel-in-progress: false
+
+jobs:
+  gerar:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repositório
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Instalar dependências
+        run: pip install anthropic
+
+      - name: Gerar próximo post
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          MODELO_GERACAO: ${{ vars.MODELO_GERACAO || 'claude-sonnet-5' }}
+        run: python3 .github/scripts/gerar_post.py
+
+      - name: Commit e push do post gerado
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          if git diff --quiet -- posts progresso.md; then
+            echo "Nenhum post novo gerado nesta execução."
+            exit 0
+          fi
+          git add posts progresso.md
+          NUM=$(grep -oP '(?<=Último post gerado: Post )\d+' progresso.md)
+          git commit -m "Gera automaticamente Post ${NUM} (calendário editorial)"
+          for tentativa in 1 2 3 4; do
+            git pull --rebase origin main && git push origin main && break
+            echo "Push falhou (tentativa ${tentativa}). Aguardando..."
+            sleep $((2 ** tentativa))
+          done
