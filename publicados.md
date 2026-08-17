@@ -1,4 +1,4 @@
 # Controle de Posts Publicados
 
-Último post publicado: Post 107
-Próximo post a publicar: Post 108
+Último post publicado: Post 108
+Próximo post a publicar: Post 109
